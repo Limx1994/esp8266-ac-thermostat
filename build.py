@@ -1,0 +1,135 @@
+"""Build the ESP8266 firmware from a path without non-ASCII characters."""
+
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+
+ROOT = Path(__file__).resolve().parent
+DRIVE = "Z:"
+SDK = Path(r"D:\APPS\Espressif\frameworks\ESP8266_RTOS_SDK")
+TOOLCHAIN = Path(
+    r"D:\APPS\Espressif\tools\xtensa-lx106-elf"
+    r"\esp-2020r3-49-gd5524c1-8.4.0\xtensa-lx106-elf\bin"
+)
+CMAKE = Path(r"D:\APPS\Espressif\tools\cmake\3.13.4\bin\cmake.exe")
+NINJA = Path(r"D:\APPS\Espressif\tools\ninja\1.9.0\ninja.exe")
+PYTHON = Path(r"D:\APPS\Espressif\python_env\idf5.2_py3.11_env\Scripts\python.exe")
+
+
+def find_tool(default, name):
+    if default.is_file():
+        return default
+    found = shutil.which(name)
+    if found:
+        return Path(found)
+    raise FileNotFoundError(f"找不到 {name}；请按 ESP8266编译环境路径.md 配置工具链")
+
+
+def hex_record(address, kind, data):
+    record = bytes((len(data), address >> 8, address & 0xFF, kind)) + data
+    return ":" + record.hex().upper() + f"{(-sum(record)) & 0xFF:02X}\n"
+
+
+def write_full_images(build):
+    config = json.loads((build / "flasher_args.json").read_text(encoding="utf-8"))
+    try:
+        size_text = config["flash_settings"]["flash_size"]
+        files = config["flash_files"]
+    except (KeyError, TypeError) as exc:
+        raise ValueError("flasher_args.json 缺少 Flash 布局信息") from exc
+    unit = size_text[-2:]
+    if unit not in {"MB", "KB"}:
+        raise ValueError(f"不支持的 Flash 容量：{size_text}")
+    size = int(size_text[:-2]) * (1024 * 1024 if unit == "MB" else 1024)
+    if size <= 0 or not files:
+        raise ValueError("Flash 容量或烧录文件列表无效")
+    required = {"bootloader/bootloader.bin", "partition_table/partition-table.bin", "ac_thermostat.bin"}
+    if not required.issubset(name.replace("\\", "/") for name in files.values()):
+        raise ValueError("烧录文件列表缺少 bootloader、partition table 或应用程序")
+
+    image = bytearray(b"\xFF" * size)
+    previous_end = 0
+    for offset_text, name in sorted(files.items(), key=lambda item: int(item[0], 0)):
+        offset = int(offset_text, 0)
+        data = (build / name).read_bytes()
+        end = offset + len(data)
+        if not data or offset < previous_end or end > size:
+            raise ValueError(f"烧录文件越界、重叠或为空：{name} @ {offset_text}")
+        image[offset:end] = data
+        previous_end = end
+
+    (build / "full_flash.bin").write_bytes(image)
+    with (build / "full_flash.hex").open("w", encoding="ascii", newline="\n") as output:
+        for offset in range(0, size, 16):
+            if offset % 0x10000 == 0:
+                output.write(hex_record(0, 4, (offset >> 16).to_bytes(2, "big")))
+            output.write(hex_record(offset & 0xFFFF, 0, bytes(image[offset:offset + 16])))
+        output.write(hex_record(0, 1, b""))
+
+
+def main():
+    if os.name != "nt":
+        raise OSError("此脚本需要 Windows 的 subst 命令")
+
+    sources = sorted(
+        path.name for path in (ROOT / "main").iterdir()
+        if path.is_file() and path.suffix in {".c", ".cpp", ".S"}
+    )
+    if not sources:
+        raise FileNotFoundError("main 目录中没有可编译的源文件")
+    print(f"发现 {len(sources)} 个源文件：{', '.join(sources)}", flush=True)
+
+    sdk = Path(os.environ.get("IDF_PATH") or SDK)
+    if not (sdk / "tools" / "cmake" / "project.cmake").is_file():
+        raise FileNotFoundError(f"无效的 IDF_PATH：{sdk}")
+    cmake = find_tool(CMAKE, "cmake.exe")
+    ninja = find_tool(NINJA, "ninja.exe")
+    python = find_tool(PYTHON, "python.exe")
+    toolchain = TOOLCHAIN if (TOOLCHAIN / "xtensa-lx106-elf-gcc.exe").is_file() else None
+    if not toolchain and not shutil.which("xtensa-lx106-elf-gcc.exe"):
+        raise FileNotFoundError("找不到 xtensa-lx106-elf-gcc.exe")
+    subst = find_tool(Path(os.environ.get("SystemRoot", "")) / "System32" / "subst.exe", "subst.exe")
+
+    if Path(DRIVE + "\\").exists():
+        raise FileExistsError(f"{DRIVE} 已被占用，无法映射项目目录")
+
+    env = os.environ.copy()
+    env["IDF_PATH"] = str(sdk)
+    tool_dirs = [python.parent, cmake.parent, ninja.parent]
+    if toolchain:
+        tool_dirs.insert(0, toolchain)
+    env["PATH"] = os.pathsep.join(str(path) for path in tool_dirs) + os.pathsep + env.get("PATH", "")
+
+    mapped = Path(DRIVE + "\\")
+    build = mapped / "build" / "auto"
+    subprocess.run([str(subst), DRIVE, str(ROOT)], check=True)
+    try:
+        subprocess.run(
+            [str(cmake), "-S", str(mapped), "-B", str(build), "-G", "Ninja",
+             f"-DPYTHON_EXECUTABLE={python}"],
+            env=env, check=True,
+        )
+        subprocess.run([str(ninja), "-C", str(build), "-j", "12"], env=env, check=True)
+        for name in (
+            "ac_thermostat.bin",
+            r"bootloader\bootloader.bin",
+            r"partition_table\partition-table.bin",
+        ):
+            if not (build / name).is_file():
+                raise FileNotFoundError(f"构建结束但缺少产物：{build / name}")
+        write_full_images(build)
+    finally:
+        subprocess.run([str(subst), DRIVE, "/D"], check=True)
+    print(f"构建成功：{ROOT / 'build' / 'auto'}\full_flash.bin、full_flash.hex", flush=True)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, subprocess.CalledProcessError) as exc:
+        print(f"构建失败：{exc}", file=sys.stderr)
+        sys.exit(exc.returncode if isinstance(exc, subprocess.CalledProcessError) else 1)

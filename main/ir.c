@@ -168,6 +168,8 @@ remove_isr:
         codes[learn_slot] = candidate;
         app_reset_rule(learn_slot);
         learn_state = IR_SAVED;
+        ESP_LOGI(TAG, "learn slot %d saved: %u pulses, %d kHz",
+                 learn_slot + 1, (unsigned)candidate.count, learn_carrier);
     }
 finish:
     if (err != ESP_OK) {
@@ -254,8 +256,10 @@ esp_err_t ir_start_learn(int slot, int carrier_khz)
         busy = false;
         learn_state = IR_ERROR;
         learn_error = ESP_ERR_NO_MEM;
+        ESP_LOGE(TAG, "learn slot %d could not start: no memory", slot + 1);
         return ESP_ERR_NO_MEM;
     }
+    ESP_LOGI(TAG, "learn slot %d waiting for IR at %d kHz", slot + 1, carrier_khz);
     return ESP_OK;
 }
 
@@ -285,6 +289,8 @@ esp_err_t ir_send(int slot)
 finish:
     busy = false;
     if (err != ESP_OK) ESP_LOGE(TAG, "send slot %d failed: %s", slot + 1, esp_err_to_name(err));
+    else ESP_LOGI(TAG, "send slot %d complete: %u pulses, %u kHz",
+                  slot + 1, (unsigned)codes[slot].count, (unsigned)codes[slot].carrier_khz);
     return err;
 }
 

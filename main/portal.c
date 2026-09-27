@@ -302,7 +302,10 @@ esp_err_t portal_stop(void)
     if (err != ESP_OK) return err;
     server = NULL;
     err = esp_wifi_stop();
-    if (err == ESP_OK) ap_on = false;
+    if (err == ESP_OK) {
+        ap_on = false;
+        ESP_LOGI(TAG, "AP stopped");
+    }
     return err;
 }
 

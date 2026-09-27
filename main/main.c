@@ -65,11 +65,16 @@ esp_err_t app_save_rule(int slot, const rule_cfg_t *rule)
     err = nvs_set_blob(handle, slot == 0 ? "rule0" : "rule1", rule, sizeof(*rule));
     if (err == ESP_OK) err = nvs_commit(handle);
     nvs_close(handle);
-    if (err != ESP_OK) return err;
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "rule %d save failed: %s", slot + 1, esp_err_to_name(err));
+        return err;
+    }
     xSemaphoreTake(status_lock, portMAX_DELAY);
     current.rules[slot] = *rule;
     memset(&states[slot], 0, sizeof(states[slot]));
     xSemaphoreGive(status_lock);
+    ESP_LOGI(TAG, "rule %d saved: threshold10=%d rising=%d enabled=%d",
+             slot + 1, rule->threshold10, rule->rising, rule->enabled);
     return ESP_OK;
 }
 
@@ -94,7 +99,6 @@ static esp_err_t init_buttons(void)
 static esp_err_t sleep_until_button(bool *open_portal)
 {
     *open_portal = false;
-    ESP_LOGI(TAG, "sleeping; automatic control paused");
     esp_err_t err = gpio_isr_handler_remove(GPIO_NUM_12);
     if (err != ESP_OK) goto restore;
     err = gpio_isr_handler_remove(GPIO_NUM_13);
@@ -111,6 +115,7 @@ static esp_err_t sleep_until_button(bool *open_portal)
     if (err != ESP_OK) goto restore;
     err = esp_sleep_enable_timer_wakeup(3600000000U);
     if (err != ESP_OK) goto restore;
+    ESP_LOGI(TAG, "sleeping; automatic control paused");
     while (true) {
         err = esp_light_sleep_start();
         if (err != ESP_OK) break;
@@ -133,7 +138,8 @@ restore:
     if (err == ESP_OK) err = restore;
     s1_pending = s2_pending = false;
     memset(states, 0, sizeof(states));
-    ESP_LOGI(TAG, "awake; automatic control resumed");
+    if (err == ESP_OK)
+        ESP_LOGI(TAG, "awake by S%d; automatic control resumed", *open_portal ? 1 : 2);
     return err;
 }
 
@@ -159,8 +165,10 @@ static void update_temp(void)
         ESP_LOGE(TAG, "temperature read failed: %s", esp_err_to_name(err));
         return;
     }
+    ESP_LOGI(TAG, "temperature10=%d", temp10);
     for (int i = 0; i < 2; i++) {
         if (!fire[i]) continue;
+        ESP_LOGI(TAG, "rule %d triggered at temperature10=%d", i + 1, temp10);
         err = ir_send(i);
         xSemaphoreTake(status_lock, portMAX_DELAY);
         current.send_error[i] = err;
@@ -173,6 +181,7 @@ static void update_temp(void)
 
 void app_main(void)
 {
+    ESP_LOGI(TAG, "starting");
     ESP_ERROR_CHECK(nvs_flash_init());
     status_lock = xSemaphoreCreateMutex();
     if (!status_lock) abort();
@@ -183,6 +192,12 @@ void app_main(void)
     ESP_ERROR_CHECK(gpio_isr_handler_add(GPIO_NUM_12, button_isr, NULL));
     ESP_ERROR_CHECK(gpio_isr_handler_add(GPIO_NUM_13, button_isr, (void *)1));
     ESP_ERROR_CHECK(portal_init());
+    for (int i = 0; i < 2; i++) {
+        ESP_LOGI(TAG, "rule %d: threshold10=%d rising=%d enabled=%d ir=%s",
+                 i + 1, current.rules[i].threshold10, current.rules[i].rising,
+                 current.rules[i].enabled, ir_has_code(i) ? "ready" : "missing");
+    }
+    ESP_LOGI(TAG, "ready; monitoring temperature every 5 seconds");
     TickType_t last_temp = xTaskGetTickCount() - pdMS_TO_TICKS(5000);
     TickType_t last_s1 = xTaskGetTickCount() - pdMS_TO_TICKS(200);
     TickType_t last_s2 = last_s1;
