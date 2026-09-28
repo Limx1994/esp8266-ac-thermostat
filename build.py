@@ -124,7 +124,7 @@ def main():
         write_full_images(build)
     finally:
         subprocess.run([str(subst), DRIVE, "/D"], check=True)
-    print(f"构建成功：{ROOT / 'build' / 'auto'}\full_flash.bin、full_flash.hex", flush=True)
+    print(f"构建成功：{ROOT / 'build' / 'auto' / 'full_flash.bin'}、full_flash.hex", flush=True)
 
 
 if __name__ == "__main__":

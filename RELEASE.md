@@ -1,12 +1,12 @@
-# 0.1D 本地发布说明
+# 0.1E 本地发布说明
 
 日期：2026-09-28。此版本仅在本地记录与保存，尚未烧录或完成实机验收。
 
 ## 内容
 
-- 固件源代码未改动，延续 0.1C 的两组温度阈值规则、红外学习与测试发送、S1 配置热点和 S2 暂停控制的 light sleep；使用方法见 [README.md](README.md)。
-- 整理构建、硬件、烧录及发布文档，明确 ADC 尚未被固件读取、`IDF_PATH` 的覆盖范围及完整镜像对 NVS 的影响。
-- 将 Windows x64 esptool 4.12.0 与原版许可证、README 一并保存；工具校验值和分段烧录命令见 [tools\README.md](tools/README.md)。
+- 配置热点名称从 `AC-Temp-XXXX` 改为固定的 `空调智能温控`；两组温度阈值规则、红外学习与测试发送、S1 配置热点和 S2 暂停控制的 light sleep 沿用既有实现。使用方法见 [README.md](README.md)。
+- 修正 `build.py` 成功提示中的完整镜像路径，并同步构建、接线、烧录及发布文档。
+- 沿用本地 Windows x64 esptool 4.12.0；工具校验值和分段烧录命令见 [tools\README.md](tools/README.md)。
 
 ## 固件产物
 
@@ -16,7 +16,7 @@
 | --- | --- | ---: |
 | `build\auto\bootloader\bootloader.bin` | bootloader，`0x0` | 10,096 字节 |
 | `build\auto\partition_table\partition-table.bin` | partition table，`0x8000` | 3,072 字节 |
-| `build\auto\ac_thermostat.bin` | 应用固件，`0x10000` | 508,864 字节 |
+| `build\auto\ac_thermostat.bin` | 应用固件，`0x10000` | 508,848 字节 |
 | `build\auto\full_flash.bin` | 从 `0x0` 开始的完整 4 MB Flash 镜像 | 4,194,304 字节 |
 | `build\auto\full_flash.hex` | 同一 4 MB 镜像的 Intel HEX 文本格式 | 11,535,372 字节 |
 | `build\auto\flasher_args.json` | 分段偏移及 Flash 参数 | 815 字节 |
@@ -28,7 +28,7 @@
 - 项目 Markdown 的空白、标题间距与本地链接 lint、`git diff --check` 通过。
 - `tests\build.ninja` 以 `-j 12` 构建规则测试，`build_ascii\rules_test.exe` 输出 `rules_test: all cases passed`。
 - `node --check tests\check_page.js` 与 `node tests\check_page.js` 通过；控制页脚本及四个 API 路径检查通过。
-- `python build.py` 以 Ninja `-j 12` 构建通过；产物大小与上表一致，完整 BIN 在指定偏移与三个分段文件逐字节一致，`Z:` 已解除映射。
+- `python build.py` 以 Ninja `-j 12` 构建通过；产物大小与上表一致，完整 BIN 在指定偏移与三个分段文件逐字节一致，应用固件包含新热点名称，`Z:` 已解除映射。
 - 本地 `esptool.exe` 返回 4.12.0，SHA256 与 [工具说明](tools/README.md)一致；`image_info` 可解析应用镜像且校验和有效，但报告两条 `Suspicious segment` 警告。
 
 ## 未验证

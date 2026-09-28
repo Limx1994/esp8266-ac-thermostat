@@ -2,7 +2,7 @@
 
 `esptool-v4.12.0\esptool.exe` 是乐鑫发布的 Windows x64 版 esptool 4.12.0，支持本项目的 ESP8266。来源：[官方发布页](https://github.com/espressif/esptool/releases/tag/v4.12.0)。本地可执行文件的 SHA256 为 `1cd8386a7934862eb6ce1e14af3cc2309b0a743de1171fd09fab2f2ef2f5d1a3`；原版 `README.md` 和 `LICENSE` 保存在同一目录。可在 PowerShell 中用 `Get-FileHash -Algorithm SHA256 .\tools\esptool-v4.12.0\esptool.exe` 核对。
 
-先运行 `python build.py` 生成固件。用 3.3 V USB-UART 接 P3，短接 P4 后复位，使 ESP8266 进入下载模式。在项目根目录的 PowerShell 中运行以下命令，将 `COM3` 改为实际端口：
+先运行 `python build.py` 生成固件。用 3.3 V USB-UART 将 TX 接 P3-3（RXD）、RX 接 P3-2（TXD），并共接 P3-4（GND）；短接 P4 后复位，使 ESP8266 进入下载模式。在项目根目录的 PowerShell 中运行以下命令，将 `COM3` 改为实际端口：
 
 ```powershell
 & .\tools\esptool-v4.12.0\esptool.exe --chip esp8266 --port COM3 --baud 115200 `

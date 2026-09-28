@@ -221,11 +221,8 @@ esp_err_t portal_init(void)
     if (err != ESP_OK) return err;
     err = esp_wifi_set_mode(WIFI_MODE_AP);
     if (err != ESP_OK) return err;
-    uint8_t mac[6];
-    err = esp_wifi_get_mac(ESP_IF_WIFI_AP, mac);
-    if (err != ESP_OK) return err;
     wifi_config_t cfg = { 0 };
-    snprintf((char *)cfg.ap.ssid, sizeof(cfg.ap.ssid), "AC-Temp-%02X%02X", mac[4], mac[5]);
+    snprintf((char *)cfg.ap.ssid, sizeof(cfg.ap.ssid), "空调智能温控");
     cfg.ap.ssid_len = strlen((char *)cfg.ap.ssid);
     cfg.ap.authmode = WIFI_AUTH_OPEN;
     cfg.ap.max_connection = 4;
