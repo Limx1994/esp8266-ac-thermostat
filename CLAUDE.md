@@ -19,5 +19,5 @@
 
 ## 发布
 
-- 版本变更记录在 [CHANGELOG.md](CHANGELOG.md)。发布说明需写明固件产物、验证结果和未完成的实机验收。
+- 版本变更记录在 [CHANGELOG.md](CHANGELOG.md)，本地发布说明在 [RELEASE.md](RELEASE.md)。发布说明需写明固件产物、验证结果和未完成的实机验收；烧录命令见 [tools\README.md](tools/README.md)。
 - `build\`、`build_ascii\` 等构建产物不纳入 Git；提交前核对暂存清单与敏感信息。完整镜像会覆盖 NVS，保留数据时使用分段烧录。

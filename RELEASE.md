@@ -1,12 +1,12 @@
-# 0.1C 本地发布说明
+# 0.1D 本地发布说明
 
-日期：2026-09-27。此版本仅在本地记录与保存，尚未烧录或完成实机验收。
+日期：2026-09-28。此版本仅在本地记录与保存，尚未烧录或完成实机验收。
 
 ## 内容
 
-- 延续 0.1B 的两组温度阈值规则、红外学习与测试发送、S1 配置热点和 S2 暂停控制的 light sleep；使用方法见 [README.md](README.md)。
-- 将 UART0 固件日志和串口监视器统一为 115200 baud；烧录速率也是 115200 baud。ESP8266 ROM 的早期启动输出仍为 74880 baud。
-- 更新构建产物、烧录偏移及验证范围的文档。
+- 固件源代码未改动，延续 0.1C 的两组温度阈值规则、红外学习与测试发送、S1 配置热点和 S2 暂停控制的 light sleep；使用方法见 [README.md](README.md)。
+- 整理构建、硬件、烧录及发布文档，明确 ADC 尚未被固件读取、`IDF_PATH` 的覆盖范围及完整镜像对 NVS 的影响。
+- 将 Windows x64 esptool 4.12.0 与原版许可证、README 一并保存；工具校验值和分段烧录命令见 [tools\README.md](tools/README.md)。
 
 ## 固件产物
 
@@ -25,11 +25,12 @@
 
 ## 已验证
 
-- 6 份 Markdown 的空白、标题间距和本地链接 lint、`git diff --check`、`build.py` 语法检查通过。
+- 项目 Markdown 的空白、标题间距与本地链接 lint、`git diff --check` 通过。
 - `tests\build.ninja` 以 `-j 12` 构建规则测试，`build_ascii\rules_test.exe` 输出 `rules_test: all cases passed`。
-- `node --check tests\check_page.js` 与 `node tests\check_page.js` 通过；控制页脚本和四个 API 路径检查通过。
-- `python build.py` 以 Ninja `-j 12` 构建通过；产物大小与上表一致，完整 BIN 在指定偏移与三个分段文件逐字节一致，生成配置中的烧录、监视器及 UART0 固件日志速率均为 115200 baud，`Z:` 已解除映射。
+- `node --check tests\check_page.js` 与 `node tests\check_page.js` 通过；控制页脚本及四个 API 路径检查通过。
+- `python build.py` 以 Ninja `-j 12` 构建通过；产物大小与上表一致，完整 BIN 在指定偏移与三个分段文件逐字节一致，`Z:` 已解除映射。
+- 本地 `esptool.exe` 返回 4.12.0，SHA256 与 [工具说明](tools/README.md)一致；`image_info` 可解析应用镜像且校验和有效，但报告两条 `Suspicious segment` 警告。
 
 ## 未验证
 
-当前无接入的 ESP-12F 设备，尚未验证烧录、UART0 实际日志、Wi-Fi 自动弹页、DS18B20 测温、NVS 重启持久化、两组红外编码学习与发射波形、空调响应及按键唤醒。构建与主机测试通过不代表这些实机功能已通过。
+当前无接入的 ESP-12F 设备，尚未验证烧录、UART0 实际日志、Wi-Fi 自动弹页、DS18B20 测温、NVS 重启持久化、两组红外编码学习与发射波形、空调响应及按键唤醒。`image_info` 的警告也需结合实机验收判断；构建与主机测试通过不代表这些实机功能已通过。
