@@ -14,7 +14,7 @@
 - 在 Windows 上优先使用 PowerShell。运行 `python build.py` 构建；脚本临时映射空闲的 `Z:`，避免 SDK 处理中文工程路径时出错，产物位于 `build\auto\`。
 - 脚本使用本机 SDK 默认路径，也接受环境变量 `IDF_PATH`；路径见编译环境文档。所有 Ninja 编译至少使用 `-j 12`。
 - 烧录、UART0 固件日志和串口监视器的默认波特率保存在 `sdkconfig.defaults`；本地生成的 `sdkconfig` 不纳入 Git。
-- 规则测试入口为 `tests\build.ninja` 与 `tests\rules_test.c`；控制页检查入口为 `tests\check_page.js`。
+- 规则测试入口为 `tests\build.ninja` 与 `tests\rules_test.c`；控制页检查入口为 `tests\check_page.js`；烧录布局可用 `python flash.py --port COM3 --dry-run` 预检，此命令不访问串口。
 - 无实机时，红外波形、空调响应、Wi-Fi 弹页、传感器和按键唤醒均须标为未验证。
 
 ## 发布
