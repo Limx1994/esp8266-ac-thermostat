@@ -8,6 +8,9 @@ typedef struct {
     int16_t temp10;
     bool temp_valid;
     esp_err_t sensor_error;
+    uint16_t battery_mv;
+    bool battery_valid;
+    esp_err_t battery_error;
     esp_err_t send_error[2];
     rule_cfg_t rules[2];
 } app_status_t;

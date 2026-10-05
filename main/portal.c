@@ -23,6 +23,13 @@ static volatile bool dns_exited = true;
 static int dns_fd = -1;
 static bool ap_on;
 static TickType_t last_action;
+static bool ap_used;
+
+static void record_action(void)
+{
+    last_action = xTaskGetTickCount();
+    ap_used = true;
+}
 
 static esp_err_t reply(httpd_req_t *req, const char *status, const char *body)
 {
@@ -67,7 +74,7 @@ static bool json_slot(const cJSON *json, int *slot)
 
 static esp_err_t page_get(httpd_req_t *req)
 {
-    last_action = xTaskGetTickCount();
+    record_action();
     esp_err_t err = httpd_resp_set_type(req, "text/html; charset=utf-8");
     if (err == ESP_OK) err = httpd_resp_send(req, control_page, sizeof(control_page) - 1);
     return err;
@@ -75,8 +82,23 @@ static esp_err_t page_get(httpd_req_t *req)
 
 static esp_err_t probe_get(httpd_req_t *req)
 {
+    ESP_LOGI(TAG, "captive portal probe: %s", req->uri);
     esp_err_t err = httpd_resp_set_status(req, "302 Found");
     if (err == ESP_OK) err = httpd_resp_set_hdr(req, "Location", "http://192.168.4.1/");
+    if (err == ESP_OK) err = httpd_resp_send(req, NULL, 0);
+    return err;
+}
+
+static esp_err_t favicon_get(httpd_req_t *req)
+{
+    esp_err_t err = httpd_resp_set_status(req, "204 No Content");
+    if (err == ESP_OK) err = httpd_resp_send(req, NULL, 0);
+    return err;
+}
+
+static esp_err_t background_get(httpd_req_t *req)
+{
+    esp_err_t err = httpd_resp_set_status(req, "404 Not Found");
     if (err == ESP_OK) err = httpd_resp_send(req, NULL, 0);
     return err;
 }
@@ -85,13 +107,16 @@ static esp_err_t status_get(httpd_req_t *req)
 {
     app_status_t st;
     app_get_status(&st);
-    char body[520];
+    char body[640];
     int len = snprintf(body, sizeof(body),
-        "{\"temperature10\":%d,\"valid\":%s,\"sensorError\":%d,"
+        "{\"temperature10\":%d,\"valid\":%s,\"sensorError\":%d,\"carrier\":%d,"
+        "\"batteryMv\":%u,\"batteryValid\":%s,\"batteryError\":%d,"
         "\"learnState\":%d,\"learnError\":%d,\"rules\":["
         "{\"threshold10\":%d,\"rising\":%s,\"enabled\":%s,\"learned\":%s,\"sendError\":%d},"
         "{\"threshold10\":%d,\"rising\":%s,\"enabled\":%s,\"learned\":%s,\"sendError\":%d}]}",
         st.temp10, st.temp_valid ? "true" : "false", st.sensor_error,
+        ir_get_carrier(),
+        (unsigned)st.battery_mv, st.battery_valid ? "true" : "false", st.battery_error,
         ir_state(), ir_last_error(), st.rules[0].threshold10,
         st.rules[0].rising ? "true" : "false", st.rules[0].enabled ? "true" : "false",
         ir_has_code(0) ? "true" : "false", st.send_error[0], st.rules[1].threshold10,
@@ -103,7 +128,7 @@ static esp_err_t status_get(httpd_req_t *req)
 
 static esp_err_t rule_post(httpd_req_t *req)
 {
-    last_action = xTaskGetTickCount();
+    record_action();
     cJSON *json = read_json(req);
     int slot;
     if (!json || !json_slot(json, &slot)) {
@@ -132,27 +157,41 @@ static esp_err_t rule_post(httpd_req_t *req)
 
 static esp_err_t learn_post(httpd_req_t *req)
 {
-    last_action = xTaskGetTickCount();
+    record_action();
     cJSON *json = read_json(req);
     int slot;
     if (!json || !json_slot(json, &slot)) {
         cJSON_Delete(json);
         return error_reply(req, "400 Bad Request", ESP_ERR_INVALID_ARG);
     }
-    const cJSON *carrier = cJSON_GetObjectItemCaseSensitive(json, "carrier");
-    int khz = cJSON_IsNumber(carrier) ? carrier->valueint : 0;
     cJSON_Delete(json);
-    if (khz != 36 && khz != 38 && khz != 40)
-        return error_reply(req, "400 Bad Request", ESP_ERR_INVALID_ARG);
-    esp_err_t err = ir_start_learn(slot, khz);
+    esp_err_t err = ir_start_learn(slot);
     if (err == ESP_ERR_INVALID_STATE) return error_reply(req, "409 Conflict", err);
     if (err != ESP_OK) return error_reply(req, "500 Internal Server Error", err);
     return reply(req, "202 Accepted", "{\"ok\":true}");
 }
 
+static esp_err_t carrier_post(httpd_req_t *req)
+{
+    record_action();
+    cJSON *json = read_json(req);
+    if (!json) return error_reply(req, "400 Bad Request", ESP_ERR_INVALID_ARG);
+    const cJSON *item = cJSON_GetObjectItemCaseSensitive(json, "carrier");
+    if (!cJSON_IsNumber(item) || item->valuedouble != item->valueint ||
+        (item->valueint != 36 && item->valueint != 38 && item->valueint != 40)) {
+        cJSON_Delete(json);
+        return error_reply(req, "400 Bad Request", ESP_ERR_INVALID_ARG);
+    }
+    int khz = item->valueint;
+    cJSON_Delete(json);
+    esp_err_t err = ir_set_carrier(khz);
+    if (err != ESP_OK) return error_reply(req, "500 Internal Server Error", err);
+    return reply(req, "200 OK", "{\"ok\":true}");
+}
+
 static esp_err_t send_post(httpd_req_t *req)
 {
-    last_action = xTaskGetTickCount();
+    record_action();
     cJSON *json = read_json(req);
     int slot;
     if (!json || !json_slot(json, &slot)) {
@@ -228,31 +267,36 @@ esp_err_t portal_init(void)
     cfg.ap.max_connection = 4;
     err = esp_wifi_set_config(ESP_IF_WIFI_AP, &cfg);
     if (err != ESP_OK) return err;
-    uint8_t offer_dns = 1;
-    return tcpip_adapter_dhcps_option(TCPIP_ADAPTER_OP_SET,
-                                      TCPIP_ADAPTER_DOMAIN_NAME_SERVER,
-                                      &offer_dns, sizeof(offer_dns));
+    return ESP_OK;
 }
 
 esp_err_t portal_start(void)
 {
     last_action = xTaskGetTickCount();
     if (ap_on) return ESP_OK;
+    ap_used = false;
     esp_err_t err = esp_wifi_start();
     if (err != ESP_OK) return err;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.max_uri_handlers = 10;
+    config.max_open_sockets = 5;
+    config.lru_purge_enable = true;
+    config.max_uri_handlers = 15;
     err = httpd_start(&server, &config);
     if (err != ESP_OK) goto fail_wifi;
     const httpd_uri_t routes[] = {
         { .uri = "/", .method = HTTP_GET, .handler = page_get },
         { .uri = "/generate_204", .method = HTTP_GET, .handler = probe_get },
+        { .uri = "/generate_204_*", .method = HTTP_GET, .handler = probe_get },
         { .uri = "/gen_204", .method = HTTP_GET, .handler = probe_get },
         { .uri = "/hotspot-detect.html", .method = HTTP_GET, .handler = probe_get },
         { .uri = "/connecttest.txt", .method = HTTP_GET, .handler = probe_get },
         { .uri = "/ncsi.txt", .method = HTTP_GET, .handler = probe_get },
+        { .uri = "/favicon.ico", .method = HTTP_GET, .handler = favicon_get },
+        { .uri = "/mmtls/*", .method = HTTP_GET, .handler = background_get },
+        { .uri = "/mmtls/*", .method = HTTP_POST, .handler = background_get },
         { .uri = "/api/status", .method = HTTP_GET, .handler = status_get },
         { .uri = "/api/rule", .method = HTTP_POST, .handler = rule_post },
+        { .uri = "/api/carrier", .method = HTTP_POST, .handler = carrier_post },
         { .uri = "/api/learn", .method = HTTP_POST, .handler = learn_post },
         { .uri = "/api/send", .method = HTTP_POST, .handler = send_post }
     };
@@ -290,7 +334,7 @@ fail_wifi:
 esp_err_t portal_stop(void)
 {
     if (!ap_on) return ESP_OK;
-    if (ir_state() == IR_WAITING || ir_state() == IR_CAPTURING)
+    if (ir_is_busy())
         return ESP_ERR_INVALID_STATE;
     dns_running = false;
     for (int i = 0; i < 20 && !dns_exited; i++) vTaskDelay(pdMS_TO_TICKS(20));
@@ -310,4 +354,9 @@ bool portal_is_on(void) { return ap_on; }
 uint32_t portal_idle_ms(void)
 {
     return (xTaskGetTickCount() - last_action) * portTICK_PERIOD_MS;
+}
+
+uint32_t portal_timeout_ms(void)
+{
+    return ap_used ? 600000 : 180000;
 }

@@ -3,9 +3,10 @@
 
 快速用法（Windows PowerShell）：
     python build.py
-    python flash.py --port COM3 --dry-run
-    python flash.py --port COM3
-将 COM3 改为实际串口；--baud 可指定烧录波特率，默认 115200。
+    python flash.py --dry-run
+    python flash.py
+无 --port 时，系统恰有 COM1 和另一个串口才自动选择后者；
+其他情况请用 --port 指定串口。--baud 默认 115200。
 
 用途
 ====
@@ -65,7 +66,11 @@ bootloader、partition table、应用程序以及其他烧录段写入 ESP-12F F
 
 基本用法
 ========
-烧录 COM3，使用默认 115200 波特率：
+自动选择串口，使用默认 115200 波特率：
+
+    python flash.py
+
+指定 COM3：
 
     python flash.py --port COM3
 
@@ -75,7 +80,7 @@ bootloader、partition table、应用程序以及其他烧录段写入 ESP-12F F
 
 只检查本次构建生成的 Flash 布局和 BIN 文件，不访问串口、不执行烧录：
 
-    python flash.py --port COM3 --dry-run
+    python flash.py --dry-run
 
 查看帮助：
 
@@ -84,8 +89,8 @@ bootloader、partition table、应用程序以及其他烧录段写入 ESP-12F F
 参数
 ====
 --port COMx
-    必填。
-    Windows 串口名称，例如 COM3、COM12。
+    可选。Windows 串口名称，例如 COM3、COM12。
+    未指定时，仅在系统恰有两个串口且其中一个为 COM1 时选择另一个。
 
 --baud N
     可选。
@@ -138,6 +143,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import winreg
 
 
 # ---------------------------------------------------------------------------
@@ -169,6 +175,36 @@ def parse_port(value):
         )
 
     return value.upper()
+
+
+def resolve_port(port):
+    """按需从 Windows 串口列表中选择唯一的非 COM1 端口。"""
+    if port:
+        return port
+
+    try:
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                             r"HARDWARE\DEVICEMAP\SERIALCOMM")
+    except FileNotFoundError:
+        ports = set()
+    else:
+        with key:
+            ports = set()
+            for index in range(winreg.QueryInfoKey(key)[1]):
+                value = winreg.EnumValue(key, index)[1]
+                if isinstance(value, str) and re.fullmatch(
+                    r"COM[1-9][0-9]*", value, re.IGNORECASE
+                ):
+                    ports.add(value.upper())
+
+    if len(ports) == 2 and "COM1" in ports:
+        return (ports - {"COM1"}).pop()
+
+    found = ", ".join(sorted(ports)) if ports else "无"
+    raise ValueError(
+        f"无法自动选择串口（检测到：{found}）；"
+        "请用 --port 指定，或连接设备使系统恰有 COM1 和目标串口"
+    )
 
 
 def parse_baud(value):
@@ -463,9 +499,8 @@ def main():
 
     parser.add_argument(
         "--port",
-        required=True,
         type=parse_port,
-        help="Windows 串口，例如 COM3",
+        help="Windows 串口，例如 COM3；省略时从 COM1 和另一串口中选后者",
     )
 
     parser.add_argument(
@@ -490,9 +525,10 @@ def main():
     print("[1/3] 检查本次构建的烧录配置", flush=True)
     print(f"  配置文件：{BUILD / 'flasher_args.json'}")
     mode, size_text, freq, segments = read_layout()
+    port = resolve_port(args.port)
 
     print(
-        f"  端口：{args.port}，波特率：{args.baud}；"
+        f"  端口：{port}，波特率：{args.baud}；"
         f"Flash：{size_text}，模式：{mode}，频率：{freq}"
     )
 
@@ -519,7 +555,7 @@ def main():
 
     print("  仅写入上述分段；未覆盖的 NVS 区域保持原状")
     command = build_command(
-        args.port,
+        port,
         args.baud,
         mode,
         size_text,

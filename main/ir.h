@@ -6,8 +6,11 @@
 typedef enum { IR_IDLE, IR_WAITING, IR_CAPTURING, IR_SAVED, IR_ERROR } ir_state_t;
 
 esp_err_t ir_init(void);
-esp_err_t ir_start_learn(int slot, int carrier_khz);
+esp_err_t ir_start_learn(int slot);
+int ir_get_carrier(void);
+esp_err_t ir_set_carrier(int carrier_khz);
 esp_err_t ir_send(int slot);
 bool ir_has_code(int slot);
+bool ir_is_busy(void);
 ir_state_t ir_state(void);
 esp_err_t ir_last_error(void);

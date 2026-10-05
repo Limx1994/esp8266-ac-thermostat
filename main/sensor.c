@@ -1,11 +1,12 @@
 #include <stdbool.h>
 #include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "driver/gpio.h"
 #include "rom/ets_sys.h"
+#include "esp_log.h"
 #include "sensor.h"
 
 #define DQ GPIO_NUM_4
+static bool power_warned;
 
 static bool reset_bus(void)
 {
@@ -82,13 +83,37 @@ esp_err_t sensor_init(void)
     return err;
 }
 
-esp_err_t sensor_read(int16_t *temp10)
+esp_err_t sensor_start(bool *external_power)
 {
-    if (!temp10) return ESP_ERR_INVALID_ARG;
+    if (!external_power) return ESP_ERR_INVALID_ARG;
+    *external_power = false;
+    esp_err_t err = gpio_set_direction(DQ, GPIO_MODE_OUTPUT_OD);
+    if (err != ESP_OK) return err;
+    if (!reset_bus()) return ESP_ERR_NOT_FOUND;
+    write_byte(0xcc);
+    write_byte(0xb4);
+    bool powered = read_bit() != 0;
+    if (!powered && !power_warned) {
+        ESP_LOGW("sensor", "parasite power detected; conversion sleep disabled");
+        power_warned = true;
+    }
     if (!reset_bus()) return ESP_ERR_NOT_FOUND;
     write_byte(0xcc);
     write_byte(0x44);
-    vTaskDelay(pdMS_TO_TICKS(750));
+    if (powered) {
+        /* The board's 4.7 kOhm pullup keeps DQ high without a driven output. */
+        err = gpio_set_direction(DQ, GPIO_MODE_INPUT);
+        if (err != ESP_OK) return err;
+    }
+    *external_power = powered;
+    return ESP_OK;
+}
+
+esp_err_t sensor_finish(int16_t *temp10)
+{
+    if (!temp10) return ESP_ERR_INVALID_ARG;
+    esp_err_t err = gpio_set_direction(DQ, GPIO_MODE_OUTPUT_OD);
+    if (err != ESP_OK) return err;
     if (!reset_bus()) return ESP_ERR_NOT_FOUND;
     write_byte(0xcc);
     write_byte(0xbe);
