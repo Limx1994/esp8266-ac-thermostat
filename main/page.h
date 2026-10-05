@@ -1,5 +1,6 @@
 #pragma once
 
+/* 控制页由相邻 C 字符串拼接；说明放在字符串外，避免改变实际发送的 HTML。 */
 static const char control_page[] =
 "<!doctype html><html lang='zh-CN'><meta charset='utf-8'>"
 "<meta name='viewport' content='width=device-width,initial-scale=1'>"
@@ -12,15 +13,19 @@ static const char control_page[] =
 "button{box-shadow:0 3px 0 #005b78;transition:background .1s,transform .1s,box-shadow .1s}"
 "button:not(:disabled):active{background:#005b78;transform:translateY(2px);box-shadow:0 1px 0 #00465d}"
 "button:disabled{opacity:.5}.note{font-size:13px;color:#526b78}#message{min-height:24px;color:#a33822}"
+"#lowBattery{color:#a33822;font-weight:600}"
 "</style><main><h1>空调温控</h1><section><div id='temperature'>温度读取中…</div>"
 "<div id='battery'>电池电压读取中…</div>"
-"<div class='note'>热点未使用3分钟关闭，使用后空闲10分钟关闭；S1重新开启，S2暂停温控。</div></section>"
+"<div id='lowBattery' role='status' hidden>低电量：电池电压低于3.5 V，请及时充电。</div>"
+"<div class='note'>热点未使用3分钟关闭，使用后空闲10分钟关闭；休眠中两键都可唤醒，S1开关Wi-Fi热点，S2关闭热点进入休眠，每30秒测温并按规则发送红外。</div></section>"
+"<p class='note'>启用规则且已学习红外时，首次达到阈值即发送；持续满足时，每组自动发送至少间隔2分钟，按下一次有效采温判断。</p>"
 "<section><label>红外发送频率 <select id='carrier' onchange='saveCarrier()' disabled>"
 "<option value='36'>36</option><option value='38' selected>38</option><option value='40'>40</option>"
 "</select> kHz</label><div class='note'>两组共用；修改后已学习的红外码也按此频率发送。</div></section>"
 "<div id='cards'></div><p id='message'></p>"
 "<p class='note'>未自动弹出时，请访问 http://192.168.4.1 。红外学习时保持手机连接，按一次遥控器目标按键。</p></main>"
 "<script>"
+/* 动态创建两组规则卡片；页面槽位从 1 开始，温度通过 API 使用 0.1 ℃整数。 */
 "const cards=document.getElementById('cards'),msg=document.getElementById('message');"
 "for(let i=1;i<=2;i++)cards.innerHTML+=`<section><h2>规则 ${i}</h2>"
 "<label>触发温度 <input id='t${i}' type='number' min='-10' max='50' step='0.1'> °C</label>"
@@ -28,8 +33,10 @@ static const char control_page[] =
 "<label><input id='e${i}' type='checkbox'> 启用</label>"
 "<button onclick='save(${i})'>保存规则</button><button onclick='learn(${i})'>学习红外</button>"
 "<button onclick='send(${i})'>测试发送</button><div id='info${i}' class='note'></div></section>`;"
+/* 统一处理 POST 和 HTTP 错误；后续调用在页面消息区显示失败原因。 */
 "async function api(path,data){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});"
 "const j=await r.json();if(!r.ok)throw Error(j.error||('HTTP '+r.status));return j}"
+/* 保存载波期间禁用选择框；失败恢复上次已保存值，避免显示未生效的设置。 */
 "let savedCarrier=38;async function saveCarrier(){const sel=document.getElementById('carrier');"
 "const khz=Number(sel.value);sel.disabled=true;try{await api('/api/carrier',{carrier:khz});"
 "savedCarrier=khz;msg.textContent='红外发送频率已保存'}catch(e){sel.value=String(savedCarrier);"
@@ -42,12 +49,15 @@ static const char control_page[] =
 "msg.textContent='请在15秒内按一次遥控器目标按键';refresh()}catch(e){msg.textContent=e.message}}"
 "async function send(i){try{await api('/api/send',{slot:i});msg.textContent='已发送第'+i+'组红外码';refresh()}"
 "catch(e){msg.textContent=e.message}}"
+/* 每 2 秒轮询状态；配置仅首次填入，避免覆盖用户正在编辑的规则。
+ * 学习状态变化时更新提示，无效温度和电压显示对应错误。 */
 "let loaded=false,lastLearn=-1;async function refresh(){try{const r=await fetch('/api/status',{cache:'no-store'});"
 "if(!r.ok)throw Error('状态读取失败');const s=await r.json();"
 "document.getElementById('temperature').textContent=s.valid?('当前温度 '+(s.temperature10/10).toFixed(1)+' °C')"
 ":('温度读取失败，错误码 '+s.sensorError);"
 "document.getElementById('battery').textContent=s.batteryValid?('电池电压 '+(s.batteryMv/1000).toFixed(2)+' V')"
 ":('电池电压读取失败，错误码 '+s.batteryError);"
+"document.getElementById('lowBattery').hidden=!(s.batteryValid&&s.batteryMv<3500);"
 "if(!loaded){const sel=document.getElementById('carrier');savedCarrier=s.carrier;"
 "sel.value=String(savedCarrier);sel.disabled=false}"
 "for(let i=1;i<=2;i++){const q=s.rules[i-1];if(!loaded){document.getElementById('t'+i).value=(q.threshold10/10).toFixed(1);"

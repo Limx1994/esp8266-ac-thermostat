@@ -1,45 +1,63 @@
 #include <stdbool.h>
 #include "freertos/FreeRTOS.h"
 #include "driver/gpio.h"
+#include "driver/soc.h"
+#include "esp8266/gpio_struct.h"
+#include "esp_attr.h"
 #include "rom/ets_sys.h"
 #include "esp_log.h"
 #include "sensor.h"
 
 #define DQ GPIO_NUM_4
+#ifndef CONFIG_ESP8266_DEFAULT_CPU_FREQ_160
+#error 1-Wire slot timing requires the configured 160 MHz CPU clock
+#endif
 static bool power_warned;
 
-static bool reset_bus(void)
+/* 调用时已屏蔽 RTOS tick 中断，避免 ccount 被 tick 重置。
+ * 边沿、延时和采样全程位于 IRAM，避免依赖 Flash cache。
+ */
+static void IRAM_ATTR slot_wait(uint32_t start, uint32_t us)
 {
-    gpio_set_level(DQ, 0);
-    ets_delay_us(480);
+    while ((uint32_t)(soc_get_ccount() - start) < us * 160U) { }
+}
+
+static bool IRAM_ATTR reset_bus(void)
+{
+    /* 在临界区内完成复位及存在脉冲采样，避免任务切换拉长时序。 */
     portENTER_CRITICAL();
-    gpio_set_level(DQ, 1);
-    ets_delay_us(70);
-    bool present = gpio_get_level(DQ) == 0;
+    GPIO.out_w1tc = 1U << DQ;
+    uint32_t start = soc_get_ccount();
+    slot_wait(start, 480);
+    GPIO.out_w1ts = 1U << DQ;
+    slot_wait(start, 550);
+    bool present = (GPIO.in & (1U << DQ)) == 0;
     portEXIT_CRITICAL();
     ets_delay_us(410);
     return present;
 }
 
-static void write_bit(int bit)
+static void IRAM_ATTR write_bit(int bit)
 {
     portENTER_CRITICAL();
-    gpio_set_level(DQ, 0);
-    ets_delay_us(bit ? 6 : 60);
-    gpio_set_level(DQ, 1);
-    ets_delay_us(bit ? 64 : 10);
+    GPIO.out_w1tc = 1U << DQ;
+    uint32_t start = soc_get_ccount();
+    slot_wait(start, bit ? 6 : 60);
+    GPIO.out_w1ts = 1U << DQ;
+    slot_wait(start, 70);
     portEXIT_CRITICAL();
 }
 
-static int read_bit(void)
+static int IRAM_ATTR read_bit(void)
 {
     portENTER_CRITICAL();
-    gpio_set_level(DQ, 0);
-    ets_delay_us(3);
-    gpio_set_level(DQ, 1);
-    ets_delay_us(10);
-    int bit = gpio_get_level(DQ);
-    ets_delay_us(57);
+    GPIO.out_w1tc = 1U << DQ;
+    uint32_t start = soc_get_ccount();
+    slot_wait(start, 3);
+    GPIO.out_w1ts = 1U << DQ;
+    slot_wait(start, 13);
+    int bit = (GPIO.in >> DQ) & 1U;
+    slot_wait(start, 70);
     portEXIT_CRITICAL();
     return bit;
 }
@@ -56,6 +74,7 @@ static uint8_t read_byte(void)
     return value;
 }
 
+/* DS18B20 scratchpad 使用低位优先 CRC8，反向多项式为 0x8c。 */
 static uint8_t crc8(const uint8_t *data, int len)
 {
     uint8_t crc = 0;
@@ -91,6 +110,7 @@ esp_err_t sensor_start(bool *external_power)
     if (err != ESP_OK) return err;
     if (!reset_bus()) return ESP_ERR_NOT_FOUND;
     write_byte(0xcc);
+    /* Read Power Supply：返回位为 1 表示外部供电，否则按寄生供电处理。 */
     write_byte(0xb4);
     bool powered = read_bit() != 0;
     if (!powered && !power_warned) {
@@ -101,7 +121,7 @@ esp_err_t sensor_start(bool *external_power)
     write_byte(0xcc);
     write_byte(0x44);
     if (powered) {
-        /* The board's 4.7 kOhm pullup keeps DQ high without a driven output. */
+        /* 外部供电时由板上 4.7 kΩ 上拉保持 DQ 高电平，转换期间可释放输出。 */
         err = gpio_set_direction(DQ, GPIO_MODE_INPUT);
         if (err != ESP_OK) return err;
     }
@@ -109,9 +129,8 @@ esp_err_t sensor_start(bool *external_power)
     return ESP_OK;
 }
 
-esp_err_t sensor_finish(int16_t *temp10)
+static esp_err_t read_temp(int16_t *temp10)
 {
-    if (!temp10) return ESP_ERR_INVALID_ARG;
     esp_err_t err = gpio_set_direction(DQ, GPIO_MODE_OUTPUT_OD);
     if (err != ESP_OK) return err;
     if (!reset_bus()) return ESP_ERR_NOT_FOUND;
@@ -119,9 +138,30 @@ esp_err_t sensor_finish(int16_t *temp10)
     write_byte(0xbe);
     uint8_t data[9];
     for (int i = 0; i < 9; i++) data[i] = read_byte();
-    if (crc8(data, 8) != data[8]) return ESP_ERR_INVALID_CRC;
+    uint8_t expected_crc = crc8(data, 8);
+    if (expected_crc != data[8]) {
+        ESP_LOGW("sensor", "scratchpad=%02x %02x %02x %02x %02x %02x %02x %02x %02x; expected CRC=%02x",
+                 data[0], data[1], data[2], data[3], data[4],
+                 data[5], data[6], data[7], data[8], expected_crc);
+        return ESP_ERR_INVALID_CRC;
+    }
     int16_t raw = (int16_t)((data[1] << 8) | data[0]);
+    /* 拒绝 85 ℃上电默认值；将 1/16 ℃原始值四舍五入到 0.1 ℃，兼顾负温度。 */
     if (raw == 0x0550) return ESP_ERR_INVALID_STATE;
     *temp10 = (raw * 10 + (raw >= 0 ? 8 : -8)) / 16;
     return ESP_OK;
+}
+
+esp_err_t sensor_finish(int16_t *temp10)
+{
+    if (!temp10) return ESP_ERR_INVALID_ARG;
+    /* 只重试 CRC 错误和设备未找到；其他错误直接上报，避免掩盖故障。 */
+    for (int attempt = 1; attempt <= 3; attempt++) {
+        esp_err_t err = read_temp(temp10);
+        if (err == ESP_OK || attempt == 3 ||
+            (err != ESP_ERR_INVALID_CRC && err != ESP_ERR_NOT_FOUND)) return err;
+        ESP_LOGW("sensor", "scratchpad read attempt %d failed: %s; retrying",
+                 attempt, esp_err_to_name(err));
+    }
+    return ESP_FAIL;
 }

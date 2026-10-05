@@ -494,7 +494,7 @@ static void parse_init(httpd_req_t *r, http_parser *parser, parser_data_t *data)
 
 static bool method_start(unsigned char ch)
 {
-    /* Use the SDK parser's method list rather than a separate protocol list. */
+    /* 使用 SDK 解析器的方法列表识别合法首字符，避免另建协议列表与解析器不一致。 */
 #define XX(num, name, string) if (ch == #string[0]) return true;
     HTTP_METHOD_MAP(XX)
 #undef XX
@@ -531,7 +531,7 @@ static esp_err_t httpd_parse_req(struct httpd_data *hd)
                     continue;
                 }
                 if (!method_start(ch)) {
-                    /* No HTTP method can begin here. Close without an HTTP reply. */
+                    /* 首字符不可能属于 HTTP 方法，直接关闭连接，避免向非 HTTP 数据回复 HTTP 报文。 */
                     ESP_LOGI(TAG, LOG_FMT("unsupported request prefix 0x%02X; closing connection"),
                              (unsigned int)ch);
                     return ESP_FAIL;

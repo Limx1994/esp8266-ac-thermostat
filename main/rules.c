@@ -9,26 +9,11 @@ bool rule_valid(const rule_cfg_t *rule)
 bool rule_step(const rule_cfg_t *rule, rule_state_t *state, int16_t temp10)
 {
     if (!rule->enabled) return false;
-    if (!state->primed) {
-        state->primed = true;
-        state->armed = rule->rising ? temp10 < rule->threshold10
-                                    : temp10 > rule->threshold10;
-        return false;
-    }
-    if (!state->armed) {
-        bool ready = rule->rising
-            ? (state->fired ? temp10 <= rule->threshold10 - 5
-                            : temp10 < rule->threshold10)
-            : (state->fired ? temp10 >= rule->threshold10 + 5
-                            : temp10 > rule->threshold10);
-        if (ready) state->armed = true;
-        return false;
-    }
-    if (rule->rising ? temp10 >= rule->threshold10
-                     : temp10 <= rule->threshold10) {
-        state->armed = false;
-        state->fired = true;
-        return true;
-    }
-    return false;
+    /* 条件持续满足时每次都返回 true；是否发送由调用方结合每组发送间隔决定。 */
+    bool fire = rule->rising ? temp10 >= rule->threshold10
+                            : temp10 <= rule->threshold10;
+    state->primed = true;
+    state->armed = !fire;
+    state->fired = fire;
+    return fire;
 }

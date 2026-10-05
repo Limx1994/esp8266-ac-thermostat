@@ -6,6 +6,7 @@
 #include "freertos/task.h"
 #include "esp_event.h"
 #include "esp_wifi.h"
+#include "driver/rtc.h"
 #include "esp_log.h"
 #include "esp_http_server.h"
 #include "tcpip_adapter.h"
@@ -25,6 +26,7 @@ static bool ap_on;
 static TickType_t last_action;
 static bool ap_used;
 
+/* 仅页面访问和控制操作刷新空闲计时；状态轮询及手机后台探测不延长热点寿命。 */
 static void record_action(void)
 {
     last_action = xTaskGetTickCount();
@@ -47,6 +49,7 @@ static esp_err_t error_reply(httpd_req_t *req, const char *status, esp_err_t err
     return reply(req, status, body);
 }
 
+/* 请求体限制为 255 字节，并循环读取分片；读取或解析失败返回 NULL，由调用方回复错误。 */
 static cJSON *read_json(httpd_req_t *req)
 {
     if (req->content_len <= 0 || req->content_len > 255) return NULL;
@@ -63,6 +66,7 @@ static cJSON *read_json(httpd_req_t *req)
     return cJSON_Parse(body);
 }
 
+/* HTTP 使用槽位 1、2，校验整数后转换为固件内部槽位 0、1。 */
 static bool json_slot(const cJSON *json, int *slot)
 {
     const cJSON *item = cJSON_GetObjectItemCaseSensitive(json, "slot");
@@ -80,6 +84,7 @@ static esp_err_t page_get(httpd_req_t *req)
     return err;
 }
 
+/* 手机联网探测重定向到配置页；不将探测计入实际使用。 */
 static esp_err_t probe_get(httpd_req_t *req)
 {
     ESP_LOGI(TAG, "captive portal probe: %s", req->uri);
@@ -103,6 +108,7 @@ static esp_err_t background_get(httpd_req_t *req)
     return err;
 }
 
+/* 只读取状态快照，不刷新热点计时；无效读数配套返回错误码供页面展示。 */
 static esp_err_t status_get(httpd_req_t *req)
 {
     app_status_t st;
@@ -206,6 +212,8 @@ static esp_err_t send_post(httpd_req_t *req)
     return reply(req, "200 OK", "{\"ok\":true}");
 }
 
+/* 仅为 IN 类 A 查询返回 192.168.4.1；不支持的查询返回无答案响应。
+ * 使用接收超时定期检查退出标记，任务退出时自行关闭 socket。 */
 static void dns_task(void *arg)
 {
     uint8_t query[256], response[300];
@@ -267,6 +275,8 @@ esp_err_t portal_init(void)
     cfg.ap.max_connection = 4;
     err = esp_wifi_set_config(ESP_IF_WIFI_AP, &cfg);
     if (err != ESP_OK) return err;
+    phy_close_rf();
+    ESP_LOGI(TAG, "RF disabled; AP off");
     return ESP_OK;
 }
 
@@ -275,14 +285,20 @@ esp_err_t portal_start(void)
     last_action = xTaskGetTickCount();
     if (ap_on) return ESP_OK;
     ap_used = false;
+    phy_open_rf();
     esp_err_t err = esp_wifi_start();
-    if (err != ESP_OK) return err;
+    if (err != ESP_OK) {
+        phy_close_rf();
+        return err;
+    }
+    ap_on = true;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.max_open_sockets = 5;
     config.lru_purge_enable = true;
     config.max_uri_handlers = 15;
     err = httpd_start(&server, &config);
     if (err != ESP_OK) goto fail_wifi;
+    /* 同时注册手机探测、后台请求和五个控制 API；通配路径依赖本地 SDK URI 覆盖。 */
     const httpd_uri_t routes[] = {
         { .uri = "/", .method = HTTP_GET, .handler = page_get },
         { .uri = "/generate_204", .method = HTTP_GET, .handler = probe_get },
@@ -324,10 +340,26 @@ esp_err_t portal_start(void)
     ap_on = true;
     ESP_LOGI(TAG, "open AP at http://192.168.4.1");
     return ESP_OK;
+/* 启动失败按 HTTP、Wi-Fi 顺序清理；清理失败返回该错误，保留状态便于后续处理。 */
 fail_http:
-    httpd_stop(server); server = NULL;
+    {
+        esp_err_t cleanup = httpd_stop(server);
+        if (cleanup != ESP_OK) {
+            ESP_LOGE(TAG, "HTTP cleanup failed: %s", esp_err_to_name(cleanup));
+            return cleanup;
+        }
+        server = NULL;
+    }
 fail_wifi:
-    esp_wifi_stop();
+    {
+        esp_err_t cleanup = esp_wifi_stop();
+        if (cleanup != ESP_OK) {
+            ESP_LOGE(TAG, "Wi-Fi cleanup failed: %s", esp_err_to_name(cleanup));
+            return cleanup;
+        }
+        phy_close_rf();
+        ap_on = false;
+    }
     return err;
 }
 
@@ -336,16 +368,21 @@ esp_err_t portal_stop(void)
     if (!ap_on) return ESP_OK;
     if (ir_is_busy())
         return ESP_ERR_INVALID_STATE;
+    /* 等待 DNS 任务自行退出，确认 socket 关闭后再停止 HTTP 和 Wi-Fi。 */
     dns_running = false;
     for (int i = 0; i < 20 && !dns_exited; i++) vTaskDelay(pdMS_TO_TICKS(20));
     if (!dns_exited) return ESP_ERR_TIMEOUT;
-    esp_err_t err = httpd_stop(server);
-    if (err != ESP_OK) return err;
-    server = NULL;
+    esp_err_t err;
+    if (server) {
+        err = httpd_stop(server);
+        if (err != ESP_OK) return err;
+        server = NULL;
+    }
     err = esp_wifi_stop();
     if (err == ESP_OK) {
+        phy_close_rf();
         ap_on = false;
-        ESP_LOGI(TAG, "AP stopped");
+        ESP_LOGI(TAG, "AP stopped; RF disabled");
     }
     return err;
 }

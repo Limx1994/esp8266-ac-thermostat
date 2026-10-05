@@ -23,7 +23,7 @@
 
 static const char *TAG = "httpd_uri";
 
-/* Project extension: a final '*' matches the remaining path, excluding query. */
+/* 项目扩展：末尾 * 匹配剩余路径；uri_len 仅包含路径，不含查询参数。 */
 static bool uri_matches(const char *pattern, const char *uri, size_t uri_len)
 {
     size_t len = strlen(pattern);

@@ -39,6 +39,7 @@ def find_tool(default, name):
     raise FileNotFoundError(f"找不到 {name}；请按 ESP8266编译环境路径.md 配置工具链")
 
 
+# Intel HEX 校验和取记录字节和的二补数，地址字段仅保存低 16 位。
 def hex_record(address, kind, data):
     record = bytes((len(data), address >> 8, address & 0xFF, kind)) + data
     return ":" + record.hex().upper() + f"{(-sum(record)) & 0xFF:02X}\n"
@@ -66,6 +67,7 @@ def write_full_images(build):
     if not required.issubset(name.replace("\\", "/") for name in files.values()):
         raise ValueError("烧录文件列表缺少 bootloader、partition table 或应用程序")
 
+    # 未写入区域使用擦除态 0xFF；按地址排序后检查字节重叠与容量越界。
     image = bytearray(b"\xFF" * size)
     previous_end = 0
     segments = []
@@ -84,6 +86,7 @@ def write_full_images(build):
     (build / "full_flash.bin").write_bytes(image)
     with (build / "full_flash.hex").open("w", encoding="ascii", newline="\n") as output:
         for offset in range(0, size, 16):
+            # 每跨越 64 KiB 写入扩展线性地址，随后输出 16 字节数据记录。
             if offset % 0x10000 == 0:
                 output.write(hex_record(0, 4, (offset >> 16).to_bytes(2, "big")))
             output.write(hex_record(offset & 0xFFFF, 0, bytes(image[offset:offset + 16])))
@@ -127,6 +130,7 @@ def main():
         tool_dirs.insert(0, toolchain)
     env["PATH"] = os.pathsep.join(str(path) for path in tool_dirs) + os.pathsep + env.get("PATH", "")
 
+    # 临时映射 ASCII 盘符供 SDK 构建使用；finally 保证构建失败时也解除映射。
     mapped = Path(DRIVE + "\\")
     build = mapped / "build" / "auto"
     subprocess.run([str(subst), DRIVE, str(ROOT)], check=True)
@@ -139,6 +143,7 @@ def main():
             env=env, check=True,
         )
         print(f"  CMake 配置完成，耗时 {time.perf_counter() - step_started:.1f} 秒", flush=True)
+        # defaults 不覆盖已有 sdkconfig，因此以实际生成配置检查 Flash 频率。
         config_lines = (ROOT / "sdkconfig").read_text(encoding="utf-8").splitlines()
         if "CONFIG_ESPTOOLPY_FLASHFREQ_26M=y" not in config_lines:
             raise ValueError("本地 sdkconfig 未设置 26 MHz Flash；请更新配置后重试")

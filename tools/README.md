@@ -7,7 +7,7 @@
 先运行 `python build.py` 生成固件。用 3.3 V USB-UART 将 TX 接 P3-3（RXD）、RX 接 P3-2（TXD），并共接 P3-4（GND）；短接 P4 后复位，使 ESP8266 进入下载模式。在项目根目录的 PowerShell 中运行 `python flash.py --port COM3`，将 `COM3` 改为实际端口。脚本从 `build\auto\flasher_args.json` 读取 Flash 参数和分段偏移，检查文件后调用本目录的 esptool；默认分段烧录，保留未覆盖的 NVS。可先运行 `python flash.py --port COM3 --dry-run` 只检查布局，不访问串口。运行时会输出配置文件、每段地址及 sector、准备执行的命令和烧录结果；`python flash.py --help` 显示完整用法。若需手动烧录，使用以下等效命令：
 
 ```powershell
-& .\tools\esptool-v4.12.0\esptool.exe --chip esp8266 --port COM3 --baud 115200 `
+& .\tools\esptool-v4.12.0\esptool.exe --chip esp8266 --port COM3 --baud 230400 `
   --before no_reset --after no_reset write_flash `
   --flash_mode dio --flash_size 4MB --flash_freq 26m `
   0x0 .\build\auto\bootloader\bootloader.bin `
@@ -17,7 +17,9 @@
 
 不传 `--port` 时可运行 `python flash.py`：脚本会读取系统串口列表，仅在恰有两个串口且其中一个是 COM1 时选择另一个。其他情况会报错，请使用 `--port COMx` 明确指定。`python flash.py --dry-run` 也会自动选择串口，但不会打开串口或写入 Flash。
 
-分段偏移及 Flash 参数以本次构建的 `build\auto\flasher_args.json` 为准；若其中 Flash 频率不是 `26m`，请更新本地 `sdkconfig` 并重新运行 `python build.py`，烧录脚本会拒绝旧的 40 MHz 产物。烧录完成后断开 P4 短接并复位。`full_flash.bin` 从 `0x0` 整片写入会清除 NVS 中保存的规则、红外编码及共享载波；需保留数据时使用上面的分段命令。固件产物及本次验证见 [0.1G 发布说明](../RELEASE.md)。本轮只做软件检查，不连接设备烧录。
+默认烧录波特率为 `230400`，esptool 默认启用压缩传输。相比原来的 `115200`，串口传输速率提高到 2 倍；总耗时仍取决于擦除、写入和校验，实际提速尚未实机测量。连接不稳定时使用 `python flash.py --port COM3 --baud 115200`，也可通过 `--baud` 指定其他支持的速率。烧录波特率不改变固件日志的 115200 baud。
+
+分段偏移及 Flash 参数以本次构建的 `build\auto\flasher_args.json` 为准；若其中 Flash 频率不是 `26m`，请更新本地 `sdkconfig` 并重新运行 `python build.py`，烧录脚本会拒绝旧的 40 MHz 产物。烧录完成后断开 P4 短接并复位。`full_flash.bin` 从 `0x0` 整片写入会清除 NVS 中保存的规则、红外编码及共享载波；需保留数据时使用分段命令。固件产物及本轮验证见 [0.1H 本地发布](../README.md#本地发布)。主机预检通过不代表设备烧录成功，本轮不连接设备。
 
 ## 本地额外工具
 

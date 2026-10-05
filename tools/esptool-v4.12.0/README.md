@@ -13,7 +13,7 @@
 & .\tools\esptool-v4.12.0\esptool.exe -h
 ```
 
-推荐使用项目 `flash.py` 读取构建布局。实际偏移和参数以 `build\auto\flasher_args.json` 为准，不将其他芯片示例直接用于 ESP8266。
+推荐使用项目 `flash.py` 读取构建布局，默认分段烧录并保留未覆盖的 NVS；实际偏移和参数以 `build\auto\flasher_args.json` 为准，不将其他芯片示例直接用于 ESP8266。工具不负责判断空调是否接收红外，当前固件的产物与验证记录见 [本地发布](../../README.md#本地发布)。
 
 ## 贡献
 

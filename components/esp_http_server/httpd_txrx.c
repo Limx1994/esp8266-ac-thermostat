@@ -506,7 +506,7 @@ static int httpd_sock_err(const char *ctx, int sockfd)
         ESP_LOGE(TAG, LOG_FMT("error calling getsockopt : %d"), errno);
         return HTTPD_SOCK_ERR_FAIL;
     }
-    /* SO_ERROR may already be cleared by send/recv; preserve the failed call. */
+    /* send/recv 可能已清除 SO_ERROR；此时保留失败调用的 errno，避免将连接错误误判为超时。 */
     if (sock_err == 0) sock_err = io_errno;
     ESP_LOGW(TAG, LOG_FMT("error in %s : %d"), ctx, sock_err);
 

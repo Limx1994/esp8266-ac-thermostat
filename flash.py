@@ -6,7 +6,7 @@
     python flash.py --dry-run
     python flash.py
 无 --port 时，系统恰有 COM1 和另一个串口才自动选择后者；
-其他情况请用 --port 指定串口。--baud 默认 115200。
+其他情况请用 --port 指定串口。--baud 默认 230400。
 
 用途
 ====
@@ -66,7 +66,7 @@ bootloader、partition table、应用程序以及其他烧录段写入 ESP-12F F
 
 基本用法
 ========
-自动选择串口，使用默认 115200 波特率：
+自动选择串口，使用默认 230400 波特率：
 
     python flash.py
 
@@ -76,7 +76,7 @@ bootloader、partition table、应用程序以及其他烧录段写入 ESP-12F F
 
 指定烧录波特率：
 
-    python flash.py --port COM3 --baud 460800
+    python flash.py --port COM3 --baud 115200
 
 只检查本次构建生成的 Flash 布局和 BIN 文件，不访问串口、不执行烧录：
 
@@ -95,7 +95,7 @@ bootloader、partition table、应用程序以及其他烧录段写入 ESP-12F F
 --baud N
     可选。
     烧录波特率，允许范围 9600～921600。
-    默认值为 115200。
+    默认值为 230400；连接不稳定时可指定 115200。
 
 --dry-run
     可选。
@@ -179,6 +179,7 @@ def parse_port(value):
 
 def resolve_port(port):
     """按需从 Windows 串口列表中选择唯一的非 COM1 端口。"""
+    # 显式指定串口时直接使用，不读取注册表，也不尝试打开设备。
     if port:
         return port
 
@@ -480,6 +481,7 @@ def build_command(
         freq,
     ]
 
+    # 仅按已验证布局生成分段参数；真正访问串口发生在后续 subprocess 调用。
     for offset, _, path, _ in segments:
         command.extend(
             (
@@ -506,8 +508,8 @@ def main():
     parser.add_argument(
         "--baud",
         type=parse_baud,
-        default=115200,
-        help="烧录波特率，默认 115200",
+        default=230400,
+        help="烧录波特率，默认 230400；连接不稳定时可指定 115200",
     )
 
     parser.add_argument(

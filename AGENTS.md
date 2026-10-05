@@ -22,7 +22,7 @@ python flash.py --port COM3 --dry-run
 git diff --check
 ```
 
-以上命令逐条执行，失败时停止依赖步骤。`build.py` 使用 ESP8266 RTOS SDK 3.4 和 Ninja `-j 12`，临时映射空闲的 `Z:`，将固件写入 `build\auto\`；SDK 路径可通过 `IDF_PATH` 覆盖。规则测试检查阈值、回差与单次触发；主机测试使用实际源码与 mocks，页面检查验证脚本、五个 API 路径及错误显示。dry-run 不访问串口。`git diff --check` 检查空白错误，不替代 Markdown 链接与结构检查。
+以上命令逐条执行，失败时停止依赖步骤。`build.py` 使用 ESP8266 RTOS SDK 3.4 和 Ninja `-j 12`，临时映射空闲的 `Z:`，将固件写入 `build\auto\`；SDK 路径可通过 `IDF_PATH` 覆盖。规则测试检查阈值等号、首次满足、持续满足及禁用；主机测试使用实际源码与 mocks，覆盖每组 120 秒间隔、休眠、软件/I2S 发送、清理失败及 NVS；页面检查验证脚本、五个 API 路径及错误显示。dry-run 不访问串口。`git diff --check` 检查空白错误，不替代 Markdown 链接与结构检查。
 
 ## 代码风格与测试范围
 
@@ -30,7 +30,7 @@ git diff --check
 
 ## 提交与 Pull Request
 
-近期提交使用简短中文祈使描述，例如“发布本地版本并更新项目文档”；提交信息应说明实际改动。Pull Request 写明目的、涉及模块、验证命令与结果，并列出未验证的硬件功能；涉及控制页时附界面截图，涉及硬件时注明接线或日志依据。发布版本时同步检查 `README.md`、`CHANGELOG.md` 和 `RELEASE.md`。
+近期提交使用简短中文祈使描述，例如“发布本地版本并更新项目文档”；提交信息应说明实际改动。Pull Request 写明目的、涉及模块、验证命令与结果，并列出未验证的硬件功能；涉及控制页时附界面截图，涉及硬件时注明接线或日志依据。版本、产物及验证结果集中记录在 [README 的本地发布](README.md#本地发布)，历史通过 Git 查询；不恢复已删除文档，不新增 Markdown。
 
 ## 配置与安全
 

@@ -13,10 +13,11 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "build_ascii" / "portal_test"
 SDK_PATH = Path(os.environ.get("IDF_PATH") or
                 r"D:\APPS\Espressif\frameworks\ESP8266_RTOS_SDK")
-HEADERS = ["esp_err.h", "esp_log.h", "esp_event.h", "esp_wifi.h",
+HEADERS = ["esp_err.h", "esp_log.h", "esp_event.h", "esp_wifi.h", "driver/rtc.h",
            "tcpip_adapter.h", "esp_http_server.h", "esp_httpd_priv.h",
            "freertos/FreeRTOS.h", "freertos/task.h", "lwip/sockets.h", "osal.h"]
 
+# 用主机 mock 承接实际 portal 和 HTTP 覆盖代码，验证协议及资源生命周期。
 SDK = r'''
 #pragma once
 #include <winsock2.h>
@@ -152,6 +153,8 @@ esp_err_t esp_wifi_set_mode(int);
 esp_err_t esp_wifi_set_config(int, const wifi_config_t *);
 esp_err_t esp_wifi_start(void);
 esp_err_t esp_wifi_stop(void);
+void phy_open_rf(void);
+void phy_close_rf(void);
 #define socket test_socket
 #define bind test_bind
 #define close test_close
@@ -190,6 +193,9 @@ static bool battery_valid = true;
 static size_t response_len;
 static void (*dns_fn)(void *);
 static bool socket_failed;
+static bool rf_enabled = true, wifi_started;
+static bool start_failed, stop_failed, http_failed;
+static int rf_opens, rf_closes;
 
 void test_log(const char *tag, const char *fmt, ...) {}
 void test_warn(const char *tag, const char *fmt, ...) { warnings++; }
@@ -206,6 +212,7 @@ int xTaskCreate(void (*fn)(void *), const char *name, unsigned stack,
 }
 const char *esp_err_to_name(esp_err_t err) { return "mock error"; }
 esp_err_t httpd_start(httpd_handle_t *handle, const httpd_config_t *cfg) {
+    if (http_failed) return ESP_FAIL;
     memset(&hd, 0, sizeof(hd));
     hd.config = *cfg;
     hd.hd_calls = calloc(cfg->max_uri_handlers, sizeof(*hd.hd_calls));
@@ -257,8 +264,28 @@ esp_err_t esp_wifi_init(const wifi_init_config_t *cfg) { return ESP_OK; }
 esp_err_t esp_wifi_set_storage(int mode) { return ESP_OK; }
 esp_err_t esp_wifi_set_mode(int mode) { return ESP_OK; }
 esp_err_t esp_wifi_set_config(int iface, const wifi_config_t *cfg) { return ESP_OK; }
-esp_err_t esp_wifi_start(void) { return ESP_OK; }
-esp_err_t esp_wifi_stop(void) { return ESP_OK; }
+esp_err_t esp_wifi_start(void) {
+    assert(rf_enabled && !wifi_started);
+    if (start_failed) return ESP_FAIL;
+    wifi_started = true;
+    return ESP_OK;
+}
+esp_err_t esp_wifi_stop(void) {
+    assert(rf_enabled && wifi_started);
+    if (stop_failed) return ESP_FAIL;
+    wifi_started = false;
+    return ESP_OK;
+}
+void phy_open_rf(void) {
+    assert(!rf_enabled && !wifi_started);
+    rf_enabled = true;
+    rf_opens++;
+}
+void phy_close_rf(void) {
+    assert(rf_enabled && !wifi_started);
+    rf_enabled = false;
+    rf_closes++;
+}
 int test_socket(int domain, int type, int proto) { return socket_failed ? -1 : 5; }
 int test_bind(int fd, const struct sockaddr *addr, size_t len) { return 0; }
 int test_close(int fd) { return 0; }
@@ -285,6 +312,7 @@ bool ir_is_busy(void) { return false; }
 ir_state_t ir_state(void) { return IR_IDLE; }
 esp_err_t ir_last_error(void) { return ESP_OK; }
 
+/* 构造请求后调用实际 URI 分发，单独检查响应和空闲计时，不模拟手机登录界面。 */
 static esp_err_t request(const char *uri, int method) {
     memset(&hd.hd_req, 0, sizeof(hd.hd_req));
     strcpy(hd.hd_req.uri, uri);
@@ -301,8 +329,12 @@ static esp_err_t request(const char *uri, int method) {
 
 int main(void) {
     assert(portal_init() == ESP_OK);
+    assert(!rf_enabled && !wifi_started && rf_closes == 1 && rf_opens == 0);
+    assert(portal_stop() == ESP_OK && rf_closes == 1);
     now = 100;
     assert(portal_start() == ESP_OK && portal_is_on());
+    assert(rf_enabled && wifi_started && rf_opens == 1);
+    assert(portal_start() == ESP_OK && rf_opens == 1);
     assert(portal_timeout_ms() == 180000);
     assert(hd.config.max_uri_handlers == 15);
     for (int i = 0; i < 15; i++) assert(hd.hd_calls[i]);
@@ -370,6 +402,7 @@ int main(void) {
     fail_call = 0;
     assert(request("/api/status", HTTP_GET) == ESP_OK && response_code == 200);
     assert(portal_stop() == ESP_OK && !portal_is_on());
+    assert(!rf_enabled && !wifi_started && rf_closes == 2);
     assert(portal_start() == ESP_OK);
     assert(portal_timeout_ms() == 180000);
     assert(request("/generate_204_again", HTTP_GET) == ESP_OK);
@@ -380,10 +413,34 @@ int main(void) {
     assert(request("/api/status", HTTP_GET) == ESP_OK);
     assert(portal_idle_ms() == 600000 && portal_timeout_ms() == 600000);
     assert(portal_stop() == ESP_OK);
+    assert(!rf_enabled && !wifi_started);
     socket_failed = true;
     assert(portal_start() == ESP_FAIL && !portal_is_on());
+    assert(!rf_enabled && !wifi_started);
     assert(server == NULL && hd.hd_calls == NULL);
-    puts("portal: routes, redirect, idle time, response failures and restart passed");
+    socket_failed = false;
+    start_failed = true;
+    assert(portal_start() == ESP_FAIL && !portal_is_on());
+    assert(!rf_enabled && !wifi_started);
+    start_failed = false;
+    http_failed = true;
+    assert(portal_start() == ESP_FAIL && !portal_is_on());
+    assert(!rf_enabled && !wifi_started);
+    http_failed = false;
+    assert(portal_start() == ESP_OK);
+    stop_failed = true;
+    assert(portal_stop() == ESP_FAIL && portal_is_on());
+    assert(rf_enabled && wifi_started && server == NULL);
+    stop_failed = false;
+    assert(portal_stop() == ESP_OK && !portal_is_on());
+    assert(!rf_enabled && !wifi_started);
+    socket_failed = stop_failed = true;
+    assert(portal_start() == ESP_FAIL && portal_is_on());
+    assert(rf_enabled && wifi_started && server == NULL);
+    socket_failed = stop_failed = false;
+    assert(portal_stop() == ESP_OK && !portal_is_on());
+    assert(!rf_enabled && !wifi_started && rf_closes == rf_opens + 1);
+    puts("portal: routes, redirect, idle time, RF lifecycle, failures and restart passed");
     return 0;
 }
 '''
@@ -627,7 +684,7 @@ int main(void) {
     assert(httpd_default_send(&hd, 1, "x", 1, 0) == HTTPD_SOCK_ERR_FAIL);
     new_session(bad, strlen(bad));
     sd.recv_fn = receive_data;
-    /* Let parsing receive normally, but fail the error response's send. */
+    /* 接收和解析正常，单独注入错误响应发送失败，检查资源清理。 */
     socket_errno = ECONNRESET;
     assert(httpd_req_new(&hd, &sd) == ESP_ERR_HTTPD_RESP_SEND);
     assert(hd.hd_req.aux == NULL);
@@ -659,8 +716,8 @@ def main():
     command = [
         gcc, "-std=gnu11", "-Wall", "-Wextra", "-Werror",
         "-Wno-unused-parameter", "-Wno-sign-compare",
-        "-Wno-implicit-fallthrough",  # SDK 3.4 parser uses intentional fallthrough.
-        "-Wno-format",  # Preserve SDK 3.4's Xtensa-oriented printf formats.
+        "-Wno-implicit-fallthrough",  # SDK 3.4 解析器有意使用 switch fallthrough。
+        "-Wno-format",  # 保留 SDK 3.4 面向 Xtensa 的 printf 格式。
         "-I", str(OUT),
         "-I", str(SDK_PATH / "components" / "http_parser" / "include"),
         "-I", str(SDK_PATH / "components" / "json" / "cJSON"),
