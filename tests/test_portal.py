@@ -15,7 +15,8 @@ SDK_PATH = Path(os.environ.get("IDF_PATH") or
                 r"D:\APPS\Espressif\frameworks\ESP8266_RTOS_SDK")
 HEADERS = ["esp_err.h", "esp_log.h", "esp_event.h", "esp_wifi.h", "driver/rtc.h",
            "tcpip_adapter.h", "esp_http_server.h", "esp_httpd_priv.h",
-           "freertos/FreeRTOS.h", "freertos/task.h", "lwip/sockets.h", "osal.h"]
+           "freertos/FreeRTOS.h", "freertos/task.h", "lwip/sockets.h", "lwip/tcpip.h",
+           "lwip/sys.h", "osal.h"]
 
 # 用主机 mock 承接实际 portal 和 HTTP 覆盖代码，验证协议及资源生命周期。
 SDK = r'''
@@ -32,6 +33,14 @@ SDK = r'''
 #include <stdarg.h>
 typedef int esp_err_t;
 typedef uint32_t TickType_t;
+typedef int err_t;
+enum { ERR_OK = 0, ERR_MEM = -1, ERR_VAL = -6 };
+typedef struct { bool signaled; } sys_sem_t;
+err_t sys_sem_new(sys_sem_t *sem, uint8_t count);
+void sys_sem_signal(sys_sem_t *sem);
+void sys_sem_wait(sys_sem_t *sem);
+void sys_sem_free(sys_sem_t *sem);
+err_t tcpip_callback(void (*fn)(void *), void *arg);
 typedef void *httpd_handle_t;
 typedef enum http_method httpd_method_t;
 typedef int httpd_err_resp_t;
@@ -196,6 +205,42 @@ static bool socket_failed;
 static bool rf_enabled = true, wifi_started;
 static bool start_failed, stop_failed, http_failed;
 static int rf_opens, rf_closes;
+static bool timers_active = true, core_owned, sem_failed, callback_failed;
+static err_t timer_failed;
+static unsigned sem_created, sem_freed;
+static bool noise_active = true, noise_failed;
+
+esp_err_t noise_timer_set_active(bool active) {
+#ifdef CONFIG_APP_PAUSE_NOISE_TIMER
+    if (!active) assert(!rf_enabled && !wifi_started);
+    if (noise_failed) return ESP_FAIL;
+    noise_active = active;
+#else
+    (void)active;
+#endif
+    return ESP_OK;
+}
+
+err_t sys_sem_new(sys_sem_t *sem, uint8_t count) {
+    assert(count == 0);
+    if (sem_failed) return ERR_MEM;
+    sem->signaled = false; sem_created++; return ERR_OK;
+}
+void sys_sem_signal(sys_sem_t *sem) { assert(core_owned); sem->signaled = true; }
+void sys_sem_wait(sys_sem_t *sem) { assert(!core_owned && sem->signaled); }
+void sys_sem_free(sys_sem_t *sem) { sem_freed++; }
+err_t tcpip_callback(void (*fn)(void *), void *arg) {
+    if (callback_failed) return ERR_MEM;
+    assert(!core_owned); core_owned = true; fn(arg); core_owned = false; return ERR_OK;
+}
+err_t app_lwip_timers_set(int active, unsigned counts[3]) {
+    assert(core_owned);
+    if (!active) assert(!rf_enabled && !wifi_started);
+    if (timer_failed) return timer_failed;
+    counts[0] = active != timers_active ? 4 : 0;
+    counts[1] = 0; counts[2] = active ? 4 : 0;
+    timers_active = active; return ERR_OK;
+}
 
 void test_log(const char *tag, const char *fmt, ...) {}
 void test_warn(const char *tag, const char *fmt, ...) { warnings++; }
@@ -278,6 +323,12 @@ esp_err_t esp_wifi_stop(void) {
 }
 void phy_open_rf(void) {
     assert(!rf_enabled && !wifi_started);
+#ifdef CONFIG_APP_PAUSE_NOISE_TIMER
+    assert(noise_active);
+#endif
+#ifdef CONFIG_APP_PAUSE_NETWORK_TIMERS
+    assert(timers_active); /* Restoration completes before RF/Wi-Fi start. */
+#endif
     rf_enabled = true;
     rf_opens++;
 }
@@ -440,6 +491,49 @@ int main(void) {
     socket_failed = stop_failed = false;
     assert(portal_stop() == ESP_OK && !portal_is_on());
     assert(!rf_enabled && !wifi_started && rf_closes == rf_opens + 1);
+#ifdef CONFIG_APP_PAUSE_NETWORK_TIMERS
+    assert(!timers_active && sem_created == sem_freed);
+    sem_failed = true;
+    assert(portal_start() == ESP_ERR_NO_MEM && !rf_enabled && !timers_active);
+    sem_failed = false; callback_failed = true;
+    assert(portal_start() == ESP_ERR_NO_MEM && !rf_enabled && !timers_active);
+    callback_failed = false; timer_failed = ERR_VAL;
+    assert(portal_start() == ESP_FAIL && !rf_enabled && !timers_active);
+    timer_failed = ERR_OK;
+    assert(portal_start() == ESP_OK && timers_active);
+    timer_failed = ERR_MEM;
+    assert(portal_stop() == ESP_ERR_NO_MEM && !portal_is_on());
+    assert(!rf_enabled && !wifi_started && timers_active);
+    timer_failed = ERR_OK;
+    assert(portal_stop() == ESP_OK && !timers_active); /* Retry after Wi-Fi stopped. */
+    assert(portal_start() == ESP_OK && timers_active);
+    stop_failed = true;
+    assert(portal_stop() == ESP_FAIL && portal_is_on() && timers_active);
+    stop_failed = false;
+    assert(portal_stop() == ESP_OK && !timers_active);
+    assert(sem_created == sem_freed);
+#endif
+    (void)noise_active; (void)noise_failed;
+#ifdef CONFIG_APP_PAUSE_NOISE_TIMER
+    assert(!noise_active);
+    noise_failed = true;
+    assert(portal_start() == ESP_FAIL && !portal_is_on() && !rf_enabled);
+    assert(!timers_active && !noise_active);
+    noise_failed = false;
+    for (int i = 0; i < 20; i++) {
+        assert(portal_start() == ESP_OK && noise_active && timers_active);
+        stop_failed = true;
+        assert(portal_stop() == ESP_FAIL && noise_active && timers_active);
+        stop_failed = false;
+        assert(portal_stop() == ESP_OK && !noise_active && !timers_active);
+    }
+    assert(portal_start() == ESP_OK);
+    noise_failed = true;
+    assert(portal_stop() == ESP_FAIL && !portal_is_on() && !rf_enabled);
+    assert(timers_active && noise_active);
+    noise_failed = false;
+    assert(portal_stop() == ESP_OK && !noise_active && !timers_active);
+#endif
     puts("portal: routes, redirect, idle time, RF lifecycle, failures and restart passed");
     return 0;
 }
@@ -725,11 +819,12 @@ def main():
         str(SDK_PATH / "components" / "http_parser" / "src" / "http_parser.c"),
         str(SDK_PATH / "components" / "json" / "cJSON" / "cJSON.c"),
     ]
-    for name, source in [("portal", TEST), ("http", WIRE)]:
+    for name, source in [("portal", TEST), ("portal_pause", TEST), ("http", WIRE)]:
         path = OUT / f"{name}_test.c"
         path.write_text(source, encoding="utf-8")
         exe = OUT / f"{name}_test.exe"
-        subprocess.run(command + [str(path), "-o", str(exe)], check=True, cwd=ROOT)
+        options = ["-DCONFIG_APP_PAUSE_NETWORK_TIMERS=1", "-DCONFIG_APP_PAUSE_NOISE_TIMER=1"] if name == "portal_pause" else []
+        subprocess.run(command + options + [str(path), "-o", str(exe)], check=True, cwd=ROOT)
         subprocess.run([str(exe)], check=True, cwd=ROOT)
 
 

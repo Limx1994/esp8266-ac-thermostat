@@ -1,0 +1,67 @@
+menu "Power measurement"
+
+config APP_PAUSE_NOISE_TIMER
+    bool "Pause RF noise timer while AP is off"
+    default y
+    help
+        Pause only the SDK noise timer after RF shutdown, block rearming while
+        paused, and restore it before AP startup. Ignore a stale FRC2 alarm
+        only when the actual SDK timer queue is empty; keep FRC2 counting.
+        Build-local library copies expose timer objects without fixed RAM
+        addresses. Unsupported SDK object layouts fail configuration.
+
+config APP_PAUSE_NETWORK_TIMERS
+    bool "Pause lwIP cyclic/TCP timers while AP is off"
+    default y
+    help
+        Pause protocol cyclic timers and the on-demand TCP timer only after
+        networking has stopped. Restore them before starting the AP. Timer
+        list changes run synchronously in the TCP/IP thread. Other SDK and
+        application timers remain active. Disable and rebuild to compare.
+
+config APP_DISABLE_DHCP_CLIENT_TIMERS
+    bool "Disable DHCP client cyclic timers (AP-only A/B test)"
+    default y
+    help
+        Remove the DHCP client fine/coarse cyclic timer entries at build time.
+        Keep DHCP server timers and client API symbols for SDK compatibility.
+        This application supports AP only; disable this option before adding
+        STA networking. Rebuild with it disabled to restore the SDK timer table.
+
+config APP_QUIET_UART
+    bool "Silence logs and release UART TX after initialization"
+    default n
+    select LOG_SET_LEVEL
+    help
+        Keep startup diagnostics, then suppress ESP logs and configure GPIO1
+        as an input. Rebuild with this disabled to restore runtime UART logs.
+
+config APP_IDLE_BOOT_PINS
+    bool "Release GPIO0 and GPIO15 after initialization"
+    default y
+    help
+        Configure these boot strap pins as inputs without internal pulls.
+        The board must provide its existing external boot strap resistors.
+
+config APP_SENSOR_IDLE_INPUT
+    bool "Release GPIO4 after temperature transactions"
+    default y
+    help
+        Return the 1-Wire bus to input mode after initialization, failed
+        conversion start and completed reads, including read failures.
+
+endmenu
+
+menu "Temperature calibration"
+
+config APP_TEMP_OFFSET10
+    int "DS18B20 temperature offset (0.1 C)"
+    range -50 50
+    default 0
+    help
+        Add this offset before rounding the raw temperature to 0.1 C.
+        Use reference temperature minus sensor temperature after thermal
+        equilibrium. Positive values raise the reading. Keep zero until
+        a stable bias is measured; this cannot compensate changing heat sources.
+
+endmenu

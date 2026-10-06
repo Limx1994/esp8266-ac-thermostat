@@ -5,17 +5,21 @@
 #include "freertos/semphr.h"
 #include "driver/gpio.h"
 #include "driver/adc.h"
+#include "driver/rtc.h"
 #include "esp8266/gpio_struct.h"
 #include "esp_wifi.h"
 #include "esp_sleep.h"
 #include "esp_log.h"
 #include "esp_attr.h"
+#include "esp_clk.h"
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "app.h"
 #include "sensor.h"
 #include "ir.h"
 #include "portal.h"
+#include "sleep_trace.h"
+#include "rom/uart.h"
 
 static const char *TAG = "thermostat";
 static SemaphoreHandle_t status_lock;
@@ -32,12 +36,59 @@ static bool auto_sleep;
 static bool sleep_failed;
 static bool adc_sleep_seen;
 
-/* 限制单次等待，避免 SDK 在 160 MHz 下进行 32 位休眠时钟补偿时溢出。 */
-#define SLEEP_WAIT_MS 10000
+#ifdef CONFIG_APP_QUIET_UART
+static int quiet_log(int ch)
+{
+    return ch;
+}
+#endif
+
+static esp_err_t init_idle_pins(void)
+{
+    gpio_config_t cfg = {
+        .mode = GPIO_MODE_INPUT, .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE, .intr_type = GPIO_INTR_DISABLE
+    };
+#ifdef CONFIG_APP_IDLE_BOOT_PINS
+    cfg.pin_bit_mask = (1ULL << GPIO_NUM_0) | (1ULL << GPIO_NUM_15);
+    esp_err_t err = gpio_config(&cfg);
+    if (err != ESP_OK) return err;
+#endif
+#ifdef CONFIG_APP_QUIET_UART
+    ESP_LOGI(TAG, "power measurement: runtime logs off; GPIO1 input");
+    esp_log_level_set("*", ESP_LOG_NONE);
+    esp_log_set_putchar(quiet_log);
+    uart_tx_wait_idle(CONFIG_ESP_CONSOLE_UART_NUM);
+    cfg.pin_bit_mask = 1ULL << GPIO_NUM_1;
+    return gpio_config(&cfg);
+#else
+    (void)cfg;
+    return ESP_OK;
+#endif
+}
+
+/* 限制单次等待，兼容 80/160 MHz 下的 SDK 32 位休眠时钟补偿。 */
+#define SLEEP_WAIT_MS (UINT32_MAX / (CONFIG_ESP8266_DEFAULT_CPU_FREQ_MHZ * 1000U) - 1000U)
 #define SEND_INTERVAL_MS 120000
-/* 根据实测 ADC 计数 808 / 888 设置的临时热点关闭电压补偿。 */
-#define BATTERY_SLEEP_NUM 101U
-#define BATTERY_SLEEP_DEN 111U
+/* 2026-10-06 电池端实测 3994 mV；AP/唤醒参考为样本均值的两倍。 */
+#define BATTERY_CAL_MV 3994U
+#define BATTERY_BOOT_ADC 843U
+#define BATTERY_AP_ADC_X2 1679U
+#define BATTERY_SLEEP_ADC_X2 1819U
+
+static esp_err_t check_cpu_freq(void)
+{
+    unsigned expected = CONFIG_ESP8266_DEFAULT_CPU_FREQ_MHZ;
+    unsigned hardware = rtc_clk_cpu_freq_get() == RTC_CPU_FREQ_80M ? 80U : 160U;
+    unsigned software = esp_clk_cpu_freq();
+    if (hardware != expected || software != expected * 1000000U) {
+        ESP_LOGE(TAG, "CPU frequency mismatch: expected=%u MHz hardware=%u MHz software=%u Hz",
+                 expected, hardware, software);
+        return ESP_ERR_INVALID_STATE;
+    }
+    ESP_LOGI(TAG, "CPU frequency verified: %u MHz", expected);
+    return ESP_OK;
+}
 
 /* 休眠配置失败后尝试禁用并锁定降级状态；若无法退出已开启的休眠则终止。 */
 static void set_auto_sleep(bool enabled)
@@ -203,11 +254,15 @@ static void update_temp(void)
 {
     ir_report_last_send();
     ESP_LOGI(TAG, "sampling: AP=%s", portal_is_on() ? "on" : "off");
+    sleep_trace_report();
     uint16_t raw;
     esp_err_t battery_err = adc_read(&raw);
     if (battery_err == ESP_OK && raw > 1023) battery_err = ESP_ERR_INVALID_RESPONSE;
-    /* 只有经历过允许自动休眠的等待且热点关闭时，才应用临时电压补偿。 */
-    bool compensate = adc_sleep_seen && !portal_is_on();
+    bool ap_on = portal_is_on();
+    bool compensate = adc_sleep_seen && !ap_on;
+    unsigned cal_adc = ap_on ? BATTERY_AP_ADC_X2 :
+        compensate ? BATTERY_SLEEP_ADC_X2 : BATTERY_BOOT_ADC * 2U;
+    const char *cal_state = ap_on ? "ap" : compensate ? "sleep" : "boot";
     unsigned measured_mv = 0;
     if (battery_err == ESP_OK)
         measured_mv = ((uint32_t)raw * 412000U + 41943U) / 83886U;
@@ -227,10 +282,8 @@ static void update_temp(void)
     current.battery_error = battery_err;
     current.battery_valid = battery_err == ESP_OK;
     if (battery_err == ESP_OK) {
-        /* ADC 每计数对应 1/1023 V；电池经 330 kΩ / 82 kΩ 分压后测量。 */
-        current.battery_mv = compensate ?
-            (measured_mv * BATTERY_SLEEP_NUM + BATTERY_SLEEP_DEN / 2) /
-            BATTERY_SLEEP_DEN : measured_mv;
+        /* 单点增益校准，保留 ADC 变化；其他电压点的精度仍待实测。 */
+        current.battery_mv = ((uint32_t)raw * BATTERY_CAL_MV * 2U + cal_adc / 2U) / cal_adc;
     }
     current.sensor_error = err;
     current.temp_valid = err == ESP_OK;
@@ -253,9 +306,9 @@ static void update_temp(void)
         ESP_LOGE(TAG, "battery read failed: %s", esp_err_to_name(battery_err));
     } else {
         unsigned battery_mv = current.battery_mv;
-        ESP_LOGI(TAG, "battery=%u.%03u V (adc=%u measured=%u.%03u V compensated=%d)",
+        ESP_LOGI(TAG, "battery=%u.%03u V (adc=%u measured=%u.%03u V compensated=%d cal=%s)",
                  battery_mv / 1000, battery_mv % 1000, (unsigned)raw,
-                 measured_mv / 1000, measured_mv % 1000, compensate);
+                 measured_mv / 1000, measured_mv % 1000, compensate, cal_state);
     }
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "temperature read failed: %s", esp_err_to_name(err));
@@ -316,7 +369,14 @@ void app_main(void)
                  i + 1, current.rules[i].threshold10, current.rules[i].rising,
                  current.rules[i].enabled, ir_has_code(i) ? "ready" : "missing");
     }
+    ESP_ERROR_CHECK(check_cpu_freq());
+#ifdef CONFIG_APP_DISABLE_DHCP_CLIENT_TIMERS
+    ESP_LOGI(TAG, "DHCP client cyclic timers disabled (AP-only test); DHCP server retained");
+#else
+    ESP_LOGI(TAG, "DHCP client cyclic timers enabled (SDK baseline)");
+#endif
     ESP_LOGI(TAG, "ready; temperature interval: AP off 30 seconds, AP on 2 seconds; IR interval: 120 seconds per rule");
+    ESP_ERROR_CHECK(init_idle_pins());
     TickType_t last_temp = xTaskGetTickCount();
     TickType_t last_s1 = last_temp - pdMS_TO_TICKS(200);
     TickType_t last_s2 = last_s1;

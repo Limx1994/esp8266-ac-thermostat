@@ -16,14 +16,15 @@
 
 - 在 Windows 上优先使用 PowerShell。运行 `python build.py` 构建；脚本临时映射空闲的 `Z:`，避免 SDK 处理中文工程路径时出错，产物位于 `build\auto\`。
 - 脚本使用本机 SDK 默认路径，也接受环境变量 `IDF_PATH`；路径见编译环境文档。所有 Ninja 编译至少使用 `-j 12`。
-- `flash.py` 默认烧录速率为 230400 baud，可用 `--baud 115200` 降速；UART0 固件日志和串口监视器为 115200 baud，由 `sdkconfig.defaults` 配置。本地生成的 `sdkconfig` 不纳入 Git。
+- `flash.py` 默认烧录速率为 460800 baud，可用 `--baud 115200` 降速；UART0 固件日志和串口监视器为 115200 baud，由 `sdkconfig.defaults` 配置。本地生成的 `sdkconfig` 不纳入 Git。
 - 完整验证命令见 [README 的软件检查](README.md#软件检查)。规则测试使用 `tests\build.ninja`；主机行为测试为 `tests\test_power.py`、`tests\test_portal.py`；串口测试使用 `python -m unittest discover -s tests -p test_flash_port.py`；控制页检查为 `tests\check_page.js`。清理后先创建 `build_ascii` 输出目录。
 - 烧录布局使用 `python flash.py --port COM3 --dry-run` 预检，不访问串口。不传 `--port` 时，仅在系统恰有 COM1 和另一个串口时选择后者，其他情况明确报错。
-- 自动休眠需启用 `CONFIG_PM_ENABLE`；CPU 保持 160 MHz，晶振与 Flash 各 26 MHz。HTTP 请求头与 URI 上限分别为 2048、1024 字节。defaults 不覆盖已有 `sdkconfig`，须核对生成配置。
+- 自动休眠需启用 `CONFIG_PM_ENABLE`；CPU 固定为 80 MHz（按配置重新构建可回退 160 MHz），晶振与 Flash 各 26 MHz。HTTP 请求头与 URI 上限分别为 2048、1024 字节。defaults 不覆盖已有 `sdkconfig`，须核对生成配置。
+- 当前温度偏移为 0；日志开启，GPIO0/15 与 GPIO4 空闲输入、DHCP 客户端周期移除、网络及噪声定时器暂停开启。开关和验收见 [休眠与供电](README.md#休眠与供电) 与 [功耗验收](tests/功耗验收.md)。组件覆盖仅生成项目内 SDK 副本，不修改已安装 SDK；升级 SDK 须重新核验匹配条件。
 - 无实机时，红外波形、空调响应、Wi-Fi 弹页、传感器和按键唤醒均须标为未验证。
 
 ## 发布
 
 - 当前版本、改动摘要、产物校验及验证结果统一记录在 [README 的本地发布](README.md#本地发布)，历史版本通过 `git log` 查询。发布前核对文档与实际产物，保留实机待验项；不新增或恢复独立发布 Markdown。烧录命令见 [工具说明](tools/README.md)。
 - `build\`、`build_ascii\` 等构建产物不纳入 Git；提交前核对暂存清单与敏感信息。完整镜像会覆盖 NVS，保留数据时使用分段烧录。
-- `clean.ps1` 默认仅预览，`-Apply -WhatIf` 模拟删除，`-Apply` 实际清理；保留当前固件，目标含跟踪文件或重解析点时停止。用途未确认的 CSV、二进制及缓存不得混入发布提交。
+- `clean.ps1` 默认直接清理，`-WhatIf` 仅预览；原有 `-Apply` 保持兼容，`-Apply:$false` 仅预览。保留当前固件，目标含跟踪文件或重解析点时停止。用途未确认的 CSV、二进制及缓存不得混入发布提交。

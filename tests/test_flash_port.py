@@ -31,7 +31,7 @@ class FlashPortTest(unittest.TestCase):
         run.assert_not_called()
 
     def test_default_fast_baud(self):
-        self.check_baud([], 230400)
+        self.check_baud([], 460800)
 
     def test_explicit_slow_baud(self):
         self.check_baud(["--baud", "115200"], 115200)

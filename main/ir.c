@@ -20,9 +20,11 @@
 #include "ir.h"
 #include "portal.h"
 
-#ifndef CONFIG_ESP8266_DEFAULT_CPU_FREQ_160
-#error Raw IR capture requires the configured 160 MHz CPU clock
+#if CONFIG_ESP8266_DEFAULT_CPU_FREQ_MHZ != 80 && CONFIG_ESP8266_DEFAULT_CPU_FREQ_MHZ != 160
+#error Software IR timing requires a configured 80 or 160 MHz CPU clock
 #endif
+#define CPU_CYCLES_PER_US CONFIG_ESP8266_DEFAULT_CPU_FREQ_MHZ
+#define CPU_CLOCK_HZ (CPU_CYCLES_PER_US * 1000000U)
 
 #define IR_RX GPIO_NUM_5
 #define IR_TX GPIO_NUM_14
@@ -202,13 +204,13 @@ static bool IRAM_ATTR software_edge(uint32_t start, uint32_t deadline,
     } while (elapsed < deadline);
     unsigned late = elapsed - deadline;
     if (late > *late_cycles) *late_cycles = late;
-    if (late > 5U * 160U) return false;
+    if (late > 5U * CPU_CYCLES_PER_US) return false;
     if (high) GPIO.out_w1ts = 1U << IR_TX;
     else GPIO.out_w1tc = 1U << IR_TX;
     /* GPIO 写入后再次检查，捕获截止检查与写入之间发生的 NMI 延迟。 */
     late = (uint32_t)(soc_get_ccount() - start) - deadline;
     if (late > *late_cycles) *late_cycles = late;
-    return late <= 5U * 160U;
+    return late <= 5U * CPU_CYCLES_PER_US;
 }
 
 static esp_err_t IRAM_ATTR software_send(const ir_code_t *code,
@@ -220,7 +222,7 @@ static esp_err_t IRAM_ATTR software_send(const ir_code_t *code,
     uint32_t end = 0;
     for (unsigned i = 0; i < code->count; i++) {
         uint32_t begin = end;
-        end += code->duration[i] * 1600U;
+        end += code->duration[i] * 10U * CPU_CYCLES_PER_US;
         if (!(i & 1)) {
             for (uint32_t pulse = begin; pulse < end; pulse += period) {
                 uint32_t low = pulse + period / 2U;
@@ -255,6 +257,8 @@ static void learn_task(void *arg)
     GPIO.status_w1tc = 1U << IR_RX;
     err = gpio_isr_handler_add(IR_RX, capture_isr, NULL);
     if (err != ESP_OK) goto finish;
+    err = gpio_set_intr_type(IR_RX, GPIO_INTR_ANYEDGE);
+    if (err != ESP_OK) goto remove_isr;
     ESP_LOGI(TAG, "learn slot %d waiting for IR", learn_slot + 1);
     TickType_t start = xTaskGetTickCount();
     while (!capture_started && xTaskGetTickCount() - start < pdMS_TO_TICKS(15000)) {
@@ -281,7 +285,14 @@ static void learn_task(void *arg)
     if (capture_overflow) err = ESP_ERR_INVALID_SIZE;
 remove_isr:
     {
+        /* 先关闭硬件中断并清除待处理边沿，再移除回调；清理失败也不能继续触发。 */
+        portENTER_CRITICAL();
+        GPIO.pin[IR_RX].int_type = GPIO_INTR_DISABLE;
+        GPIO.status_w1tc = 1U << IR_RX;
+        portEXIT_CRITICAL();
         esp_err_t remove_err = gpio_isr_handler_remove(IR_RX);
+        if (remove_err != ESP_OK)
+            ESP_LOGE(TAG, "IR RX callback removal failed: %s", esp_err_to_name(remove_err));
         if (err == ESP_OK) err = remove_err;
     }
     if (err != ESP_OK) goto finish;
@@ -352,8 +363,8 @@ esp_err_t ir_init(void)
 {
     gpio_config_t rx = {
         .pin_bit_mask = 1ULL << IR_RX, .mode = GPIO_MODE_INPUT,
-        .pull_up_en = GPIO_PULLUP_DISABLE, .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_ANYEDGE
+        .pull_up_en = GPIO_PULLUP_ENABLE, .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE
     };
     gpio_config_t tx = {
         .pin_bit_mask = 1ULL << IR_TX, .mode = GPIO_MODE_OUTPUT,
@@ -487,7 +498,7 @@ esp_err_t ir_send(int slot)
         esp_sleep_lock();
         tx_sleep_locked = true;
     }
-    /* 热点开启时用 I2S 载波配合硬件定时器；关闭时用 160 MHz CPU 软件生成波形。 */
+    /* 热点开启时用 I2S 载波配合硬件定时器；关闭时按配置的 CPU 频率软件生成波形。 */
     bool use_i2s = portal_is_on();
     send_report_t report = {
         .seq = send_report.seq + 1, .slot = slot,
@@ -522,9 +533,9 @@ esp_err_t ir_send(int slot)
         err = hw_timer_disarm();
         if (err != ESP_OK) goto finish;
         uint32_t hz = send_carrier * 1000U;
-        uint32_t period = (160000000U + hz / 2U) / hz;
+        uint32_t period = (CPU_CLOCK_HZ + hz / 2U) / hz;
         ESP_LOGI(TAG, "software carrier configured: requested=%u Hz calculated=%u Hz period=%u cycles; audio clock not used",
-                 (unsigned)hz, (unsigned)(160000000U / period), (unsigned)period);
+                 (unsigned)hz, (unsigned)(CPU_CLOCK_HZ / period), (unsigned)period);
         uart_tx_wait_idle(CONFIG_ESP_CONSOLE_UART_NUM);
         report.stage = "envelope";
         err = software_send(&codes[slot], period, &report);
@@ -574,6 +585,7 @@ esp_err_t ir_send(int slot)
         err = ESP_ERR_INVALID_STATE;
         goto finish;
     }
+    /* I2S 使用独立的 160 MHz 外设时钟，不随 CPU 降频。 */
     ESP_LOGI(TAG, "carrier configured: requested=%u Hz, calculated=%u Hz, bck=%u clkm=%u",
              (unsigned)send_carrier * 1000U,
              160000000U / (32U * bck_div * clkm_div), bck_div, clkm_div);

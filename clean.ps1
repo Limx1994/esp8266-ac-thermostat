@@ -1,6 +1,6 @@
 ﻿#Requires -Version 5.1
 [CmdletBinding(SupportsShouldProcess = $true)]
-param([switch]$Apply)
+param([switch]$Apply = $true)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -74,7 +74,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw '无法读取 Git 跟踪文件，停止清理' }
     $tracked = @(($tracked -join "`n").Split([char]0) | Where-Object { $_ })
     $targets = @('build\s1_checkpoint', 'build\s1_build.log', 'build_ascii',
-                 'tests\__pycache__', '.ninja_deps', '.ninja_log')
+                 '__pycache__', 'tests\__pycache__', '.ninja_deps', '.ninja_log')
     foreach ($folder in @('main', 'components', 'tests')) {
         $path = Join-Path $root $folder
         if (Test-Path -LiteralPath $path -PathType Container) {

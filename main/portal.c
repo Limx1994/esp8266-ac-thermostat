@@ -11,10 +11,15 @@
 #include "esp_http_server.h"
 #include "tcpip_adapter.h"
 #include "lwip/sockets.h"
+#ifdef CONFIG_APP_PAUSE_NETWORK_TIMERS
+#include "lwip/tcpip.h"
+#include "lwip/sys.h"
+#endif
 #include "cJSON.h"
 #include "app.h"
 #include "ir.h"
 #include "portal.h"
+#include "noise_timer.h"
 #include "page.h"
 
 static const char *TAG = "portal";
@@ -25,6 +30,50 @@ static int dns_fd = -1;
 static bool ap_on;
 static TickType_t last_action;
 static bool ap_used;
+
+#ifdef CONFIG_APP_PAUSE_NETWORK_TIMERS
+/* Implemented in the generated SDK timeouts.c; called only by tiT. */
+extern err_t app_lwip_timers_set(int active, unsigned counts[3]);
+typedef struct {
+    sys_sem_t done;
+    bool active;
+    err_t result;
+    unsigned counts[3];
+} timer_request_t;
+
+static void network_timer_request(void *arg)
+{
+    timer_request_t *request = arg;
+    request->result = app_lwip_timers_set(request->active, request->counts);
+    sys_sem_signal(&request->done);
+}
+#endif
+
+static esp_err_t set_network_timers(bool active)
+{
+#ifdef CONFIG_APP_PAUSE_NETWORK_TIMERS
+    timer_request_t request = { .active = active };
+    err_t result = sys_sem_new(&request.done, 0);
+    if (result != ERR_OK) {
+        ESP_LOGE(TAG, "network timer semaphore failed: %d", result);
+        return ESP_ERR_NO_MEM;
+    }
+    result = tcpip_callback(network_timer_request, &request);
+    if (result == ERR_OK) {
+        /* No timeout: the queued callback owns this stack context until done. */
+        sys_sem_wait(&request.done);
+        result = request.result;
+    }
+    sys_sem_free(&request.done);
+    if (result != ERR_OK) {
+        ESP_LOGE(TAG, "network timers %s failed: %d", active ? "resume" : "pause", result);
+        return result == ERR_MEM ? ESP_ERR_NO_MEM : ESP_FAIL;
+    }
+    ESP_LOGI(TAG, "network timers %s: cyclic=%u tcp=%u remaining=%u",
+             active ? "resumed" : "paused", request.counts[0], request.counts[1], request.counts[2]);
+#endif
+    return ESP_OK;
+}
 
 /* 仅页面访问和控制操作刷新空闲计时；状态轮询及手机后台探测不延长热点寿命。 */
 static void record_action(void)
@@ -258,14 +307,19 @@ static void dns_task(void *arg)
 
 esp_err_t portal_init(void)
 {
+    ESP_LOGI(TAG, "init stage=tcpip_adapter_init");
     tcpip_adapter_init();
+    ESP_LOGI(TAG, "init stage=esp_event_loop_create_default");
     esp_err_t err = esp_event_loop_create_default();
     if (err != ESP_OK) return err;
     wifi_init_config_t init = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_LOGI(TAG, "init stage=esp_wifi_init");
     err = esp_wifi_init(&init);
     if (err != ESP_OK) return err;
+    ESP_LOGI(TAG, "init stage=esp_wifi_set_storage");
     err = esp_wifi_set_storage(WIFI_STORAGE_RAM);
     if (err != ESP_OK) return err;
+    ESP_LOGI(TAG, "init stage=esp_wifi_set_mode");
     err = esp_wifi_set_mode(WIFI_MODE_AP);
     if (err != ESP_OK) return err;
     wifi_config_t cfg = { 0 };
@@ -273,9 +327,15 @@ esp_err_t portal_init(void)
     cfg.ap.ssid_len = strlen((char *)cfg.ap.ssid);
     cfg.ap.authmode = WIFI_AUTH_OPEN;
     cfg.ap.max_connection = 4;
+    ESP_LOGI(TAG, "init stage=esp_wifi_set_config");
     err = esp_wifi_set_config(ESP_IF_WIFI_AP, &cfg);
     if (err != ESP_OK) return err;
+    ESP_LOGI(TAG, "init stage=phy_close_rf");
     phy_close_rf();
+    err = noise_timer_set_active(false);
+    if (err != ESP_OK) return err;
+    err = set_network_timers(false);
+    if (err != ESP_OK) return err;
     ESP_LOGI(TAG, "RF disabled; AP off");
     return ESP_OK;
 }
@@ -285,10 +345,21 @@ esp_err_t portal_start(void)
     last_action = xTaskGetTickCount();
     if (ap_on) return ESP_OK;
     ap_used = false;
+    esp_err_t err = set_network_timers(true);
+    if (err != ESP_OK) return err;
+    err = noise_timer_set_active(true);
+    if (err != ESP_OK) {
+        esp_err_t cleanup = set_network_timers(false);
+        return cleanup != ESP_OK ? cleanup : err;
+    }
     phy_open_rf();
-    esp_err_t err = esp_wifi_start();
+    err = esp_wifi_start();
     if (err != ESP_OK) {
         phy_close_rf();
+        esp_err_t noise_err = noise_timer_set_active(false);
+        if (noise_err != ESP_OK) return noise_err;
+        esp_err_t cleanup = set_network_timers(false);
+        if (cleanup != ESP_OK) return cleanup;
         return err;
     }
     ap_on = true;
@@ -359,13 +430,20 @@ fail_wifi:
         }
         phy_close_rf();
         ap_on = false;
+        cleanup = noise_timer_set_active(false);
+        if (cleanup != ESP_OK) return cleanup;
+        cleanup = set_network_timers(false);
+        if (cleanup != ESP_OK) return cleanup;
     }
     return err;
 }
 
 esp_err_t portal_stop(void)
 {
-    if (!ap_on) return ESP_OK;
+    if (!ap_on) {
+        esp_err_t err = noise_timer_set_active(false);
+        return err != ESP_OK ? err : set_network_timers(false);
+    }
     if (ir_is_busy())
         return ESP_ERR_INVALID_STATE;
     /* 等待 DNS 任务自行退出，确认 socket 关闭后再停止 HTTP 和 Wi-Fi。 */
@@ -383,6 +461,9 @@ esp_err_t portal_stop(void)
         phy_close_rf();
         ap_on = false;
         ESP_LOGI(TAG, "AP stopped; RF disabled");
+        err = noise_timer_set_active(false);
+        if (err != ESP_OK) return err;
+        err = set_network_timers(false);
     }
     return err;
 }

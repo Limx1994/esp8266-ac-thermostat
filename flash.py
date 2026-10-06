@@ -6,7 +6,7 @@
     python flash.py --dry-run
     python flash.py
 无 --port 时，系统恰有 COM1 和另一个串口才自动选择后者；
-其他情况请用 --port 指定串口。--baud 默认 230400。
+其他情况请用 --port 指定串口。--baud 默认 460800。
 
 用途
 ====
@@ -66,7 +66,7 @@ bootloader、partition table、应用程序以及其他烧录段写入 ESP-12F F
 
 基本用法
 ========
-自动选择串口，使用默认 230400 波特率：
+自动选择串口，使用默认 460800 波特率：
 
     python flash.py
 
@@ -95,7 +95,7 @@ bootloader、partition table、应用程序以及其他烧录段写入 ESP-12F F
 --baud N
     可选。
     烧录波特率，允许范围 9600～921600。
-    默认值为 230400；连接不稳定时可指定 115200。
+    默认值为 460800；连接不稳定时可指定 115200。
 
 --dry-run
     可选。
@@ -508,8 +508,8 @@ def main():
     parser.add_argument(
         "--baud",
         type=parse_baud,
-        default=230400,
-        help="烧录波特率，默认 230400；连接不稳定时可指定 115200",
+        default=460800,
+        help="烧录波特率，默认 460800；连接不稳定时可指定 115200",
     )
 
     parser.add_argument(

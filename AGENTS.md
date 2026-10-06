@@ -2,7 +2,7 @@
 
 ## 项目结构
 
-`main\` 存放 ESP8266 固件：`main.c` 负责启动与控制，`sensor.c`、`ir.c`、`rules.c` 和 `portal.c` 分别处理测温、红外、规则和配置热点；控制页内嵌于 `page.h`，没有独立资源目录。`components\esp_http_server\` 保存 SDK HTTP 组件的局部覆盖。`tests\` 包含规则、功耗、HTTP、串口选择和页面检查。`tools\` 保存烧录工具及说明。硬件接线以 [硬件说明](ESP-12F硬件引脚与链路说明.md) 为准。项目仅使用单手机配置，不涉及多客户端。
+`main\` 存放 ESP8266 固件：`main.c` 负责启动与控制，`sensor.c`、`ir.c`、`rules.c` 和 `portal.c` 分别处理测温、红外、规则和配置热点；`sleep_trace.c`、`startup_trace.c` 记录休眠与启动诊断，`noise_timer.c` 处理 RF 关闭时的噪声定时器。控制页内嵌于 `page.h`，没有独立资源目录。`components\esp_http_server\` 保存 SDK HTTP 组件的局部覆盖，`components\esp8266\` 复用 SDK 组件并接入构建目录中的休眠副本。`tests\` 包含规则、功耗、HTTP、串口选择和页面检查。`tools\` 保存烧录工具、SDK 定时器构建脚本及说明；不修改已安装 SDK。硬件接线以 [硬件说明](ESP-12F硬件引脚与链路说明.md) 为准。项目仅使用单手机配置，不涉及多客户端。
 
 ## 构建与测试
 
@@ -22,7 +22,7 @@ python flash.py --port COM3 --dry-run
 git diff --check
 ```
 
-以上命令逐条执行，失败时停止依赖步骤。`build.py` 使用 ESP8266 RTOS SDK 3.4 和 Ninja `-j 12`，临时映射空闲的 `Z:`，将固件写入 `build\auto\`；SDK 路径可通过 `IDF_PATH` 覆盖。规则测试检查阈值等号、首次满足、持续满足及禁用；主机测试使用实际源码与 mocks，覆盖每组 120 秒间隔、休眠、软件/I2S 发送、清理失败及 NVS；页面检查验证脚本、五个 API 路径及错误显示。dry-run 不访问串口。`git diff --check` 检查空白错误，不替代 Markdown 链接与结构检查。
+以上命令逐条执行，失败时停止依赖步骤。`build.py` 使用 ESP8266 RTOS SDK 3.4 和 Ninja `-j 12`，临时映射空闲的 `Z:`，将固件写入 `build\auto\`；SDK 路径可通过 `IDF_PATH` 覆盖。规则测试检查阈值等号、首次满足、持续满足及禁用；主机测试使用实际源码与 mocks，覆盖 80/160 MHz、温度偏移及分辨率核验、每组 120 秒间隔、休眠诊断、网络/噪声定时器、软件/I2S 发送、清理失败及 NVS。功耗测试依赖本次构建生成的 SDK 副本，必须先构建。页面检查验证脚本、五个 API 路径及错误显示。dry-run 不访问串口。`git diff --check` 检查空白错误，不替代 Markdown 链接与结构检查。
 
 ## 代码风格与测试范围
 
@@ -34,4 +34,4 @@ git diff --check
 
 ## 配置与安全
 
-将可提交的默认设置放在 `sdkconfig.defaults`；生成的 `sdkconfig`、`build\`、`build_ascii\` 和 Python 缓存不入库。defaults 不覆盖已有 `sdkconfig`，实际参数以生成配置为准。CPU 为 160 MHz，ESP-12F 晶振与 Flash 频率各为 26 MHz，属于不同配置项；自动休眠需要 `CONFIG_PM_ENABLE=y`。不得提交密钥或真实凭证；烧录参数与 NVS 数据保留方式见 [工具说明](tools/README.md)。
+将可提交的默认设置放在 `sdkconfig.defaults`；生成的 `sdkconfig`、`build\`、`build_ascii\` 和 Python 缓存不入库。defaults 不覆盖已有 `sdkconfig`，实际参数以生成配置为准。CPU 固定为 80 MHz（按配置重新构建可回退 160 MHz），ESP-12F 晶振与 Flash 频率各为 26 MHz，属于不同配置项；自动休眠需要 `CONFIG_PM_ENABLE=y`。不得提交密钥或真实凭证；烧录参数与 NVS 数据保留方式见 [工具说明](tools/README.md)。
