@@ -69,7 +69,7 @@ static esp_err_t init_idle_pins(void)
 
 /* 限制单次等待，兼容 80/160 MHz 下的 SDK 32 位休眠时钟补偿。 */
 #define SLEEP_WAIT_MS (UINT32_MAX / (CONFIG_ESP8266_DEFAULT_CPU_FREQ_MHZ * 1000U) - 1000U)
-#define SEND_INTERVAL_MS 120000
+#define SEND_INTERVAL_MS 180000
 /* 2026-10-06 电池端实测 3994 mV；AP/唤醒参考为样本均值的两倍。 */
 #define BATTERY_CAL_MV 3994U
 #define BATTERY_BOOT_ADC 843U
@@ -294,7 +294,7 @@ static void update_temp(void)
             if (learn == IR_WAITING || learn == IR_CAPTURING) continue;
             if (ir_has_code(i)) {
                 bool matched = rule_step(&current.rules[i], &states[i], temp10);
-                /* 每组独立限频；只有成功发送才更新时间，失败不占用两分钟间隔。 */
+                /* 每组独立限频；只有成功发送才更新时间，失败不占用三分钟间隔。 */
                 fire[i] = matched && (!send_recorded[i] ||
                     xTaskGetTickCount() - last_send[i] >= pdMS_TO_TICKS(SEND_INTERVAL_MS));
             }
@@ -375,7 +375,7 @@ void app_main(void)
 #else
     ESP_LOGI(TAG, "DHCP client cyclic timers enabled (SDK baseline)");
 #endif
-    ESP_LOGI(TAG, "ready; temperature interval: AP off 30 seconds, AP on 2 seconds; IR interval: 120 seconds per rule");
+    ESP_LOGI(TAG, "ready; temperature interval: AP off 60 seconds, AP on 2 seconds; IR interval: 180 seconds per rule");
     ESP_ERROR_CHECK(init_idle_pins());
     TickType_t last_temp = xTaskGetTickCount();
     TickType_t last_s1 = last_temp - pdMS_TO_TICKS(200);
@@ -424,8 +424,8 @@ void app_main(void)
             if (err != ESP_OK) ESP_LOGE(TAG, "portal timeout stop: %s", esp_err_to_name(err));
         }
         set_led_enabled(portal_is_on());
-        /* 热点开启时每 2 秒采温，关闭时每 30 秒采温；两种模式都继续温控。 */
-        TickType_t interval = pdMS_TO_TICKS(portal_is_on() ? 2000 : 30000);
+        /* 热点开启时每 2 秒采温，关闭时每 60 秒采温；两种模式都继续温控。 */
+        TickType_t interval = pdMS_TO_TICKS(portal_is_on() ? 2000 : 60000);
         if (sample_now || xTaskGetTickCount() - last_temp >= interval) {
             last_temp = xTaskGetTickCount();
             sample_now = false;

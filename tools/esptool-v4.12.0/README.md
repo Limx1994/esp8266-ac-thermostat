@@ -6,7 +6,7 @@
 
 ## 文档与本项目用法
 
-上游 [文档](https://docs.espressif.com/projects/esptool/) 和 `esptool.py -h` 提供完整说明。本目录保存 Windows 可执行版，本项目的接线、参数、校验值及 NVS 保留方法见 [烧录工具说明](../README.md)。在仓库根目录的 PowerShell 中可运行：
+上游 [文档](https://docs.espressif.com/projects/esptool/) 和工具帮助提供完整说明；在线文档可能对应更新版本，本地参数以本目录 4.12.0 可执行文件的 `-h` 输出为准。本目录保存 Windows 可执行版，本项目的接线、参数、校验值及 NVS 保留方法见 [烧录工具说明](../README.md)。在仓库根目录的 PowerShell 中可运行：
 
 ```powershell
 & .\tools\esptool-v4.12.0\esptool.exe version

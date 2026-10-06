@@ -1,6 +1,6 @@
 # ESP8266 烧录工具
 
-项目脚本使用 `esptool-v4.12.0\esptool.exe`，即已有的 Windows x64 esptool 4.12.0，支持 ESP8266。来源记录：[上游发布页](https://github.com/espressif/esptool/releases/tag/v4.12.0)。本轮本地版本输出为 4.12.0，SHA256 与已有记录一致：`1cd8386a7934862eb6ce1e14af3cc2309b0a743de1171fd09fab2f2ef2f5d1a3`。同目录保留 [上游说明的中文整理](esptool-v4.12.0/README.md) 和原始 `LICENSE`；可用 `Get-FileHash -Algorithm SHA256 .\tools\esptool-v4.12.0\esptool.exe` 核对。本轮未重新下载或在线比对上游二进制。
+项目脚本使用 `esptool-v4.12.0\esptool.exe`，即已有的 Windows x64 esptool 4.12.0，支持 ESP8266。来源记录：[上游发布页](https://github.com/espressif/esptool/releases/tag/v4.12.0)。已有本地核验记录的版本输出为 4.12.0，SHA256 为：`1cd8386a7934862eb6ce1e14af3cc2309b0a743de1171fd09fab2f2ef2f5d1a3`。同目录保留 [上游说明的中文整理](esptool-v4.12.0/README.md) 和原始 `LICENSE`；可用 `Get-FileHash -Algorithm SHA256 .\tools\esptool-v4.12.0\esptool.exe` 核对。该记录未重新下载或在线比对上游二进制；当前本地文件可按上述命令重新核验。
 
 ## 推荐烧录流程
 
