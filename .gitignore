@@ -1,7 +1,16 @@
-build/
-build_clean/
-build_ascii/
-sdkconfig
-sdkconfig.old
-.ninja_deps
-.ninja_log
+# 本地构建、生成配置与缓存
+Sof/build/
+Sof/build_clean/
+Sof/build_ascii/
+Sof/sdkconfig
+Sof/sdkconfig.old
+Sof/sdk_component.cmake
+**/__pycache__/
+*.py[cod]
+# 测量导出、额外下载工具与硬件生成文件
+Sof/*.csv
+Sof/tools/flash_download_tool/
+Ad/__Previews/
+Ad/History/
+Ad/*.zip
+Ad/*.PrjPcbStructure

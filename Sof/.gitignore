@@ -1,0 +1,7 @@
+build/
+build_clean/
+build_ascii/
+sdkconfig
+sdkconfig.old
+.ninja_deps
+.ninja_log
