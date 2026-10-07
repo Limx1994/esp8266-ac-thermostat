@@ -15,7 +15,7 @@
 ## 构建与验证
 
 - Git 根目录为上层 `D:\空调温度`，固件构建和测试在 `Sof` 执行。在 Windows 上优先使用 PowerShell。运行 `python build.py` 构建；脚本临时映射空闲的 `Z:`，避免 SDK 处理中文工程路径时出错，产物位于 `build\auto\`。
-- 脚本使用本机 SDK 默认路径，也接受环境变量 `IDF_PATH`；路径见编译环境文档。所有 Ninja 编译至少使用 `-j 12`。
+- 发布版本由固件目录的 `version.txt` 指定，与发布标签同步；SDK 映射路径下不依赖 Git 自动识别。脚本使用本机 SDK 默认路径，也接受环境变量 `IDF_PATH`；路径见编译环境文档。所有 Ninja 编译至少使用 `-j 12`。
 - `flash.py` 默认烧录速率为 460800 baud，可用 `--baud 115200` 降速；UART0 固件日志和串口监视器为 115200 baud，由 `sdkconfig.defaults` 配置。本地生成的 `sdkconfig` 不纳入 Git。
 - 完整验证命令见 [README 的软件检查](README.md#软件检查)。规则测试使用 `tests\build.ninja`；主机行为测试为 `tests\test_power.py`、`tests\test_portal.py`；串口测试使用 `python -m unittest discover -s tests -p test_flash_port.py`；控制页检查为 `tests\check_page.js`。清理后先创建 `build_ascii` 输出目录。
 - 烧录布局使用 `python flash.py --port COM3 --dry-run` 预检，不访问串口。不传 `--port` 时，仅在系统恰有 COM1 和另一个串口时选择后者，其他情况明确报错。

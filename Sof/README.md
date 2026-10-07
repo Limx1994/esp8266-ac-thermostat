@@ -202,9 +202,9 @@ git diff --check
 | 迁移兼容 | `clean.ps1` 改为检查 Git 工作树；Windows PowerShell 5.1 的 `-WhatIf` 和 `-Apply:$false` 均通过，各删除 0、跳过 7、失败 0 |
 | 提交边界 | 历史及当前暂存文件凭证模式扫描通过；测量 CSV 2 个、额外工具 1 个、硬件预览/备份 3 个及构建/缓存/生成配置排除提交 |
 
-迁移后旧清理脚本的 `.git` 检查曾失败，已修复并复验；Altium 项目保留原导出格式，仅豁免末尾空行检查。固件 C 源码未作本轮修改，已有行为改动随本次发布保存。硬件波形、手机弹页、温度精度、积分平均电流和 24 小时稳定性未验证。
+迁移后旧清理脚本的 `.git` 检查曾失败，已修复并复验；SDK 在映射盘符下无法发现上层 Git，已采用原生 `version.txt` 明确版本；Altium 项目保留原导出格式，仅豁免末尾空行检查。固件 C 源码未作本轮修改，已有行为改动随本次发布保存。硬件波形、手机弹页、温度精度、积分平均电流和 24 小时稳定性未验证。
 
-[GitHub Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v0.1I) 提供分段烧录包、`full_flash.bin`、`full_flash.hex` 及 `SHA256SUMS.txt`。分段烧录保留未覆盖的 NVS；从 `0x0` 写入完整镜像会清除规则、红外编码与共享载波。发布镜像在标签创建后构建，版本应为 `v0.1I`；以 Release 的 SHA256 清单核对下载内容，旧记录的哈希不代表本次附件。
+[GitHub Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v0.1I) 提供分段烧录包、`full_flash.bin`、`full_flash.hex` 及 `SHA256SUMS.txt`。分段烧录保留未覆盖的 NVS；从 `0x0` 写入完整镜像会清除规则、红外编码与共享载波。发布版本由 SDK 原生读取 `Sof\version.txt`，当前为 `v0.1I`；映射盘符和源码 ZIP 中无需依赖 Git 自动识别。更新发布版本时同步修改该文件和标签。发布镜像在标签创建后构建，版本应为 `v0.1I`；以 Release 的 SHA256 清单核对下载内容，旧记录的哈希不代表本次附件。
 
 ### 历史文档同步 · 2026-10-07
 
