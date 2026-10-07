@@ -19,14 +19,14 @@
 
 默认烧录波特率为 `460800`，esptool 默认启用压缩传输。连接不稳定时使用 `python flash.py --port COM3 --baud 115200`；`--baud` 接受 9600～921600 的整数，实际可用速率还取决于串口设备。总耗时取决于传输、擦除、写入和校验，实际提速尚未实机测量。烧录波特率不改变固件日志的 115200 baud。
 
-分段偏移及 Flash 参数以本次构建的 `build\auto\flasher_args.json` 为准；若其中 Flash 频率不是 `26m`，请更新本地 `sdkconfig` 并重新运行 `python build.py`，烧录脚本会拒绝旧的 40 MHz 产物。烧录完成后断开 P4 短接并复位。`full_flash.bin` 从 `0x0` 整片写入会清除 NVS 中保存的规则、红外编码及共享载波；需保留数据时使用分段命令。固件产物及本次验证见 [本地发布](../README.md#本地发布)。主机预检通过不代表设备烧录成功，本次文档更新不连接设备。
+分段偏移及 Flash 参数以本次构建的 `build\auto\flasher_args.json` 为准；若其中 Flash 频率不是 `26m`，请更新本地 `sdkconfig` 并重新运行 `python build.py`，烧录脚本会拒绝旧的 40 MHz 产物。烧录完成后断开 P4 短接并复位。`full_flash.bin` 从 `0x0` 整片写入会清除 NVS 中保存的规则、红外编码及共享载波；需保留数据时使用分段命令。固件产物及最新验证见 [本地发布](../README.md#本地发布)。主机预检通过不代表设备烧录成功，实机验证须另行连接设备执行。
 
 ## SDK 定时器构建工具
 
-`lwip_power.cmake` 按配置生成构建目录中的 `lwip_timeouts.c`，`lwip_timers.inc` 提供网络周期暂停/恢复实现。`noise_power.cmake` 与 `expose_timers.py` 生成项目内静态库及休眠源码副本，为实际 SDK 定时器对象添加符号别名。`components\esp8266` 接入这些副本；不会修改已安装 SDK，匹配失败时停止构建。开关、回退条件和验收见 [休眠与供电](../README.md#休眠与供电) 与 [功耗验收](../tests/功耗验收.md)。
+`lwip_power.cmake` 按配置生成构建目录中的 `lwip_timeouts.c`，`lwip_timers.inc` 提供网络周期暂停/恢复实现。`noise_power.cmake` 与 `expose_timers.py` 生成项目内静态库及休眠源码副本，为实际 SDK 定时器对象添加符号别名。`components\esp8266` 接入这些副本；不会修改已安装 SDK，匹配失败时停止构建。开关、回退条件和验收见 [休眠与供电](../README.md#休眠与供电) 与 [功耗验收](../README.md#功耗验收)。
 
 ## 本地额外工具
 
-工作区另有 `flash_download_tool\flash_download_tool_3.9.11.exe`，未被 `flash.py` 使用。已有只读检查记录称其包含 esptool/ESP8266 资源，采用 PyInstaller 打包且无版本元数据或数字签名；本次未重新核验这些属性。文件名不足以确认实际版本、来源和运行行为。本轮不运行、不纳入发布提交，原文件保留在工作区。
+工作区另有 `flash_download_tool\flash_download_tool_3.9.11.exe`，未被 `flash.py` 使用。已有只读检查记录称其包含 esptool/ESP8266 资源，采用 PyInstaller 打包且无版本元数据或数字签名；本次未重新核验这些属性。文件名不足以确认实际版本、来源和运行行为。该额外工具未纳入 Git，不属于项目构建或自动烧录流程。
 
 该文件大小为 26,519,970 字节，本地 SHA256 为 `193f4f4113e5f315ad19175dd33456ba632801699f5b67e52ce164f11d7a54ca`，仅用于识别本地文件，不代表来源已核验。
