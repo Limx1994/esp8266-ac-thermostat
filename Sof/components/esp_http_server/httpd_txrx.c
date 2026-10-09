@@ -78,7 +78,7 @@ static esp_err_t httpd_send_all(httpd_req_t *r, const char *buf, size_t buf_len)
 
     while (buf_len > 0) {
         ret = ra->sd->send_fn(ra->sd->handle, ra->sd->fd, buf, buf_len, 0);
-        if (ret < 0) {
+        if (ret <= 0) {
             ESP_LOGD(TAG, LOG_FMT("error in send_fn"));
             return ESP_FAIL;
         }
@@ -157,7 +157,7 @@ size_t httpd_unrecv(struct httpd_req *r, const char *buf, size_t buf_len)
 
     /* Copy data into internal pending_data buffer */
     size_t offset = sizeof(ra->sd->pending_data) - ra->sd->pending_len;
-    memcpy(ra->sd->pending_data + offset, buf, buf_len);
+    memcpy(ra->sd->pending_data + offset, buf, ra->sd->pending_len);
     ESP_LOGD(TAG, LOG_FMT("length = %d"), ra->sd->pending_len);
     return ra->sd->pending_len;
 }

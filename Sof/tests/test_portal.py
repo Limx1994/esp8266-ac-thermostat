@@ -202,18 +202,27 @@ static bool battery_valid = true;
 static size_t response_len;
 static void (*dns_fn)(void *);
 static bool socket_failed;
+static bool dns_script, dns_timeout_error, bind_error, dns_task_error, ir_busy_mock;
+static unsigned dns_step, dns_replies;
+static unsigned char dns_reply[64];
+static size_t dns_reply_len;
 static bool rf_enabled = true, wifi_started;
 static bool start_failed, stop_failed, http_failed;
+static bool http_stop_error;
 static int rf_opens, rf_closes;
 static bool timers_active = true, core_owned, sem_failed, callback_failed;
 static err_t timer_failed;
 static unsigned sem_created, sem_freed;
-static bool noise_active = true, noise_failed;
+static bool noise_active = true, noise_failed, noise_pause_failed;
+static unsigned init_fail_at, init_calls;
+static esp_err_t init_result(void) {
+    return ++init_calls == init_fail_at ? ESP_ERR_INVALID_STATE : ESP_OK;
+}
 
 esp_err_t noise_timer_set_active(bool active) {
 #ifdef CONFIG_APP_PAUSE_NOISE_TIMER
     if (!active) assert(!rf_enabled && !wifi_started);
-    if (noise_failed) return ESP_FAIL;
+    if (noise_failed || (!active && noise_pause_failed)) return ESP_FAIL;
     noise_active = active;
 #else
     (void)active;
@@ -252,6 +261,7 @@ void vTaskDelay(TickType_t ticks) {
 }
 int xTaskCreate(void (*fn)(void *), const char *name, unsigned stack,
                 void *arg, unsigned priority, void *task) {
+    if (dns_task_error) return 0;
     dns_fn = fn;
     return pdPASS;
 }
@@ -267,6 +277,7 @@ esp_err_t httpd_start(httpd_handle_t *handle, const httpd_config_t *cfg) {
 }
 esp_err_t httpd_stop(httpd_handle_t handle) {
     assert(handle == &hd);
+    if (http_stop_error) return ESP_FAIL;
     httpd_unregister_all_uri_handlers(&hd);
     free(hd.hd_calls);
     hd.hd_calls = NULL;
@@ -302,13 +313,25 @@ esp_err_t httpd_resp_send_err(httpd_req_t *req, httpd_err_resp_t err) {
     warnings++;
     return response_step();
 }
-int httpd_req_recv(httpd_req_t *req, char *body, size_t len) { return -1; }
+static const char *post_body;
+static size_t post_pos;
+static int action_error, action_slot, action_calls, action_carrier;
+static rule_cfg_t action_rule;
+int httpd_req_recv(httpd_req_t *req, char *body, size_t len) {
+    if (!post_body) return -1;
+    size_t remaining = strlen(post_body) - post_pos;
+    if (len > remaining) len = remaining;
+    if (len > 7) len = 7; /* Force fragmented request-body reads. */
+    memcpy(body, post_body + post_pos, len);
+    post_pos += len;
+    return len;
+}
 void tcpip_adapter_init(void) {}
-esp_err_t esp_event_loop_create_default(void) { return ESP_OK; }
-esp_err_t esp_wifi_init(const wifi_init_config_t *cfg) { return ESP_OK; }
-esp_err_t esp_wifi_set_storage(int mode) { return ESP_OK; }
-esp_err_t esp_wifi_set_mode(int mode) { return ESP_OK; }
-esp_err_t esp_wifi_set_config(int iface, const wifi_config_t *cfg) { return ESP_OK; }
+esp_err_t esp_event_loop_create_default(void) { return init_result(); }
+esp_err_t esp_wifi_init(const wifi_init_config_t *cfg) { return init_result(); }
+esp_err_t esp_wifi_set_storage(int mode) { return init_result(); }
+esp_err_t esp_wifi_set_mode(int mode) { return init_result(); }
+esp_err_t esp_wifi_set_config(int iface, const wifi_config_t *cfg) { return init_result(); }
 esp_err_t esp_wifi_start(void) {
     assert(rf_enabled && !wifi_started);
     if (start_failed) return ESP_FAIL;
@@ -338,13 +361,34 @@ void phy_close_rf(void) {
     rf_closes++;
 }
 int test_socket(int domain, int type, int proto) { return socket_failed ? -1 : 5; }
-int test_bind(int fd, const struct sockaddr *addr, size_t len) { return 0; }
+int test_bind(int fd, const struct sockaddr *addr, size_t len) { return bind_error ? -1 : 0; }
 int test_close(int fd) { return 0; }
-int test_setsockopt(int fd, int level, int opt, const void *val, size_t len) { return 0; }
+int test_setsockopt(int fd, int level, int opt, const void *val, size_t len) { return dns_timeout_error ? -1 : 0; }
 int test_recvfrom(int fd, void *buf, size_t len, int flags,
-                  struct sockaddr *peer, socklen_t *peer_len) { return -1; }
+                  struct sockaddr *peer, socklen_t *peer_len) {
+    if (!dns_script) return -1;
+    unsigned step = dns_step++;
+    if (step >= 8) { dns_running = false; return -1; }
+    unsigned char query[19] = {0x12, 0x34, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+                               1, 'a', 0, 0, 1, 0, 1};
+    if (step == 0) return -1;
+    if (step == 2) query[12] = 64;
+    if (step == 5) query[16] = 28;
+    if (step == 6) query[18] = 2;
+    memcpy(buf, query, sizeof(query));
+    return step == 1 ? 16 : step == 3 ? 17 : 19;
+}
 int test_sendto(int fd, const void *buf, size_t len, int flags,
-                const struct sockaddr *peer, socklen_t peer_len) { return -1; }
+                const struct sockaddr *peer, socklen_t peer_len) {
+    assert(len <= sizeof(dns_reply));
+    memcpy(dns_reply, buf, len); dns_reply_len = len; dns_replies++;
+    if (dns_replies == 1 || dns_replies == 4) {
+        assert(len == 35 && dns_reply[7] == 1);
+        const unsigned char address[] = {192, 168, 4, 1};
+        assert(memcmp(dns_reply + len - 4, address, 4) == 0);
+    } else assert(len == 19 && dns_reply[7] == 0);
+    return dns_replies == 4 ? -1 : (int)len;
+}
 uint16_t test_htons(uint16_t value) { return value; }
 void app_get_status(app_status_t *st) {
     memset(st, 0, sizeof(*st));
@@ -352,14 +396,16 @@ void app_get_status(app_status_t *st) {
     st->battery_valid = battery_valid;
     st->battery_error = battery_valid ? ESP_OK : ESP_FAIL;
 }
-esp_err_t app_save_rule(int slot, const rule_cfg_t *cfg) { return ESP_OK; }
+esp_err_t app_save_rule(int slot, const rule_cfg_t *cfg) {
+    action_slot = slot; action_rule = *cfg; action_calls++; return action_error;
+}
 bool rule_valid(const rule_cfg_t *cfg) { return true; }
-esp_err_t ir_start_learn(int slot) { return ESP_OK; }
+esp_err_t ir_start_learn(int slot) { action_slot = slot; action_calls++; return action_error; }
 int ir_get_carrier(void) { return 38; }
-esp_err_t ir_set_carrier(int carrier) { return ESP_OK; }
-esp_err_t ir_send(int slot) { return ESP_OK; }
+esp_err_t ir_set_carrier(int carrier) { action_carrier = carrier; action_calls++; return action_error; }
+esp_err_t ir_send(int slot) { action_slot = slot; action_calls++; return action_error; }
 bool ir_has_code(int slot) { return false; }
-bool ir_is_busy(void) { return false; }
+bool ir_is_busy(void) { return ir_busy_mock; }
 ir_state_t ir_state(void) { return IR_IDLE; }
 esp_err_t ir_last_error(void) { return ESP_OK; }
 
@@ -369,6 +415,8 @@ static esp_err_t request(const char *uri, int method) {
     strcpy(hd.hd_req.uri, uri);
     hd.hd_req.method = method;
     hd.hd_req.handle = &hd;
+    hd.hd_req.content_len = post_body ? strlen(post_body) : 0;
+    post_pos = 0;
     hd.hd_req.aux = &hd.hd_req_aux;
     assert(http_parser_parse_url(uri, strlen(uri), 0,
                                 &hd.hd_req_aux.url_parse_res) == 0);
@@ -378,7 +426,76 @@ static esp_err_t request(const char *uri, int method) {
     return httpd_uri(&hd);
 }
 
+static void check_posts(void) {
+    const char *slot_bad[] = {"{", "{}", "{\"slot\":0}", "{\"slot\":3}",
+        "{\"slot\":1.5}", "{\"slot\":\"1\"}"};
+    const char *routes[] = {"/api/rule", "/api/learn", "/api/send"};
+    for (unsigned r = 0; r < 3; r++) {
+        for (unsigned i = 0; i < sizeof(slot_bad) / sizeof(slot_bad[0]); i++) {
+            post_body = slot_bad[i];
+            unsigned calls = action_calls;
+            assert(request(routes[r], HTTP_POST) == ESP_OK && response_code == 400);
+            assert(action_calls == calls);
+        }
+    }
+    const char *rule_bad[] = {"{\"slot\":1}",
+        "{\"slot\":1,\"threshold10\":-101,\"rising\":true,\"enabled\":true}",
+        "{\"slot\":1,\"threshold10\":501,\"rising\":true,\"enabled\":true}",
+        "{\"slot\":1,\"threshold10\":22.5,\"rising\":true,\"enabled\":true}",
+        "{\"slot\":1,\"threshold10\":220,\"rising\":1,\"enabled\":true}",
+        "{\"slot\":1,\"threshold10\":220,\"rising\":true,\"enabled\":0}"};
+    for (unsigned i = 0; i < sizeof(rule_bad) / sizeof(rule_bad[0]); i++) {
+        post_body = rule_bad[i];
+        unsigned calls = action_calls;
+        assert(request("/api/rule", HTTP_POST) == ESP_OK && response_code == 400);
+        assert(action_calls == calls);
+    }
+    post_body = "{\"slot\":2,\"threshold10\":-100,\"rising\":false,\"enabled\":true}";
+    assert(request("/api/rule", HTTP_POST) == ESP_OK && response_code == 200);
+    assert(action_slot == 1 && action_rule.threshold10 == -100 &&
+           !action_rule.rising && action_rule.enabled);
+    action_error = ESP_FAIL;
+    assert(request("/api/rule", HTTP_POST) == ESP_OK && response_code == 500);
+    const int errors[] = {ESP_OK, ESP_ERR_INVALID_STATE, ESP_ERR_NOT_FOUND, ESP_FAIL};
+    const int send_status[] = {200, 409, 404, 500};
+    const int learn_status[] = {202, 409, 500, 500};
+    post_body = "{\"slot\":1}";
+    for (unsigned i = 0; i < 4; i++) {
+        action_error = errors[i];
+        assert(request("/api/send", HTTP_POST) == ESP_OK && response_code == send_status[i]);
+        assert(action_slot == 0);
+        assert(request("/api/learn", HTTP_POST) == ESP_OK && response_code == learn_status[i]);
+    }
+    const char *carrier_bad[] = {"{", "{}", "{\"carrier\":37}",
+        "{\"carrier\":38.5}", "{\"carrier\":\"38\"}"};
+    for (unsigned i = 0; i < sizeof(carrier_bad) / sizeof(carrier_bad[0]); i++) {
+        post_body = carrier_bad[i];
+        assert(request("/api/carrier", HTTP_POST) == ESP_OK && response_code == 400);
+    }
+    action_error = ESP_OK;
+    for (int khz = 36; khz <= 40; khz += 2) {
+        char body[32]; snprintf(body, sizeof(body), "{\"carrier\":%d}", khz);
+        post_body = body;
+        assert(request("/api/carrier", HTTP_POST) == ESP_OK && response_code == 200);
+        assert(action_carrier == khz);
+    }
+    post_body = "{\"carrier\":38}";
+    action_error = ESP_FAIL;
+    assert(request("/api/carrier", HTTP_POST) == ESP_OK && response_code == 500);
+    action_error = ESP_OK;
+    char oversized[257]; memset(oversized, 'x', 256); oversized[256] = 0;
+    post_body = oversized;
+    assert(request("/api/carrier", HTTP_POST) == ESP_OK && response_code == 400);
+    post_body = NULL;
+}
+
 int main(void) {
+    for (init_fail_at = 1; init_fail_at <= 5; init_fail_at++) {
+        init_calls = 0;
+        assert(portal_init() == ESP_ERR_INVALID_STATE && init_calls == init_fail_at);
+        assert(!portal_is_on() && rf_enabled && !wifi_started && rf_closes == 0);
+    }
+    init_fail_at = init_calls = 0;
     assert(portal_init() == ESP_OK);
     assert(!rf_enabled && !wifi_started && rf_closes == 1 && rf_opens == 0);
     assert(portal_stop() == ESP_OK && rf_closes == 1);
@@ -452,6 +569,14 @@ int main(void) {
     }
     fail_call = 0;
     assert(request("/api/status", HTTP_GET) == ESP_OK && response_code == 200);
+    check_posts();
+    dns_script = true; dns_step = dns_replies = 0;
+    dns_task(NULL); dns_fn = NULL;
+    assert(dns_replies == 4 && dns_reply_len == 35 && dns_fd == -1 && dns_exited);
+    dns_script = false;
+    ir_busy_mock = true;
+    assert(portal_stop() == ESP_ERR_INVALID_STATE && portal_is_on());
+    ir_busy_mock = false;
     assert(portal_stop() == ESP_OK && !portal_is_on());
     assert(!rf_enabled && !wifi_started && rf_closes == 2);
     assert(portal_start() == ESP_OK);
@@ -465,6 +590,22 @@ int main(void) {
     assert(portal_idle_ms() == 600000 && portal_timeout_ms() == 600000);
     assert(portal_stop() == ESP_OK);
     assert(!rf_enabled && !wifi_started);
+    bind_error = true;
+    assert(portal_start() == ESP_FAIL && !portal_is_on() && dns_fd == -1);
+    bind_error = false; dns_task_error = true;
+    assert(portal_start() == ESP_ERR_NO_MEM && !portal_is_on() && dns_fd == -1);
+    dns_task_error = false;
+    assert(portal_start() == ESP_OK);
+    dns_timeout_error = true;
+    dns_task(NULL); dns_fn = NULL;
+    assert(!dns_running && dns_exited && dns_fd == -1);
+    dns_timeout_error = false;
+    assert(portal_stop() == ESP_OK && !portal_is_on());
+    bind_error = http_stop_error = true;
+    assert(portal_start() == ESP_FAIL && portal_is_on() && server != NULL);
+    assert(portal_start() == ESP_ERR_INVALID_STATE);
+    bind_error = http_stop_error = false;
+    assert(portal_stop() == ESP_OK && !portal_is_on() && server == NULL);
     socket_failed = true;
     assert(portal_start() == ESP_FAIL && !portal_is_on());
     assert(!rf_enabled && !wifi_started);
@@ -513,7 +654,7 @@ int main(void) {
     assert(portal_stop() == ESP_OK && !timers_active);
     assert(sem_created == sem_freed);
 #endif
-    (void)noise_active; (void)noise_failed;
+    (void)noise_active; (void)noise_failed; (void)noise_pause_failed;
 #ifdef CONFIG_APP_PAUSE_NOISE_TIMER
     assert(!noise_active);
     noise_failed = true;
@@ -530,8 +671,21 @@ int main(void) {
     assert(portal_start() == ESP_OK);
     noise_failed = true;
     assert(portal_stop() == ESP_FAIL && !portal_is_on() && !rf_enabled);
-    assert(timers_active && noise_active);
+    assert(!timers_active && noise_active);
     noise_failed = false;
+    assert(portal_stop() == ESP_OK && !noise_active && !timers_active);
+    start_failed = noise_pause_failed = true;
+    assert(portal_start() == ESP_FAIL && !portal_is_on() && !rf_enabled);
+    assert(!timers_active && noise_active);
+    start_failed = noise_pause_failed = false;
+    assert(portal_stop() == ESP_OK && !noise_active && !timers_active);
+    assert(portal_start() == ESP_OK);
+    noise_failed = true; timer_failed = ERR_MEM;
+    unsigned before_cleanup = sem_created;
+    assert(portal_stop() == ESP_FAIL && !portal_is_on());
+    assert(sem_created == before_cleanup + 1 && sem_created == sem_freed);
+    assert(timers_active && noise_active);
+    noise_failed = false; timer_failed = ERR_OK;
     assert(portal_stop() == ESP_OK && !noise_active && !timers_active);
 #endif
     puts("portal: routes, redirect, idle time, RF lifecycle, failures and restart passed");
@@ -548,7 +702,13 @@ WIRE = r'''
 #include "../../components/esp_http_server/httpd_parse.c"
 #undef TAG
 #define TAG uri_tag
+static void *uri_malloc(size_t size);
+static char *uri_strdup(const char *text);
+#define malloc uri_malloc
+#define strdup uri_strdup
 #include "../../components/esp_http_server/httpd_uri.c"
+#undef malloc
+#undef strdup
 #undef TAG
 
 static struct httpd_data hd;
@@ -558,6 +718,12 @@ static const char *input;
 static size_t input_len, input_pos, output_pos, read_size = 128;
 static char output[8000], last_warning[160];
 static int socket_errno, socket_error, sockopt_error;
+static int fail_send_at, send_calls;
+static int zero_send_at;
+static int fail_uri_alloc;
+static unsigned parse_helpers;
+static void *uri_malloc(size_t size) { return fail_uri_alloc == 1 ? NULL : malloc(size); }
+static char *uri_strdup(const char *text) { return fail_uri_alloc == 2 ? NULL : strdup(text); }
 static unsigned filtered_count, eof_reads;
 static char last_filter[160];
 
@@ -577,7 +743,7 @@ void test_warn(const char *tag, const char *fmt, ...) {
     va_end(args);
 }
 void *httpd_os_thread_handle(void) { return &hd; }
-struct sock_db *httpd_sess_get(httpd_handle_t handle, int fd) { return &sd; }
+struct sock_db *httpd_sess_get(httpd_handle_t handle, int fd) { return fd < 0 ? NULL : &sd; }
 void httpd_sess_free_ctx(void *ctx, httpd_free_ctx_fn_t free_fn) {
     if (ctx && free_fn) free_fn(ctx);
 }
@@ -597,6 +763,8 @@ int test_io_sockopt(int fd, int level, int opt, void *value, size_t *size) {
     return 0;
 }
 int test_io_send(int fd, const char *buf, size_t len, int flags) {
+    if (send_calls + 1 == zero_send_at) { send_calls++; return 0; }
+    if (++send_calls == fail_send_at) { errno = EIO; return -1; }
     if (socket_errno) { errno = socket_errno; return -1; }
     assert(output_pos + len < sizeof(output));
     memcpy(output + output_pos, buf, len);
@@ -620,6 +788,25 @@ static int receive_data(httpd_handle_t handle, int fd, char *buf, size_t len, in
     return count;
 }
 static esp_err_t status_reply(httpd_req_t *req) {
+    if (parse_helpers) {
+        char buffer[64];
+        if (parse_helpers == 1) {
+            assert(httpd_req_get_url_query_len(req) == strlen("x=abc&y=last"));
+            assert(httpd_req_get_url_query_str(req, buffer, sizeof(buffer)) == ESP_OK);
+            assert(strcmp(buffer, "x=abc&y=last") == 0);
+            assert(httpd_req_get_url_query_str(req, buffer, 2) == ESP_ERR_HTTPD_RESULT_TRUNC);
+        } else {
+            assert(httpd_req_get_url_query_len(req) == 0);
+            assert(httpd_req_get_url_query_str(req, buffer, sizeof(buffer)) == ESP_ERR_NOT_FOUND);
+        }
+        assert(httpd_req_get_hdr_value_len(req, "x-test") == 5);
+        assert(httpd_req_get_hdr_value_len(req, "missing") == 0);
+        assert(httpd_req_get_hdr_value_str(req, "X-Test", buffer, sizeof(buffer)) == ESP_OK);
+        assert(strcmp(buffer, "value") == 0);
+        assert(httpd_req_get_hdr_value_str(req, "X-Test", buffer, 2) == ESP_ERR_HTTPD_RESULT_TRUNC);
+        assert(strcmp(buffer, "v") == 0);
+        assert(httpd_req_get_hdr_value_str(req, "missing", buffer, sizeof(buffer)) == ESP_ERR_NOT_FOUND);
+    }
     return httpd_resp_send(req, "{}", 2);
 }
 static esp_err_t probe_reply(httpd_req_t *req) {
@@ -646,6 +833,7 @@ static void new_session(const char *data, size_t len) {
     last_filter[0] = 0;
     filtered_count = eof_reads = 0;
     socket_errno = socket_error = sockopt_error = 0;
+    zero_send_at = fail_send_at = send_calls = 0;
 }
 static void check_status(void) {
     const char *get = "GET /api/status HTTP/1.1\r\nHost: 192.168.4.1\r\n\r\n";
@@ -673,6 +861,266 @@ static void check_filtered(const char *data, size_t len) {
     assert(output_pos == 0 && last_warning[0] == 0);
     assert(filtered_count == 1 && strstr(last_filter, "closing connection"));
     check_status();
+}
+static void check_unrecv_bound(void) {
+    new_session("", 0);
+    hd.hd_req.handle = &hd;
+    hd.hd_req.aux = &hd.hd_req_aux;
+    hd.hd_req_aux.sd = &sd;
+    char data[sizeof(sd.pending_data) + sizeof(sd.pending_len)];
+    memset(data, 'x', sizeof(data));
+    assert(httpd_unrecv(&hd.hd_req, data, sizeof(data)) == sizeof(sd.pending_data));
+    assert(sd.pending_len == sizeof(sd.pending_data));
+    assert(memcmp(sd.pending_data, data, sizeof(sd.pending_data)) == 0);
+}
+static httpd_req_t *prepare_request(void) {
+    new_session("payload", 7);
+    httpd_req_t *req = &hd.hd_req;
+    memset(req, 0, sizeof(*req));
+    memset(&hd.hd_req_aux, 0, sizeof(hd.hd_req_aux));
+    req->handle = &hd; req->aux = &hd.hd_req_aux;
+    hd.hd_req_aux.sd = &sd;
+    hd.hd_req_aux.resp_hdrs = headers;
+    hd.hd_req_aux.status = "200 OK";
+    hd.hd_req_aux.content_type = "text/plain";
+    return req;
+}
+static int pending_bytes(httpd_handle_t handle, int fd) { return 2; }
+static int timeout_recv(httpd_handle_t handle, int fd, char *buf, size_t len, int flags) {
+    return HTTPD_SOCK_ERR_TIMEOUT;
+}
+static unsigned freed_contexts;
+static void count_context_free(void *ctx) { assert(ctx == (void *)3); freed_contexts++; }
+static void check_parser_guards(void) {
+    httpd_req_t *req = prepare_request();
+    struct httpd_req_aux *aux = req->aux;
+    http_parser parser; http_parser_init(&parser, HTTP_REQUEST);
+    parser.method = HTTP_GET; parser.http_major = parser.http_minor = 1;
+    parser_data_t data = {.req=req}; parser.data = &data;
+    const char *url = "/api/status";
+    data.status = PARSING_BODY;
+    assert(cb_url(&parser, url, strlen(url)) == ESP_FAIL && data.status == PARSING_FAILED);
+    data.status = PARSING_IDLE;
+    assert(cb_header_field(&parser, aux->scratch, 1) == ESP_FAIL && data.status == PARSING_FAILED);
+    data.status = PARSING_BODY;
+    assert(cb_header_value(&parser, aux->scratch, 1) == ESP_FAIL && data.status == PARSING_FAILED);
+    data.status = PARSING_IDLE;
+    assert(cb_headers_complete(&parser) == ESP_FAIL && data.status == PARSING_FAILED);
+    data.status = PARSING_IDLE;
+    assert(cb_on_body(&parser, aux->scratch, 1) == ESP_FAIL && data.status == PARSING_FAILED);
+    data.status = PARSING_IDLE;
+    assert(cb_no_body(&parser) == ESP_FAIL && data.status == PARSING_FAILED);
+    data.last.at = url; data.last.length = HTTPD_MAX_URI_LEN + 1;
+    assert(verify_url(&parser) == ESP_FAIL && data.error == HTTPD_414_URI_TOO_LONG);
+    data.last.length = strlen(url); parser.http_major = 2; parser.http_minor = 0;
+    assert(verify_url(&parser) == ESP_FAIL && data.error == HTTPD_505_VERSION_NOT_SUPPORTED);
+    parser.http_minor = 1;
+    assert(verify_url(&parser) == ESP_FAIL && data.error == HTTPD_505_VERSION_NOT_SUPPORTED);
+    parser.http_major = 0;
+    assert(verify_url(&parser) == ESP_FAIL && data.error == HTTPD_505_VERSION_NOT_SUPPORTED);
+    parser.http_major = 1;
+    for (unsigned minor = 0; minor <= 2; minor++) {
+        parser.http_minor = minor;
+        assert(verify_url(&parser) == ESP_OK);
+    }
+    parser.http_major = 2; parser.http_minor = 0;
+    data.status = PARSING_URL;
+    assert(cb_header_field(&parser, aux->scratch, 1) == ESP_FAIL && data.status == PARSING_FAILED);
+    data.status = PARSING_URL;
+    assert(cb_headers_complete(&parser) == ESP_FAIL && data.status == PARSING_FAILED);
+    data.status = PARSING_URL;
+    assert(cb_no_body(&parser) == ESP_FAIL && data.status == PARSING_FAILED);
+    parser.http_major = parser.http_minor = 1; parser.method = HTTP_CONNECT;
+    assert(verify_url(&parser) == ESP_FAIL && data.error == HTTPD_400_BAD_REQUEST);
+    parser.method = HTTP_GET; data.status = PARSING_URL;
+    data.raw_datalen = sizeof(sd.pending_data) + 1;
+    assert(cb_header_field(&parser, aux->scratch, 1) == ESP_FAIL && data.status == PARSING_FAILED);
+    data.status = PARSING_BODY;
+    assert(cb_on_body(&parser, aux->scratch, 1) == ESP_FAIL && data.status == PARSING_FAILED);
+    data.status = PARSING_BODY; data.last.at = aux->scratch;
+    data.raw_datalen = sizeof(sd.pending_data) + 5;
+    assert(cb_no_body(&parser) == ESP_FAIL && data.status == PARSING_FAILED);
+    data.status = PARSING_URL; data.last.at = url; data.last.length = strlen(url);
+    parser.content_length = UINT64_MAX; data.raw_datalen = 0;
+    parser.upgrade = 1;
+    assert(cb_headers_complete(&parser) == ESP_FAIL && data.error == HTTPD_XXX_UPGRADE_NOT_SUPPORTED);
+    assert(data.status == PARSING_FAILED);
+    parser.upgrade = 0; data.status = PARSING_URL;
+    assert(cb_headers_complete(&parser) == ESP_OK && data.status == PARSING_BODY && req->content_len == 0);
+    data.status = PARSING_URL; data.last.at = aux->scratch;
+    strcpy(aux->scratch, url); data.raw_datalen = 4;
+    assert(cb_no_body(&parser) == ESP_OK && data.status == PARSING_COMPLETE);
+    assert(read_block(req, sizeof(aux->scratch), 1) == 0);
+    sd.pending_len = 0; sd.recv_fn = timeout_recv;
+    assert(read_block(req, 0, 1) == -1);
+    assert(strstr(output, "HTTP/1.1 408 Request Timeout"));
+    assert(strstr(output + 1, "HTTP/1.1") == NULL);
+    sd.recv_fn = httpd_default_recv;
+    sd.pending_len = 0; socket_errno = EAGAIN;
+    assert(read_block(req, 0, 1) == -1);
+    socket_errno = 0; input_len = input_pos = eof_reads = 0;
+    assert(read_block(req, 0, 1) == -1);
+    data.status = PARSING_URL;
+    assert(parse_block(&parser, 0, 0) == -1 && data.error == HTTPD_414_URI_TOO_LONG);
+    data.status = PARSING_HDR_FIELD;
+    assert(parse_block(&parser, 0, 0) == -1 && data.error == HTTPD_431_REQ_HDR_FIELDS_TOO_LARGE);
+    data.status = PARSING_IDLE;
+    assert(parse_block(&parser, 0, 0) == -1 && data.status == PARSING_FAILED);
+    new_session("", 0);
+    assert(httpd_req_new(&hd, &sd) == ESP_FAIL && hd.hd_req.aux == NULL);
+    req = prepare_request();
+    sd.ctx = (void *)3; sd.free_ctx = count_context_free;
+    req->sess_ctx = (void *)4; req->free_ctx = count_context_free;
+    httpd_req_cleanup(req);
+    assert(freed_contexts == 1 && sd.ctx == (void *)4 && sd.free_ctx == count_context_free);
+    assert(req->handle == NULL && req->aux == NULL);
+}
+static void check_http_helpers(void) {
+    char buffer[64];
+    httpd_req_t invalid = {0};
+    const char *queries[] = {
+        "GET /api/status?x=abc&y=last HTTP/1.1\r\nHost: ap\r\nX-Test:   value\r\n\r\n",
+        "GET /api/status HTTP/1.1\r\nHost: ap\r\nX-Test: value\r\n\r\n"};
+    for (unsigned i = 0; i < 2; i++) {
+        parse_helpers = i + 1;
+        new_session(queries[i], strlen(queries[i]));
+        assert(httpd_req_new(&hd, &sd) == ESP_OK);
+        assert(httpd_req_delete(&hd) == ESP_OK);
+        assert(strstr(output, "HTTP/1.1 200 OK"));
+    }
+    parse_helpers = 0;
+    assert(httpd_req_get_url_query_len(NULL) == 0 && httpd_req_get_url_query_len(&invalid) == 0);
+    assert(httpd_req_get_url_query_str(NULL, buffer, sizeof(buffer)) == ESP_ERR_INVALID_ARG);
+    assert(httpd_req_get_url_query_str(&invalid, buffer, sizeof(buffer)) == ESP_ERR_HTTPD_INVALID_REQ);
+    assert(httpd_req_get_hdr_value_len(NULL, "X") == 0);
+    assert(httpd_req_get_hdr_value_len(&invalid, NULL) == 0);
+    assert(httpd_req_get_hdr_value_len(&invalid, "X") == 0);
+    assert(httpd_req_get_hdr_value_str(NULL, "X", buffer, sizeof(buffer)) == ESP_ERR_INVALID_ARG);
+    assert(httpd_req_get_hdr_value_str(&invalid, NULL, buffer, sizeof(buffer)) == ESP_ERR_INVALID_ARG);
+    assert(httpd_req_get_hdr_value_str(&invalid, "X", buffer, sizeof(buffer)) == ESP_ERR_HTTPD_INVALID_REQ);
+    assert(!httpd_validate_req_ptr(NULL) && !httpd_validate_req_ptr(&invalid));
+    httpd_req_t *req = prepare_request();
+    assert(httpd_default_send(&hd, 1, NULL, 1, 0) == HTTPD_SOCK_ERR_INVALID);
+    assert(httpd_default_recv(&hd, 1, NULL, 1, 0) == HTTPD_SOCK_ERR_INVALID);
+    hd.hd_req_aux.req_hdrs_count = 1;
+    strcpy(hd.hd_req_aux.scratch, "malformed-header");
+    assert(httpd_req_get_hdr_value_len(req, "X") == 0);
+    assert(httpd_req_get_hdr_value_str(req, "X", buffer, sizeof(buffer)) == ESP_ERR_NOT_FOUND);
+    hd.hd_req_aux.req_hdrs_count = 0;
+    assert(httpd_sess_set_send_override(&hd, -1, httpd_default_send) == ESP_ERR_INVALID_ARG);
+    assert(httpd_sess_set_recv_override(&hd, -1, httpd_default_recv) == ESP_ERR_INVALID_ARG);
+    assert(httpd_sess_set_pending_override(&hd, -1, pending_bytes) == ESP_ERR_INVALID_ARG);
+    assert(httpd_sess_set_send_override(&hd, 1, httpd_default_send) == ESP_OK);
+    assert(httpd_sess_set_recv_override(&hd, 1, httpd_default_recv) == ESP_OK);
+    assert(httpd_sess_set_pending_override(&hd, 1, pending_bytes) == ESP_OK && sd.pending_fn == pending_bytes);
+    assert(httpd_send(NULL, "x", 1) == HTTPD_SOCK_ERR_INVALID);
+    assert(httpd_send(req, NULL, 1) == HTTPD_SOCK_ERR_INVALID);
+    assert(httpd_send(&invalid, "x", 1) == HTTPD_SOCK_ERR_INVALID);
+    assert(httpd_send(req, "x", 1) == 1);
+    socket_errno = EIO;
+    assert(httpd_send(req, "x", 1) == HTTPD_SOCK_ERR_FAIL);
+    socket_errno = 0;
+    assert(httpd_req_to_sockfd(req) == 1 && httpd_req_to_sockfd(NULL) == -1 && httpd_req_to_sockfd(&invalid) == -1);
+    assert(httpd_req_recv(NULL, buffer, 1) == HTTPD_SOCK_ERR_INVALID);
+    assert(httpd_req_recv(req, NULL, 1) == HTTPD_SOCK_ERR_INVALID);
+    assert(httpd_req_recv(&invalid, buffer, 1) == HTTPD_SOCK_ERR_INVALID);
+    assert(httpd_req_recv(req, buffer, 1) == 0);
+    hd.hd_req_aux.remaining_len = 7;
+    assert(httpd_req_recv(req, buffer, sizeof(buffer)) == 7);
+    assert(memcmp(buffer, "payload", 7) == 0 && !hd.hd_req_aux.remaining_len);
+    hd.hd_req_aux.remaining_len = 1; socket_errno = EIO;
+    assert(httpd_req_recv(req, buffer, 1) == HTTPD_SOCK_ERR_FAIL);
+    socket_errno = EAGAIN;
+    assert(httpd_default_send(&hd, 1, "x", 1, 0) == HTTPD_SOCK_ERR_TIMEOUT);
+    assert(httpd_default_recv(&hd, 1, buffer, 1, 0) == HTTPD_SOCK_ERR_TIMEOUT);
+    assert(httpd_unrecv(req, "z", 1) == 1);
+    assert(httpd_recv(req, buffer, 2) == 1 && buffer[0] == 'z');
+    socket_errno = EIO;
+    assert(httpd_unrecv(req, "z", 1) == 1);
+    assert(httpd_recv(req, buffer, 2) == HTTPD_SOCK_ERR_FAIL);
+    socket_errno = 0;
+    for (int chunk = 0; chunk <= 1; chunk++) {
+        for (int fail = 0; fail <= (chunk ? 9 : 7); fail++) {
+            req = prepare_request();
+            assert(httpd_resp_set_hdr(req, "X-Test", "yes") == ESP_OK);
+            fail_send_at = fail;
+            esp_err_t err = chunk ? httpd_resp_send_chunk(req, "abc", -1) : httpd_resp_send(req, "abc", -1);
+            assert(err == (fail ? ESP_ERR_HTTPD_RESP_SEND : ESP_OK));
+            if (chunk && !fail) {
+                assert(httpd_resp_send_chunk(req, NULL, 0) == ESP_OK);
+                assert(strstr(output, "Transfer-Encoding: chunked\r\n"));
+                assert(strstr(output, "3\r\nabc\r\n0\r\n\r\n"));
+            }
+        }
+    }
+    req = prepare_request();
+    assert(httpd_resp_send(NULL, "x", 1) == ESP_ERR_INVALID_ARG);
+    assert(httpd_resp_send(&invalid, "x", 1) == ESP_ERR_HTTPD_INVALID_REQ);
+    assert(httpd_resp_send_chunk(NULL, "x", 1) == ESP_ERR_INVALID_ARG);
+    assert(httpd_resp_send_chunk(&invalid, "x", 1) == ESP_ERR_HTTPD_INVALID_REQ);
+    assert(httpd_resp_set_status(NULL, "200 OK") == ESP_ERR_INVALID_ARG);
+    assert(httpd_resp_set_status(req, NULL) == ESP_ERR_INVALID_ARG);
+    assert(httpd_resp_set_status(&invalid, "200 OK") == ESP_ERR_HTTPD_INVALID_REQ);
+    assert(httpd_resp_set_type(NULL, "text/plain") == ESP_ERR_INVALID_ARG);
+    assert(httpd_resp_set_type(req, NULL) == ESP_ERR_INVALID_ARG);
+    assert(httpd_resp_set_type(&invalid, "text/plain") == ESP_ERR_HTTPD_INVALID_REQ);
+    assert(httpd_resp_set_hdr(NULL, "X", "Y") == ESP_ERR_INVALID_ARG);
+    assert(httpd_resp_set_hdr(req, NULL, "Y") == ESP_ERR_INVALID_ARG);
+    assert(httpd_resp_set_hdr(req, "X", NULL) == ESP_ERR_INVALID_ARG);
+    assert(httpd_resp_set_hdr(&invalid, "X", "Y") == ESP_ERR_HTTPD_INVALID_REQ);
+    for (unsigned i = 0; i < hd.config.max_resp_headers; i++)
+        assert(httpd_resp_set_hdr(req, "X", "Y") == ESP_OK);
+    assert(httpd_resp_set_hdr(req, "X", "Y") == ESP_ERR_HTTPD_RESP_HDR);
+    char long_type[HTTPD_SCRATCH_BUF + 1]; memset(long_type, 'x', sizeof(long_type) - 1); long_type[sizeof(long_type) - 1] = 0;
+    assert(httpd_resp_set_type(req, long_type) == ESP_OK);
+    assert(httpd_resp_send(req, NULL, 0) == ESP_ERR_HTTPD_RESP_HDR);
+    assert(httpd_resp_send_chunk(req, NULL, 0) == ESP_ERR_HTTPD_RESP_HDR);
+    const int errors[] = {501, 505, 400, 404, 405, 408, 414, 411, 431, 200, 500, 999};
+    for (unsigned i = 0; i < sizeof(errors)/sizeof(errors[0]); i++) {
+        req = prepare_request();
+        assert(httpd_resp_send_err(req, errors[i]) == ESP_OK);
+        char expected[32]; snprintf(expected, sizeof(expected), "HTTP/1.1 %d ", errors[i] == 999 ? 500 : errors[i]);
+        assert(strstr(output, expected));
+    }
+    req = prepare_request(); assert(httpd_resp_send_404(req) == ESP_OK);
+    req = prepare_request(); assert(httpd_resp_send_408(req) == ESP_OK);
+    req = prepare_request(); assert(httpd_resp_send_500(req) == ESP_OK);
+    req = prepare_request();
+    hd.hd_req_aux.url_parse_res.field_set = 0;
+    assert(httpd_uri(&hd) == ESP_FAIL && output_pos == 0);
+    req = prepare_request();
+    zero_send_at = 1; fail_send_at = 2;
+    assert(httpd_resp_send(req, "test", 4) == ESP_ERR_HTTPD_RESP_SEND);
+    assert(send_calls == 1 && output_pos == 0);
+    assert(httpd_query_key_value(NULL, "x", buffer, sizeof(buffer)) == ESP_ERR_INVALID_ARG);
+    assert(httpd_query_key_value("x=abc", NULL, buffer, sizeof(buffer)) == ESP_ERR_INVALID_ARG);
+    assert(httpd_query_key_value("x=abc", "x", NULL, 0) == ESP_ERR_INVALID_ARG);
+    assert(httpd_query_key_value("x=abc&y=last", "x", buffer, sizeof(buffer)) == ESP_OK && strcmp(buffer, "abc") == 0);
+    assert(httpd_query_key_value("x=abc&y=last", "Y", buffer, sizeof(buffer)) == ESP_OK && strcmp(buffer, "last") == 0);
+    assert(httpd_query_key_value("x=abc", "x", buffer, 2) == ESP_ERR_HTTPD_RESULT_TRUNC && strcmp(buffer, "a") == 0);
+    assert(httpd_query_key_value("x=abc", "missing", buffer, sizeof(buffer)) == ESP_ERR_NOT_FOUND);
+    assert(httpd_query_key_value("broken", "missing", buffer, sizeof(buffer)) == ESP_ERR_NOT_FOUND);
+    const httpd_uri_t route = {.uri="/new", .method=HTTP_GET, .handler=status_reply};
+    assert(httpd_register_uri_handler(NULL, &route) == ESP_ERR_INVALID_ARG);
+    assert(httpd_register_uri_handler(&hd, NULL) == ESP_ERR_INVALID_ARG);
+    assert(httpd_register_uri_handler(&hd, &route) == ESP_ERR_HTTPD_HANDLERS_FULL);
+    assert(httpd_unregister_uri_handler(NULL, "/new", HTTP_GET) == ESP_ERR_INVALID_ARG);
+    assert(httpd_unregister_uri_handler(&hd, NULL, HTTP_GET) == ESP_ERR_INVALID_ARG);
+    assert(httpd_unregister_uri_handler(&hd, "/missing", HTTP_GET) == ESP_ERR_NOT_FOUND);
+    assert(httpd_unregister_uri_handler(&hd, "/api/status", HTTP_GET) == ESP_OK);
+    assert(httpd_register_uri_handler(&hd, &route) == ESP_OK);
+    assert(httpd_unregister_uri(NULL, "/new") == ESP_ERR_INVALID_ARG);
+    assert(httpd_unregister_uri(&hd, NULL) == ESP_ERR_INVALID_ARG);
+    assert(httpd_unregister_uri(&hd, "/missing") == ESP_ERR_NOT_FOUND);
+    assert(httpd_unregister_uri(&hd, "/new") == ESP_OK);
+    for (int failure = 1; failure <= 2; failure++) {
+        fail_uri_alloc = failure;
+        assert(httpd_register_uri_handler(&hd, &route) == ESP_ERR_HTTPD_ALLOC_MEM);
+        assert(hd.hd_calls[0] == NULL);
+    }
+    fail_uri_alloc = 0;
+    assert(httpd_register_uri_handler(&hd, &route) == ESP_OK);
+    assert(httpd_unregister_uri(&hd, "/new") == ESP_OK);
 }
 int main(void) {
     hd.config = (httpd_config_t){.max_uri_handlers=3, .max_resp_headers=8};
@@ -739,6 +1187,12 @@ int main(void) {
     }
     const char *bad = "GARBAGE / HTTP/1.1\r\n\r\n";
     check_rejected(bad, strlen(bad), 400);
+    const char *wrong_version = "GET /api/status HTTP/2.1\r\nHost: ap\r\n\r\n";
+    check_rejected(wrong_version, strlen(wrong_version), 505);
+    const char *http10 = "GET /api/status HTTP/1.0\r\n\r\n";
+    new_session(http10, strlen(http10));
+    assert(httpd_req_new(&hd, &sd) == ESP_OK);
+    assert(httpd_req_delete(&hd) == ESP_OK && strstr(output, "200 OK"));
     const char *post = "POST /mmtls/698f2814 HTTP/1.1\r\nContent-Length: 200\r\n\r\n";
     len = snprintf(packet, sizeof(packet), "%s", post);
     memset(packet + len, 0x16, 200);
@@ -798,6 +1252,9 @@ int main(void) {
     assert(hd.hd_req.aux == NULL);
     hd.config.max_resp_headers = 8;
     check_status();
+    check_unrecv_bound();
+    check_http_helpers();
+    check_parser_guards();
     httpd_unregister_all_uri_handlers(&hd);
     free(hd.hd_calls);
     puts("HTTP: protocol filtering, long URI/header, POST body, error-close, recovery and socket errno passed");

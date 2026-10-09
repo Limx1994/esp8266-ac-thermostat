@@ -114,6 +114,24 @@ int main(void)
     up.threshold10 = 260;
     up.rising = 2;
     assert(!rule_valid(&up));
+    assert(!rule_valid(NULL));
+    up.rising = 1;
+    up.threshold10 = -101;
+    assert(!rule_valid(&up));
+    up.threshold10 = 500;
+    up.enabled = 2;
+    assert(!rule_valid(&up));
+    up.enabled = 1;
+    assert(rule_valid(&up));
+    /* 最大原始输入与最短时间差应饱和，不能溢出改变方向。 */
+    rule_trend_t extreme;
+    for (int sign = -1; sign <= 1; sign += 2) {
+        rule_trend_reset(&extreme);
+        assert(rule_trend_step(&extreme, sign > 0 ? INT16_MIN : INT16_MAX, 0));
+        assert(rule_trend_step(&extreme, sign > 0 ? INT16_MAX : INT16_MIN, 1));
+        assert(rule_trend_step(&extreme, sign > 0 ? INT16_MAX : INT16_MIN, 2));
+        assert(extreme.fast_milli == 0 && extreme.interval_ms == 600000);
+    }
     test_trend();
     puts("rules_test: threshold equality, repeated sends, startup/recovery and disabled rules passed");
     return 0;

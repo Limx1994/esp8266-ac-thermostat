@@ -222,6 +222,7 @@ SemaphoreHandle_t xSemaphoreCreateBinary(void) { return (void *)2; }
 BaseType_t xSemaphoreGive(SemaphoreHandle_t sem) { (void)sem; return pdTRUE; }
 esp_err_t gpio_config(const gpio_config_t *cfg) {
 #ifdef TEST_IDLE_PINS
+    if ((cfg->pin_bit_mask & (1U << 2)) && fail_led_config) return ESP_FAIL;
     if (cfg->pin_bit_mask & ((1U << 0) | (1U << 1) | (1U << 15))) {
         assert(cfg->mode == GPIO_MODE_INPUT && cfg->pull_up_en == GPIO_PULLUP_DISABLE);
         assert(cfg->pull_down_en == GPIO_PULLDOWN_DISABLE && cfg->intr_type == GPIO_INTR_DISABLE);
@@ -274,12 +275,20 @@ esp_err_t gpio_install_isr_service(int flags) { (void)flags; return ESP_OK; }
 void nvs_close(nvs_handle handle) { (void)handle; }
 #ifndef TEST_IR_NVS
 esp_err_t nvs_set_blob(nvs_handle handle, const char *key, const void *data, size_t size) {
+#ifdef TEST_IDLE_PINS
+    if (rule_save_error) return rule_save_error;
+#endif
     (void)handle; (void)key; (void)data; (void)size; return ESP_OK;
 }
 esp_err_t nvs_set_u16(nvs_handle handle, const char *key, uint16_t value) {
     (void)handle; (void)key; (void)value; return ESP_OK;
 }
-esp_err_t nvs_commit(nvs_handle handle) { (void)handle; return ESP_OK; }
+esp_err_t nvs_commit(nvs_handle handle) {
+#ifdef TEST_IDLE_PINS
+    if (rule_commit_error) return rule_commit_error;
+#endif
+    (void)handle; return ESP_OK;
+}
 #endif
 '''
 
@@ -289,13 +298,19 @@ CONTROL = r'''
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 static int critical_depth;
-static bool quiet_installed, uart_drained, fail_idle_config;
+static bool quiet_installed, uart_drained, fail_idle_config, fail_led_config;
+static esp_err_t rule_save_error, rule_commit_error, rule_open_error, rule_read_error;
+static bool invalid_rule_size;
 static uint64_t idle_pin_mask;
 #undef portENTER_CRITICAL
 #undef portEXIT_CRITICAL
 #define portENTER_CRITICAL() (++critical_depth)
 #define portEXIT_CRITICAL() assert(--critical_depth >= 0)
+#include <stdlib.h>
+_Noreturn void test_control_abort(void);
+#define abort test_control_abort
 #include "main.c"
+#undef abort
 void esp_log_level_set(const char *tag, int level) {
     assert(strcmp(tag, "*") == 0 && level == ESP_LOG_NONE);
 }
@@ -306,6 +321,8 @@ void uart_tx_wait_idle(uint8_t uart) {
     assert(uart == 0 && quiet_installed); uart_drained = true;
 }
 static jmp_buf finished;
+static unsigned abort_calls;
+_Noreturn void test_control_abort(void) { abort_calls++; longjmp(finished, 2); }
 static TickType_t start_tick;
 static uint32_t now_ms, end_ms, notified, ap_start, hold_until[17];
 static uint32_t sample_times[512], send_times[512];
@@ -314,7 +331,10 @@ static int ap_starts, ap_stops;
 static int button_wakes[2];
 static uint32_t stopped_at;
 static bool ap, ap_used, ir_busy, fail_pm, fail_wakeup, sensor_error;
+static bool fail_pm_restore, fail_led_task, frozen_ticks, missing_ir;
+static TickType_t frozen_value;
 static bool led_test;
+static unsigned led_waits;
 static unsigned trace_report_calls;
 static TickType_t max_notify_wait;
 void sleep_trace_report(void) {
@@ -363,15 +383,16 @@ static void advance_time(uint32_t target) {
     }
     now_ms = target;
 }
-TickType_t xTaskGetTickCount(void) { return start_tick + pdMS_TO_TICKS(now_ms); }
+TickType_t xTaskGetTickCount(void) { return frozen_ticks ? frozen_value : start_tick + pdMS_TO_TICKS(now_ms); }
 TaskHandle_t xTaskGetCurrentTaskHandle(void) { return (void *)1; }
 BaseType_t xTaskCreate(TaskFunction_t fn, const char *name, unsigned stack,
                       void *arg, unsigned pri, TaskHandle_t *handle) {
     (void)fn; (void)name; (void)stack; (void)arg; (void)pri;
+    if (fail_led_task) return pdFALSE;
     if (handle) *handle = (void *)2;
     return pdPASS;
 }
-void vTaskDelete(TaskHandle_t handle) { (void)handle; assert(false); }
+void vTaskDelete(TaskHandle_t handle) { (void)handle; assert(fail_led_config); }
 void vTaskDelay(TickType_t ticks) {
     assert(ap || !led_enabled);
     if (conversion_pending) {
@@ -389,8 +410,14 @@ BaseType_t xTaskNotifyGive(TaskHandle_t task) { assert(task == (void *)2); retur
 uint32_t ulTaskNotifyTake(BaseType_t clear, TickType_t ticks) {
     assert(clear == pdTRUE);
     if (led_test) {
-        assert(ticks == portMAX_DELAY && led_level == 1);
-        longjmp(finished, 1);
+        if (ticks == portMAX_DELAY) {
+            assert(led_level == 1);
+            longjmp(finished, 1);
+        }
+        assert(ticks == pdMS_TO_TICKS(500));
+        assert(led_level == (led_waits ? 1 : 0));
+        if (++led_waits == 2) led_enabled = false;
+        return 0;
     }
     assert(ticks <= pdMS_TO_TICKS(SLEEP_WAIT_MS));
     if (ticks > max_notify_wait) max_notify_wait = ticks;
@@ -419,12 +446,13 @@ esp_err_t esp_pm_configure(const void *cfg) {
     pm_calls++;
     bool enable = ((const esp_pm_config_esp8266_t *)cfg)->light_sleep_enable;
     if (enable && fail_pm) return ESP_FAIL;
+    if (!enable && fail_pm_restore) return ESP_FAIL;
     if (enable) assert(!ap && !ir_busy);
     return ESP_OK;
 }
 esp_err_t nvs_flash_init(void) { return ESP_OK; }
 esp_err_t nvs_open(const char *name, int mode, nvs_handle *handle) {
-    (void)name; (void)mode; *handle = 1; return ESP_OK;
+    (void)name; (void)mode; *handle = 1; return rule_open_error;
 }
 esp_err_t nvs_get_blob(nvs_handle handle, const char *key, void *data, size_t *size) {
     (void)handle; assert(*size == sizeof(rule_cfg_t));
@@ -432,7 +460,8 @@ esp_err_t nvs_get_blob(nvs_handle handle, const char *key, void *data, size_t *s
         .enabled = strcmp(key, "rule0") == 0 };
     if (enable_down && strcmp(key, "rule1") == 0)
         *(rule_cfg_t *)data = (rule_cfg_t){ .threshold10=280, .rising=0, .enabled=1 };
-    return ESP_OK;
+    if (invalid_rule_size) (*size)--;
+    return rule_read_error;
 }
 esp_err_t sensor_init(void) { return ESP_OK; }
 esp_err_t adc_init(adc_config_t *cfg) {
@@ -470,7 +499,7 @@ esp_err_t sensor_finish(int16_t *temp) {
 }
 esp_err_t ir_init(void) { return ESP_OK; }
 void ir_report_last_send(void) { assert(!auto_sleep); }
-bool ir_has_code(int slot) { (void)slot; return true; }
+bool ir_has_code(int slot) { (void)slot; return !missing_ir; }
 bool ir_is_busy(void) { return ir_busy; }
 ir_state_t ir_state(void) { return ir_busy ? IR_WAITING : IR_IDLE; }
 esp_err_t ir_send(int slot) {
@@ -520,6 +549,52 @@ static void run_control(uint32_t duration, const event_t *script, size_t count,
     assert(critical_depth == 0 && fast_reads == 0 && single_reads == battery_reads);
 }
 int main(void) {
+    rule_open_error = ESP_ERR_NVS_NOT_FOUND;
+    assert(load_rules() == ESP_OK && !current.rules[0].enabled && !current.rules[1].enabled);
+    rule_open_error = ESP_FAIL;
+    assert(load_rules() == ESP_FAIL);
+    rule_open_error = ESP_OK; rule_read_error = ESP_FAIL;
+    assert(load_rules() == ESP_FAIL);
+    rule_read_error = ESP_ERR_NVS_NOT_FOUND;
+    assert(load_rules() == ESP_OK);
+    rule_read_error = ESP_OK; invalid_rule_size = true;
+    assert(load_rules() == ESP_ERR_INVALID_STATE);
+    invalid_rule_size = false;
+    assert(load_rules() == ESP_OK);
+    rule_cfg_t before = current.rules[0], replacement = before;
+    replacement.threshold10 = 250;
+    rule_open_error = ESP_FAIL;
+    assert(app_save_rule(0, &replacement) == ESP_FAIL);
+    rule_open_error = ESP_OK; rule_save_error = ESP_FAIL;
+    assert(app_save_rule(0, &replacement) == ESP_FAIL);
+    rule_save_error = ESP_OK; rule_commit_error = ESP_FAIL;
+    assert(app_save_rule(0, &replacement) == ESP_FAIL);
+    assert(memcmp(&current.rules[0], &before, sizeof(before)) == 0);
+    rule_commit_error = ESP_OK;
+    assert(app_save_rule(-1, &replacement) == ESP_ERR_INVALID_ARG);
+    assert(app_save_rule(2, &replacement) == ESP_ERR_INVALID_ARG);
+    assert(app_save_rule(0, NULL) == ESP_ERR_INVALID_ARG);
+    ap = ir_busy = auto_sleep = sleep_failed = false;
+    fail_pm = fail_pm_restore = true;
+    set_auto_sleep(true);
+    assert(sleep_failed && !auto_sleep);
+    fail_pm = false; sleep_failed = false; auto_sleep = true;
+    if (!setjmp(finished)) { set_auto_sleep(false); assert(false); }
+    assert(abort_calls == 1);
+    fail_pm_restore = false; auto_sleep = sleep_failed = false;
+    fail_led_task = true;
+    run_control(1000, NULL, 0, false, false, false, 0);
+    assert(abort_calls == 2 && sample_count == 0);
+    fail_led_task = false;
+    missing_ir = true;
+    run_control(1000, NULL, 0, false, false, false, 0);
+    assert(sample_count == 1 && send_count == 0 && !states[0].primed);
+    missing_ir = false;
+    set_auto_sleep(false); /* The main loop disables sleep before update_temp. */
+    frozen_ticks = true; frozen_value = trend.times[trend.count - 1] / portTICK_PERIOD_MS;
+    if (!setjmp(finished)) { update_temp(); assert(false); }
+    assert(abort_calls == 3);
+    frozen_ticks = false;
     fail_idle_config = true;
 #if defined(CONFIG_APP_IDLE_BOOT_PINS) || defined(CONFIG_APP_QUIET_UART)
     assert(init_idle_pins() == ESP_FAIL);
@@ -756,6 +831,12 @@ int main(void) {
     adc_raw = 855;
     led_enabled = false; led_test = true;
     if (!setjmp(finished)) led_task(NULL);
+    led_enabled = true; led_waits = 0;
+    if (!setjmp(finished)) led_task(NULL);
+    assert(led_waits == 2 && !led_enabled && led_level == 1);
+    fail_led_config = true;
+    led_task(NULL);
+    fail_led_config = false;
     puts("power control: trend 120-600s IR interval, AP pause/reset, retries, tick wrap, battery and AP lifecycle passed");
     return 0;
 }
@@ -968,7 +1049,7 @@ int main(void) {
         assert(sensor_finish(&temp) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
         assert(input_pos == input_count);
     }
-    for (int failure = 0; failure < 5; failure++) {
+    for (int failure = 0; failure < 6; failure++) {
         setup_bus(true, true);
         input_count = 2;
         queue_config(400, failure != 0, 0x1f);
@@ -976,17 +1057,19 @@ int main(void) {
             inputs[input_count++] = failure == 1; /* Missing before write. */
             if (failure != 1) queue_config(400, failure != 2, failure == 3 ? 0x1f : 0x7f);
         }
-        if (failure == 4) {
-            /* CRC-valid TH corruption must also fail the readback comparison. */
+        if (failure >= 4) {
+            /* CRC-valid TH/TL corruption must independently fail readback. */
             input_count -= 73;
             uint8_t data[9] = {0x90, 1, 74, 70, 0x7f, 0xff, 12, 16, 0};
+            if (failure == 5) { data[2] = 75; data[3] = 69; }
             data[8] = crc8(data, 8);
             inputs[input_count++] = 0;
             for (int i = 0; i < 9; i++)
                 for (int bit = 0; bit < 8; bit++) inputs[input_count++] = (data[i] >> bit) & 1;
         }
         const esp_err_t errors[] = {ESP_ERR_INVALID_CRC, ESP_ERR_NOT_FOUND,
-            ESP_ERR_INVALID_CRC, ESP_ERR_INVALID_RESPONSE, ESP_ERR_INVALID_RESPONSE};
+            ESP_ERR_INVALID_CRC, ESP_ERR_INVALID_RESPONSE, ESP_ERR_INVALID_RESPONSE,
+            ESP_ERR_INVALID_RESPONSE};
         assert(sensor_start(&external) == errors[failure] && !external);
         assert(input_pos == input_count);
     }
@@ -1021,6 +1104,8 @@ static TaskFunction_t rx_handler;
 static esp_err_t rx_add_error, rx_enable_error, rx_remove_error;
 static unsigned rx_add_calls, rx_enable_calls, rx_remove_calls, rx_cleanup_logs;
 static esp_err_t set_error, commit_error, read_error;
+static esp_err_t open_error, carrier_read_error = ESP_ERR_NVS_NOT_FOUND;
+static uint16_t carrier_read_value;
 static bool i2s_running, timer_running, semaphore_ready;
 static esp_err_t rate_error, start_error, stop_error, alarm_error, timer_error;
 static bool send_timeout;
@@ -1028,7 +1113,7 @@ static TaskFunction_t timer_cb;
 static uint32_t sample_rate;
 static int stop_calls, disarm_calls;
 static int alarm_calls;
-static bool timer_config_bad;
+static unsigned timer_config_bad;
 static unsigned uart_drains;
 static bool gpio_direction_failed;
 static uint8_t audio_reg;
@@ -1107,10 +1192,12 @@ void uart_tx_wait_idle(uint8_t num) {
 }
 static TickType_t learn_tick;
 static unsigned capture_delays;
+static unsigned capture_shape;
+static bool capture_timeout;
 static bool run_learn, task_failed;
 TickType_t xTaskGetTickCount(void) { return learn_tick; }
 int64_t esp_timer_get_time(void) {
-    return simulate_capture ? (capture_delays ? 200000 : 1000) : 0;
+    return simulate_capture ? (capture_delays ? (capture_timeout ? 800000 : 200000) : 1000) : 0;
 }
 void vTaskDelay(TickType_t ticks) {
     assert(GPIO.pin[5].int_type == GPIO_INTR_ANYEDGE && rx_handler == capture_isr && busy);
@@ -1120,6 +1207,13 @@ void vTaskDelay(TickType_t ticks) {
     if (simulate_capture && !capture_started) {
         capture_started = true; capture_count = 7; first_us = last_us = 0;
         for (int i = 0; i < 7; i++) capture_us[i] = 1000;
+        if (capture_shape == 1) capture_count = 6;
+        if (capture_shape == 2) capture_us[0] = 0;
+        if (capture_shape == 3) capture_us[0] = 650010;
+        if (capture_shape == 4)
+            for (int i = 0; i < 7; i++) capture_us[i] = 200000;
+        if (capture_shape == 5) capture_overflow = true;
+        if (capture_shape == 6) capture_count = IR_MAX;
     }
 }
 void vTaskDelete(TaskHandle_t task) { (void)task; }
@@ -1142,7 +1236,9 @@ BaseType_t xSemaphoreTake(SemaphoreHandle_t sem, TickType_t ticks) {
     assert(i2s_running && (audio_reg & 0x80) && test_pin_func == FUNC_I2SI_WS);
     for (int i = 0; i < IR_MAX && timer_running; i++) {
         frc1.ctrl.en = 0;
-        if (timer_config_bad) frc1.ctrl.div = 8;
+        if (timer_config_bad == 1) frc1.ctrl.div = 8;
+        if (timer_config_bad == 2) frc1.ctrl.reload = 1;
+        if (timer_config_bad == 3) frc1.ctrl.intr_type = TIMER_EDGE_INT + 1;
         timer_cb(NULL);
         timer_running = frc1.ctrl.en != 0;
         if (timer_running) {
@@ -1159,11 +1255,14 @@ esp_err_t gpio_set_level(int pin, uint32_t level) { (void)pin; (void)level; retu
 int gpio_get_level(int pin) { (void)pin; return 1; }
 esp_err_t nvs_open(const char *name, int mode, nvs_handle *handle) {
     assert(strcmp(name, "ac") == 0);
+    if (open_error) return open_error;
     if (!nvs_enabled && mode == NVS_READONLY) return ESP_ERR_NVS_NOT_FOUND;
     *handle = 1; return ESP_OK;
 }
 esp_err_t nvs_get_u16(nvs_handle handle, const char *key, uint16_t *value) {
-    (void)handle; (void)key; (void)value; return ESP_ERR_NVS_NOT_FOUND;
+    assert(handle == 1 && strcmp(key, "carrier") == 0);
+    *value = carrier_read_value;
+    return carrier_read_error;
 }
 esp_err_t nvs_get_blob(nvs_handle handle, const char *key, void *data, size_t *size) {
     assert(handle == 1);
@@ -1185,7 +1284,8 @@ esp_err_t nvs_set_blob(nvs_handle handle, const char *key, const void *data, siz
     return ESP_OK;
 }
 esp_err_t nvs_set_u16(nvs_handle handle, const char *key, uint16_t value) {
-    (void)handle; (void)key; (void)value; return ESP_OK;
+    assert(handle == 1 && strcmp(key, "carrier") == 0);
+    (void)value; return set_error;
 }
 esp_err_t nvs_commit(nvs_handle handle) {
     assert(handle == 1);
@@ -1302,6 +1402,42 @@ static void check_cleanup(esp_err_t expected) {
 }
 int main(void) {
     assert(ir_init() == ESP_OK && !i2s_running && !timer_running && !ir_is_busy());
+    /* Exercise actual GPIO ISR edges, ignored high edge and buffer overflow. */
+    GPIO.in = 1U << IR_RX;
+    capture_started = false; capture_count = 0; capture_overflow = false;
+    capture_isr(NULL);
+    assert(!capture_started && capture_count == 0);
+    GPIO.in = 0;
+    capture_isr(NULL);
+    assert(capture_started && capture_count == 0);
+    capture_isr(NULL);
+    assert(capture_count == 1 && capture_us[0] == 0);
+    capture_count = IR_MAX;
+    capture_isr(NULL);
+    assert(capture_overflow);
+    capture_started = capture_overflow = false; capture_count = 0;
+    assert(ir_set_carrier(37) == ESP_ERR_INVALID_ARG);
+    for (int khz = 36; khz <= 40; khz += 2) {
+        assert(ir_set_carrier(khz) == ESP_OK && ir_get_carrier() == khz);
+    }
+    open_error = ESP_FAIL;
+    assert(ir_set_carrier(38) == ESP_FAIL && ir_get_carrier() == 40);
+    assert(ir_init() == ESP_FAIL);
+    open_error = ESP_OK;
+    set_error = ESP_FAIL;
+    assert(ir_set_carrier(38) == ESP_FAIL && ir_get_carrier() == 40);
+    set_error = ESP_OK; commit_error = ESP_FAIL;
+    assert(ir_set_carrier(38) == ESP_FAIL && ir_get_carrier() == 40);
+    commit_error = ESP_OK;
+    carrier_read_error = ESP_FAIL;
+    assert(ir_init() == ESP_FAIL);
+    carrier_read_error = ESP_OK; carrier_read_value = 37;
+    assert(ir_init() == ESP_ERR_INVALID_STATE);
+    carrier_read_value = 36;
+    assert(ir_init() == ESP_OK && ir_get_carrier() == 36);
+    carrier_read_error = ESP_ERR_NVS_NOT_FOUND;
+    assert(ir_set_carrier(38) == ESP_OK);
+    memset(saved_sizes, 0, sizeof(saved_sizes)); nvs_enabled = false;
     assert(rx_pullup && GPIO.pin[5].int_type == GPIO_INTR_DISABLE && rx_handler == NULL);
     const int carriers[] = {36,38,40};
     for (int i = 0; i < 3; i++) {
@@ -1335,7 +1471,9 @@ int main(void) {
     assert(ir_send(0) == ESP_OK && audio_reg == 0x35 && !ir_is_busy());
     reset_send(); invalid_divider = true; check_cleanup(ESP_ERR_INVALID_STATE);
     assert(audio_reg == 0x35 && alarm_calls == 0);
-    reset_send(); timer_config_bad = true; check_cleanup(ESP_ERR_INVALID_STATE);
+    for (unsigned fault = 1; fault <= 3; fault++) {
+        reset_send(); timer_config_bad = fault; check_cleanup(ESP_ERR_INVALID_STATE);
+    }
     reset_send(); check_cleanup(ESP_OK); /* GPIO input stays low throughout TX. */
     assert(GPIO.in == 0 && tx_index == codes[0].count);
     reset_send(); GPIO.in = 1U << 14; check_cleanup(ESP_OK);
@@ -1504,6 +1642,16 @@ int main(void) {
     assert(ir_start_learn(0) == ESP_OK && ir_state() == IR_ERROR);
     assert(ir_last_error() == ESP_FAIL && code_hash(&codes[0]) == saved_hash);
     read_error = ESP_OK;
+    for (unsigned shape = 1; shape <= 6; shape++) {
+        capture_shape = shape;
+        assert(ir_start_learn(0) == ESP_OK && ir_state() == IR_ERROR && !busy);
+        assert(ir_last_error() == (shape >= 5 ? ESP_ERR_INVALID_SIZE : ESP_ERR_INVALID_RESPONSE));
+        assert(code_hash(&codes[0]) == saved_hash);
+    }
+    capture_shape = 0; capture_timeout = true;
+    assert(ir_start_learn(0) == ESP_OK && ir_state() == IR_ERROR && !busy);
+    assert(ir_last_error() == ESP_ERR_INVALID_SIZE && code_hash(&codes[0]) == saved_hash);
+    capture_timeout = false;
     saved_codes[0].version = 99;
     memset(codes, 0, sizeof(codes));
     assert(ir_init() == ESP_OK && !ir_has_code(0) && ir_has_code(1));
@@ -1923,7 +2071,11 @@ int main(void) {
 '''
     path = OUT / "network_pause.c"
     exe = OUT / "network_pause.exe"
-    path.write_text(prefix + table[0] + harness + "\n".join(functions) + fragment + checks, encoding="utf-8")
+    fragment_path = (ROOT / "tools/lwip_timers.inc").as_posix()
+    mapped_fragment = f'\n#line 1 "{fragment_path}"\n' + fragment
+    mapped_checks = f'\n#line 1 "{path.as_posix()}"\n' + checks
+    path.write_text(prefix + table[0] + harness + "\n".join(functions) + mapped_fragment + mapped_checks,
+                    encoding="utf-8")
     subprocess.run([gcc, "-std=c11", "-Wall", "-Wextra", "-Werror",
                     str(path), "-o", str(exe)], check=True, cwd=ROOT)
     subprocess.run([str(exe)], check=True, cwd=ROOT)
@@ -1953,7 +2105,7 @@ typedef struct os_timer_t {
 os_timer_t * volatile app_ets_timer_head;
 os_timer_t app_noise_timer, other_timer;
 uint16_t NoiseTimerInterval = 3000;
-static bool fail_arm;
+static bool fail_arm, fail_pause;
 static unsigned irq_state, armed, last_delay;
 static bool last_repeat;
 esp_irqflag_t soc_save_local_irq(void) {
@@ -1962,6 +2114,7 @@ esp_irqflag_t soc_save_local_irq(void) {
 void soc_restore_local_irq(esp_irqflag_t saved) { irq_state = saved; }
 void test_log(const char *tag, const char *fmt, ...) { (void)tag; (void)fmt; }
 void pp_disable_noise_timer(void) {
+    if (fail_pause) return;
     os_timer_t * volatile *link = &app_ets_timer_head;
     while (*link && *link != &app_noise_timer) link = &(*link)->timer_next;
     if (*link) *link = (*link)->timer_next;
@@ -1997,7 +2150,13 @@ uint32_t test_read_reg(uint32_t reg) { assert(reg == FRC2_ALARM); return alarm; 
 int main(void) {
     assert(noise_timer_set_active(false) == ESP_ERR_INVALID_STATE);
     app_noise_timer.timer_func = pp_noise_test;
+    NoiseTimerInterval = 0;
+    assert(noise_timer_set_active(false) == ESP_ERR_INVALID_STATE);
     reset_noise_timer(3000); assert(app_os_timer_pending());
+    fail_pause = true;
+    assert(noise_timer_set_active(false) == ESP_FAIL && noise_paused);
+    assert(app_os_timer_pending() && irq_state == 0);
+    fail_pause = false;
     assert(noise_timer_set_active(false) == ESP_OK && !app_os_timer_pending());
     unsigned before = armed;
     pp_noise_test(NULL); reset_noise_timer(100);

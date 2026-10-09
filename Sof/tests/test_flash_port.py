@@ -53,6 +53,7 @@ class FlashPortTest(unittest.TestCase):
 
     def test_selects_other_port(self):
         self.check_ports(["COM1", "com5"], "COM5")
+        self.check_ports(["COM1", "com5", "COM5", "invalid", 123], "COM5")
 
     def test_rejects_ambiguous_ports(self):
         self.check_ports(["COM1"])

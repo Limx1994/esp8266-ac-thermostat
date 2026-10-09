@@ -75,6 +75,14 @@ static esp_err_t set_network_timers(bool active)
     return ESP_OK;
 }
 
+/* RF/Wi-Fi 停止后独立清理两组定时器，保留首个错误。 */
+static esp_err_t pause_timers(void)
+{
+    esp_err_t err = noise_timer_set_active(false);
+    esp_err_t network_err = set_network_timers(false);
+    return err != ESP_OK ? err : network_err;
+}
+
 /* 仅页面访问和控制操作刷新空闲计时；状态轮询及手机后台探测不延长热点寿命。 */
 static void record_action(void)
 {
@@ -332,9 +340,7 @@ esp_err_t portal_init(void)
     if (err != ESP_OK) return err;
     ESP_LOGI(TAG, "init stage=phy_close_rf");
     phy_close_rf();
-    err = noise_timer_set_active(false);
-    if (err != ESP_OK) return err;
-    err = set_network_timers(false);
+    err = pause_timers();
     if (err != ESP_OK) return err;
     ESP_LOGI(TAG, "RF disabled; AP off");
     return ESP_OK;
@@ -343,7 +349,8 @@ esp_err_t portal_init(void)
 esp_err_t portal_start(void)
 {
     last_action = xTaskGetTickCount();
-    if (ap_on) return ESP_OK;
+    if (ap_on)
+        return server && dns_running && !dns_exited ? ESP_OK : ESP_ERR_INVALID_STATE;
     ap_used = false;
     esp_err_t err = set_network_timers(true);
     if (err != ESP_OK) return err;
@@ -356,9 +363,7 @@ esp_err_t portal_start(void)
     err = esp_wifi_start();
     if (err != ESP_OK) {
         phy_close_rf();
-        esp_err_t noise_err = noise_timer_set_active(false);
-        if (noise_err != ESP_OK) return noise_err;
-        esp_err_t cleanup = set_network_timers(false);
+        esp_err_t cleanup = pause_timers();
         if (cleanup != ESP_OK) return cleanup;
         return err;
     }
@@ -430,9 +435,7 @@ fail_wifi:
         }
         phy_close_rf();
         ap_on = false;
-        cleanup = noise_timer_set_active(false);
-        if (cleanup != ESP_OK) return cleanup;
-        cleanup = set_network_timers(false);
+        cleanup = pause_timers();
         if (cleanup != ESP_OK) return cleanup;
     }
     return err;
@@ -441,8 +444,7 @@ fail_wifi:
 esp_err_t portal_stop(void)
 {
     if (!ap_on) {
-        esp_err_t err = noise_timer_set_active(false);
-        return err != ESP_OK ? err : set_network_timers(false);
+        return pause_timers();
     }
     if (ir_is_busy())
         return ESP_ERR_INVALID_STATE;
@@ -461,9 +463,7 @@ esp_err_t portal_stop(void)
         phy_close_rf();
         ap_on = false;
         ESP_LOGI(TAG, "AP stopped; RF disabled");
-        err = noise_timer_set_active(false);
-        if (err != ESP_OK) return err;
-        err = set_network_timers(false);
+        err = pause_timers();
     }
     return err;
 }

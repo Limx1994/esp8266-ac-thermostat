@@ -74,12 +74,14 @@ python flash.py --port COM3 --dry-run
 本次发布版本（实机验收仍待完成）：
 
 ```text
-0.1I · 2026-10-07
+0.1J · 2026-10-09
 ```
 
-0.1I 发布包含：
+0.1J 发布包含：
 
-**80 MHz / 休眠诊断 / 温度校准 / 60 秒采温 / 120～600 秒趋势自动发送**
+**HTTP 错误处理与缓存边界修复 / 热点状态与清理修复 / 扩展回归测试**
+
+保留 80 MHz、温度校准、60 秒采温和 120～600 秒趋势自动发送。
 
 既有文档记录的低电流读数（对应镜像、测量接点与积分条件未确认）：
 
@@ -101,7 +103,7 @@ python flash.py --port COM3 --dry-run
 ## 下载与许可
 
 - [GitHub 仓库](https://github.com/Limx1994/esp8266-ac-thermostat)
-- [0.1I Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v0.1I)：分段烧录包、完整镜像及 SHA256 校验清单。保留规则和红外编码时使用分段烧录；完整镜像会清除 NVS。
+- [0.1J Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v0.1J)：分段烧录包、完整镜像及 SHA256 校验清单。保留规则和红外编码时使用分段烧录；完整镜像会清除 NVS。
 - 项目采用 [PolyForm Noncommercial 1.0.0](LICENSE)，附带第三方工具保留其原有许可。
 
 ---

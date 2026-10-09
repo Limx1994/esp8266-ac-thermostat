@@ -30,6 +30,13 @@ let valid = true;
 let failStatus = false;
 let batteryMv = 4199;
 let batteryValid = true;
+let learnState = 0;
+let learned = false;
+let sendError = 0;
+let rising = false;
+let failAction = '';
+let errorBody = '操作失败';
+let networkFailure = false;
 const requests = [];
 // 用最小 DOM、fetch 和定时器 mock 执行实际脚本，不访问设备或启动真实轮询。
 async function loadPage() {
@@ -43,18 +50,21 @@ async function loadPage() {
     }},
     setInterval(callback, delay) { intervals.push({callback, delay}); },
     async fetch(path, options) {
+      if (networkFailure) throw new Error('网络中断');
       if (path === '/api/status') {
         statusReads++;
         assert.strictEqual(options.cache, 'no-store');
         return {ok: !failStatus, json: async () => ({
-          valid, temperature10, sensorError: 7, carrier: storedCarrier, learnState: 0,
+          valid, temperature10, sensorError: 7, carrier: storedCarrier, learnState, learnError: 9,
           batteryMv, batteryValid, batteryError: 8,
-          rules: [0, 1].map(() => ({threshold10: 220, rising: false,
-            enabled: false, learned: false, sendError: 0}))
+          rules: [0, 1].map(() => ({threshold10: 220, rising,
+            enabled: false, learned, sendError}))
         })};
       }
       const data = JSON.parse(options.body);
       requests.push({path, data});
+      if (path === failAction)
+        return {ok: false, status: 503, json: async () => ({error: errorBody})};
       if (path === '/api/carrier' && failSave)
         return {ok: false, json: async () => ({error: 'save failed'})};
       if (path === '/api/carrier') storedCarrier = data.carrier;
@@ -62,7 +72,7 @@ async function loadPage() {
     }
   };
   vm.createContext(context);
-  vm.runInContext(script[1], context);
+  vm.runInContext(script[1], context, {filename: 'thermostat-page.js'});
   assert.strictEqual(statusReads, 1);
   assert.strictEqual(intervals.length, 1);
   assert.strictEqual(intervals[0].delay, 2000);
@@ -130,8 +140,56 @@ async function check() {
   await vm.runInContext('learn(1)', context);
   assert.strictEqual(requests.at(-1).path, '/api/learn');
   assert.strictEqual(JSON.stringify(requests.at(-1).data), '{"slot":1}');
+  elements.get('t1').value = '-10';
+  elements.get('d1').value = '1';
+  elements.get('e1').checked = true;
+  await vm.runInContext('save(1)', context);
+  assert.strictEqual(requests.at(-1).path, '/api/rule');
+  assert.deepStrictEqual(requests.at(-1).data, {slot: 1, threshold10: -100, rising: true, enabled: true});
+  for (const value of ['', '   ', 'invalid', 'Infinity']) {
+    const before = requests.length;
+    elements.get('t1').value = value;
+    await vm.runInContext('save(1)', context);
+    assert.strictEqual(elements.get('message').textContent, '请输入温度');
+    assert.strictEqual(requests.length, before);
+  }
+  elements.get('t1').value = '50';
+  elements.get('d1').value = '0';
+  elements.get('e1').checked = false;
+  await vm.runInContext('save(1)', context);
+  assert.deepStrictEqual(requests.at(-1).data, {slot: 1, threshold10: 500, rising: false, enabled: false});
+  await vm.runInContext('send(2)', context);
+  assert.strictEqual(requests.at(-1).path, '/api/send');
+  assert.strictEqual(requests.at(-1).data.slot, 2);
+  assert.strictEqual(elements.get('message').textContent, '已发送第2组红外码');
+  for (const [path, call] of [['/api/rule', 'save(1)'], ['/api/learn', 'learn(1)'], ['/api/send', 'send(1)']]) {
+    failAction = path;
+    await vm.runInContext(call, context);
+    assert.strictEqual(elements.get('message').textContent, '操作失败');
+  }
+  errorBody = '';
+  await vm.runInContext('send(1)', context);
+  assert.strictEqual(elements.get('message').textContent, 'HTTP 503');
+  failAction = '';
+  learned = true;
+  sendError = 6;
+  for (const state of [3, 4, 0]) {
+    learnState = state;
+    await refresh();
+    if (state === 3) assert.strictEqual(elements.get('message').textContent, '红外学习成功并已保存');
+    if (state === 4) assert.strictEqual(elements.get('message').textContent, '红外学习失败，错误码 9');
+  }
+  assert.strictEqual(elements.get('info1').textContent, '已学习；上次发送错误码 6');
+  networkFailure = true;
+  await refresh();
+  assert.strictEqual(elements.get('message').textContent, '网络中断');
+  await vm.runInContext('saveCarrier()', context);
+  assert.match(elements.get('message').textContent, /网络中断/);
+  networkFailure = false;
+  rising = true;
   ({elements} = await loadPage());
   assert.strictEqual(elements.get('carrier').value, '36');
+  assert.strictEqual(elements.get('d1').value, '1');
   console.log('control page: script, routes, 2s refresh, low battery boundary/recovery, errors and shared carrier passed');
 }
 check().catch(error => { console.error(error); process.exitCode = 1; });
