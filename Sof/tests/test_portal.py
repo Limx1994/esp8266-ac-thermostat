@@ -339,6 +339,8 @@ esp_err_t httpd_resp_send_err(httpd_req_t *req, httpd_err_resp_t err) {
 static const char *post_body;
 static size_t post_pos;
 static int action_error, action_slot, action_calls, action_carrier;
+static bool action_battery, cal_storage_failed;
+static int action_reference;
 static rule_cfg_t action_rule;
 int httpd_req_recv(httpd_req_t *req, char *body, size_t len) {
     if (post_recv_error) return -1;
@@ -431,6 +433,14 @@ void app_get_status(app_status_t *st) {
 esp_err_t app_save_rule(int slot, const rule_cfg_t *cfg) {
     action_slot = slot; action_rule = *cfg; action_calls++; return action_error;
 }
+esp_err_t app_calibrate(bool battery, int reference, bool *storage_failed) {
+    action_battery = battery; action_reference = reference; action_calls++;
+    *storage_failed = cal_storage_failed;
+    if (battery ? (reference < 2500 || reference > 4500) : (reference < -100 || reference > 500)) {
+        *storage_failed = false; return ESP_ERR_INVALID_ARG;
+    }
+    return action_error;
+}
 bool rule_valid(const rule_cfg_t *cfg) { return true; }
 esp_err_t ir_start_learn(int slot) { action_slot = slot; action_calls++; return action_error; }
 int ir_get_carrier(void) { return 38; }
@@ -459,6 +469,32 @@ static esp_err_t request(const char *uri, int method) {
 }
 
 static void check_posts(void) {
+    const char *cal_bad[] = {"{", "{}", "{\"type\":1}", "{\"type\":\"other\"}",
+        "{\"type\":\"temperature\"}", "{\"type\":\"temperature\",\"reference10\":25.5}",
+        "{\"type\":\"battery\",\"referenceMv\":\"3595\"}", "{\"type\":\"battery\",\"referenceMv\":null}"};
+    for (unsigned i = 0; i < sizeof(cal_bad) / sizeof(cal_bad[0]); i++) {
+        post_body = cal_bad[i]; unsigned calls = action_calls;
+        assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 400);
+        assert(action_calls == calls);
+    }
+    post_body = "{\"type\":\"temperature\",\"reference10\":255}";
+    action_error = ESP_OK;
+    assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 200);
+    assert(!action_battery && action_reference == 255);
+    post_body = "{\"type\":\"battery\",\"referenceMv\":3595}";
+    assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 200);
+    assert(action_battery && action_reference == 3595);
+    action_error = ESP_ERR_INVALID_STATE;
+    assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 409);
+    cal_storage_failed = true;
+    assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 500);
+    action_error = ESP_ERR_INVALID_ARG;
+    assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 500);
+    cal_storage_failed = false;
+    assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 400);
+    action_error = ESP_FAIL;
+    assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 500);
+    action_error = ESP_OK;
     const char *slot_bad[] = {"{", "{}", "{\"slot\":0}", "{\"slot\":3}",
         "{\"slot\":1.5}", "{\"slot\":\"1\"}"};
     const char *routes[] = {"/api/rule", "/api/learn", "/api/send"};
@@ -536,8 +572,8 @@ int main(void) {
     assert(rf_enabled && wifi_started && rf_opens == 1);
     assert(portal_start() == ESP_OK && rf_opens == 1);
     assert(portal_timeout_ms() == 180000);
-    assert(hd.config.max_uri_handlers == 15);
-    for (int i = 0; i < 15; i++) assert(hd.hd_calls[i]);
+    assert(hd.config.max_uri_handlers == 16);
+    for (int i = 0; i < 16; i++) assert(hd.hd_calls[i]);
     assert(httpd_register_uri_handler(&hd, hd.hd_calls[0]) ==
            ESP_ERR_HTTPD_HANDLER_EXISTS);
     const char *probes[] = {

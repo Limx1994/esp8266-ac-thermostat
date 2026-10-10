@@ -246,6 +246,19 @@ finish:
     return err;
 }
 
+static void trace_rx(const char *phase, const char *stage)
+{
+    portENTER_CRITICAL();
+    unsigned level = (GPIO.in >> IR_RX) & 1;
+    unsigned intr = GPIO.pin[IR_RX].int_type;
+    unsigned pending = (GPIO.status >> IR_RX) & 1;
+    uint32_t calls = isr_call_count;
+    unsigned segments = capture_count;
+    portEXIT_CRITICAL();
+    ESP_LOGI(TAG, "learn RX: phase=%s stage=%s level=%u intr=%u pending=%u isr_calls=%u segments=%u",
+             phase, stage, level, intr, pending, (unsigned)calls, segments);
+}
+
 /* 等待信号最多 15 秒；采集最多 750 ms，高电平空闲 100 ms 判定帧结束。 */
 static void learn_task(void *arg)
 {
@@ -253,14 +266,19 @@ static void learn_task(void *arg)
     TickType_t poll_ticks = pdMS_TO_TICKS(2);
     if (!poll_ticks) poll_ticks = 1;
     esp_err_t err = ESP_OK;
+    const char *stage = "rx-handler-add";
     capture_count = 0;
     capture_started = capture_overflow = false;
     isr_call_count = 0;
+    trace_rx("begin", stage);
     GPIO.status_w1tc = 1U << IR_RX;
     err = gpio_isr_handler_add(IR_RX, capture_isr, NULL);
     if (err != ESP_OK) goto finish;
+    stage = "rx-edge-enable";
     err = gpio_set_intr_type(IR_RX, GPIO_INTR_ANYEDGE);
     if (err != ESP_OK) goto remove_isr;
+    stage = "wait-signal";
+    trace_rx("armed", stage);
     ESP_LOGI(TAG, "learn slot %d waiting for IR", learn_slot + 1);
     TickType_t start = xTaskGetTickCount();
     while (!capture_started && xTaskGetTickCount() - start < pdMS_TO_TICKS(15000)) {
@@ -272,6 +290,7 @@ static void learn_task(void *arg)
         goto remove_isr;
     }
     learn_state = IR_CAPTURING;
+    stage = "capture";
     while (!capture_overflow) {
         uint32_t now = (uint32_t)esp_timer_get_time();
         if ((int32_t)(now - first_us) >= 750000) {
@@ -295,9 +314,13 @@ remove_isr:
         esp_err_t remove_err = gpio_isr_handler_remove(IR_RX);
         if (remove_err != ESP_OK)
             ESP_LOGE(TAG, "IR RX callback removal failed: %s", esp_err_to_name(remove_err));
-        if (err == ESP_OK) err = remove_err;
+        if (err == ESP_OK && remove_err != ESP_OK) {
+            stage = "rx-handler-remove";
+            err = remove_err;
+        }
     }
     if (err != ESP_OK) goto finish;
+    stage = "validate";
     if (capture_count >= IR_MAX) { err = ESP_ERR_INVALID_SIZE; goto finish; }
     /* 追加帧末空闲段，随后转换为 10 μs 单位并校验段数、单段及总时长。 */
     capture_us[capture_count++] = IR_GAP_UNITS * 10U;
@@ -326,13 +349,19 @@ remove_isr:
         goto finish;
     }
     nvs_handle handle;
+    stage = "nvs-open";
     err = nvs_open("ac", NVS_READWRITE, &handle);
     if (err != ESP_OK) goto finish;
     const char *key = learn_slot == 0 ? "ir0" : "ir1";
     size_t size = offsetof(ir_code_t, duration) + candidate.count * sizeof(uint16_t);
+    stage = "nvs-set";
     err = nvs_set_blob(handle, key, &candidate, size);
-    if (err == ESP_OK) err = nvs_commit(handle);
     if (err == ESP_OK) {
+        stage = "nvs-commit";
+        err = nvs_commit(handle);
+    }
+    if (err == ESP_OK) {
+        stage = "nvs-readback";
         /* 采集已结束，复用采集缓冲区回读 NVS，核对长度和完整内容。 */
         size_t read_size = sizeof(capture_us);
         err = nvs_get_blob(handle, key, capture_us, &read_size);
@@ -355,8 +384,10 @@ finish:
     if (err != ESP_OK) {
         learn_error = err;
         learn_state = IR_ERROR;
-        ESP_LOGE(TAG, "learn slot %d failed: %s", learn_slot + 1, esp_err_to_name(err));
+        trace_rx("failed", stage);
+        ESP_LOGE(TAG, "learn slot %d failed: %s; stage=%s", learn_slot + 1, esp_err_to_name(err), stage);
     }
+    app_set_learning(false);
     busy = false;
     vTaskDelete(NULL);
 }
@@ -473,17 +504,26 @@ esp_err_t ir_start_learn(int slot)
 {
     if (slot < 0 || slot > 1) return ESP_ERR_INVALID_ARG;
     portENTER_CRITICAL();
-    if (busy) { portEXIT_CRITICAL(); return ESP_ERR_INVALID_STATE; }
+    if (busy) {
+        ir_state_t state = learn_state;
+        bool idle = output_idle;
+        portEXIT_CRITICAL();
+        ESP_LOGW(TAG, "learn slot %d rejected: ESP_ERR_INVALID_STATE; busy=1 learn_state=%d output_idle=%d",
+                 slot + 1, state, idle);
+        return ESP_ERR_INVALID_STATE;
+    }
     busy = true;
     portEXIT_CRITICAL();
     learn_slot = slot;
     learn_error = ESP_OK;
     learn_state = IR_WAITING;
+    app_set_learning(true);
     if (xTaskCreate(learn_task, "ir_learn", 4096, NULL, 8, NULL) != pdPASS) {
-        busy = false;
         learn_state = IR_ERROR;
         learn_error = ESP_ERR_NO_MEM;
-        ESP_LOGE(TAG, "learn slot %d could not start: no memory", slot + 1);
+        ESP_LOGE(TAG, "learn slot %d could not start: no memory; stage=task-create", slot + 1);
+        app_set_learning(false);
+        busy = false;
         return ESP_ERR_NO_MEM;
     }
     return ESP_OK;

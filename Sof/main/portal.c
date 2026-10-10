@@ -234,6 +234,32 @@ static esp_err_t learn_post(httpd_req_t *req)
     return reply(req, "202 Accepted", "{\"ok\":true}");
 }
 
+static esp_err_t calibration_post(httpd_req_t *req)
+{
+    record_action();
+    cJSON *json = read_json(req);
+    const cJSON *type = cJSON_GetObjectItemCaseSensitive(json, "type");
+    if (!cJSON_IsString(type) || !type->valuestring ||
+        (strcmp(type->valuestring, "temperature") != 0 && strcmp(type->valuestring, "battery") != 0)) {
+        cJSON_Delete(json);
+        return error_reply(req, "400 Bad Request", ESP_ERR_INVALID_ARG);
+    }
+    bool battery = strcmp(type->valuestring, "battery") == 0;
+    const cJSON *value = cJSON_GetObjectItemCaseSensitive(json, battery ? "referenceMv" : "reference10");
+    if (!cJSON_IsNumber(value) || value->valuedouble != value->valueint) {
+        cJSON_Delete(json);
+        return error_reply(req, "400 Bad Request", ESP_ERR_INVALID_ARG);
+    }
+    int reference = value->valueint;
+    cJSON_Delete(json);
+    bool storage_failed;
+    esp_err_t err = app_calibrate(battery, reference, &storage_failed);
+    if (err == ESP_OK) return reply(req, "200 OK", "{\"ok\":true}");
+    if (!storage_failed && err == ESP_ERR_INVALID_ARG) return error_reply(req, "400 Bad Request", err);
+    if (!storage_failed && err == ESP_ERR_INVALID_STATE) return error_reply(req, "409 Conflict", err);
+    return error_reply(req, "500 Internal Server Error", err);
+}
+
 static esp_err_t carrier_post(httpd_req_t *req)
 {
     record_action();
@@ -371,10 +397,10 @@ esp_err_t portal_start(void)
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.max_open_sockets = 5;
     config.lru_purge_enable = true;
-    config.max_uri_handlers = 15;
+    config.max_uri_handlers = 16;
     err = httpd_start(&server, &config);
     if (err != ESP_OK) goto fail_wifi;
-    /* 同时注册手机探测、后台请求和五个控制 API；通配路径依赖本地 SDK URI 覆盖。 */
+    /* 同时注册手机探测、后台请求和控制 API；通配路径依赖本地 SDK URI 覆盖。 */
     const httpd_uri_t routes[] = {
         { .uri = "/", .method = HTTP_GET, .handler = page_get },
         { .uri = "/generate_204", .method = HTTP_GET, .handler = probe_get },
@@ -389,6 +415,7 @@ esp_err_t portal_start(void)
         { .uri = "/api/status", .method = HTTP_GET, .handler = status_get },
         { .uri = "/api/rule", .method = HTTP_POST, .handler = rule_post },
         { .uri = "/api/carrier", .method = HTTP_POST, .handler = carrier_post },
+        { .uri = "/api/calibration", .method = HTTP_POST, .handler = calibration_post },
         { .uri = "/api/learn", .method = HTTP_POST, .handler = learn_post },
         { .uri = "/api/send", .method = HTTP_POST, .handler = send_post }
     };
