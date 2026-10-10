@@ -377,7 +377,8 @@ esp_err_t ir_init(void)
     if (err != ESP_OK) return err;
     err = gpio_config(&tx);
     if (err != ESP_OK) return err;
-    gpio_set_level(IR_TX, 0);
+    err = gpio_set_level(IR_TX, 0);
+    if (err != ESP_OK) return err;
     err = gpio_install_isr_service(0);
     if (err != ESP_OK) return err;
     tx_done = xSemaphoreCreateBinary();

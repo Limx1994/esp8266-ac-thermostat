@@ -188,10 +188,30 @@ int test_io_sockopt(int, int, int, void *, size_t *);
 '''
 
 TEST = r'''
+static void *uri_malloc(size_t size);
+static char *uri_strdup(const char *text);
+#define malloc uri_malloc
+#define strdup uri_strdup
 #define TAG httpd_tag
 #include "../../components/esp_http_server/httpd_uri.c"
 #undef TAG
+#undef malloc
+#undef strdup
+static int portal_snprintf(char *buf, size_t size, const char *fmt, ...);
+#define snprintf portal_snprintf
 #include "../../main/portal.c"
+#undef snprintf
+static unsigned status_format_error;
+static int portal_snprintf(char *buf, size_t size, const char *fmt, ...) {
+    if (status_format_error && strstr(fmt, "\"temperature10\""))
+        return status_format_error == 1 ? -1 : (int)size;
+    va_list args; va_start(args, fmt);
+    int result = vsnprintf(buf, size, fmt, args);
+    va_end(args); return result;
+}
+static int fail_uri_alloc;
+static void *uri_malloc(size_t size) { return fail_uri_alloc == 1 ? NULL : malloc(size); }
+static char *uri_strdup(const char *text) { return fail_uri_alloc == 2 ? NULL : strdup(text); }
 
 static struct httpd_data hd;
 static TickType_t now;
@@ -199,6 +219,7 @@ static int warnings, response_code, response_calls, fail_call;
 static char location[80];
 static char status_body[640];
 static bool battery_valid = true;
+static bool status_alt, hold_dns, post_recv_error;
 static size_t response_len;
 static void (*dns_fn)(void *);
 static bool socket_failed;
@@ -212,6 +233,7 @@ static bool http_stop_error;
 static int rf_opens, rf_closes;
 static bool timers_active = true, core_owned, sem_failed, callback_failed;
 static err_t timer_failed;
+static bool timer_pause_failed;
 static unsigned sem_created, sem_freed;
 static bool noise_active = true, noise_failed, noise_pause_failed;
 static unsigned init_fail_at, init_calls;
@@ -245,6 +267,7 @@ err_t tcpip_callback(void (*fn)(void *), void *arg) {
 err_t app_lwip_timers_set(int active, unsigned counts[3]) {
     assert(core_owned);
     if (!active) assert(!rf_enabled && !wifi_started);
+    if (!active && timer_pause_failed) return ERR_MEM;
     if (timer_failed) return timer_failed;
     counts[0] = active != timers_active ? 4 : 0;
     counts[1] = 0; counts[2] = active ? 4 : 0;
@@ -257,7 +280,7 @@ TickType_t xTaskGetTickCount(void) { return now; }
 void vTaskDelete(void *task) {}
 void vTaskDelay(TickType_t ticks) {
     now += ticks;
-    if (dns_fn) { dns_fn(NULL); dns_fn = NULL; }
+    if (dns_fn && !hold_dns) { dns_fn(NULL); dns_fn = NULL; }
 }
 int xTaskCreate(void (*fn)(void *), const char *name, unsigned stack,
                 void *arg, unsigned priority, void *task) {
@@ -318,6 +341,7 @@ static size_t post_pos;
 static int action_error, action_slot, action_calls, action_carrier;
 static rule_cfg_t action_rule;
 int httpd_req_recv(httpd_req_t *req, char *body, size_t len) {
+    if (post_recv_error) return -1;
     if (!post_body) return -1;
     size_t remaining = strlen(post_body) - post_pos;
     if (len > remaining) len = remaining;
@@ -368,13 +392,16 @@ int test_recvfrom(int fd, void *buf, size_t len, int flags,
                   struct sockaddr *peer, socklen_t *peer_len) {
     if (!dns_script) return -1;
     unsigned step = dns_step++;
-    if (step >= 8) { dns_running = false; return -1; }
+    if (step >= 11) { dns_running = false; return -1; }
     unsigned char query[19] = {0x12, 0x34, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0,
                                1, 'a', 0, 0, 1, 0, 1};
     if (step == 0) return -1;
     if (step == 2) query[12] = 64;
     if (step == 5) query[16] = 28;
     if (step == 6) query[18] = 2;
+    if (step == 8) query[15] = 1;
+    if (step == 9) query[17] = 1;
+    if (step == 10) query[12] = 18; /* Label extends beyond the datagram. */
     memcpy(buf, query, sizeof(query));
     return step == 1 ? 16 : step == 3 ? 17 : 19;
 }
@@ -395,6 +422,11 @@ void app_get_status(app_status_t *st) {
     st->battery_mv = 4199;
     st->battery_valid = battery_valid;
     st->battery_error = battery_valid ? ESP_OK : ESP_FAIL;
+    st->temp_valid = status_alt;
+    for (unsigned i = 0; i < 2; i++) {
+        st->rules[i].rising = status_alt;
+        st->rules[i].enabled = status_alt;
+    }
 }
 esp_err_t app_save_rule(int slot, const rule_cfg_t *cfg) {
     action_slot = slot; action_rule = *cfg; action_calls++; return action_error;
@@ -404,7 +436,7 @@ esp_err_t ir_start_learn(int slot) { action_slot = slot; action_calls++; return 
 int ir_get_carrier(void) { return 38; }
 esp_err_t ir_set_carrier(int carrier) { action_carrier = carrier; action_calls++; return action_error; }
 esp_err_t ir_send(int slot) { action_slot = slot; action_calls++; return action_error; }
-bool ir_has_code(int slot) { return false; }
+bool ir_has_code(int slot) { return status_alt; }
 bool ir_is_busy(void) { return ir_busy_mock; }
 ir_state_t ir_state(void) { return IR_IDLE; }
 esp_err_t ir_last_error(void) { return ESP_OK; }
@@ -542,6 +574,26 @@ int main(void) {
     assert(request("/api/status", HTTP_GET) == ESP_OK);
     assert(strstr(status_body, "\"batteryValid\":false,\"batteryError\":1"));
     battery_valid = true;
+    TickType_t saved_action = last_action;
+    bool saved_used = ap_used;
+    status_alt = true;
+    assert(request("/api/status", HTTP_GET) == ESP_OK);
+    assert(strstr(status_body, "\"valid\":true") && strstr(status_body, "\"learned\":true"));
+    status_alt = false;
+    for (status_format_error = 1; status_format_error <= 2; status_format_error++) {
+        assert(request("/api/status", HTTP_GET) == ESP_OK && response_code == 500);
+    }
+    status_format_error = 0;
+    for (fail_call = 1; fail_call <= 3; fail_call++) {
+        assert(request("/api/status", HTTP_GET) == ESP_FAIL && response_calls == fail_call);
+    }
+    fail_call = 1;
+    assert(request("/", HTTP_GET) == ESP_FAIL);
+    fail_call = 0;
+    post_body = "{\"slot\":1}"; post_recv_error = true;
+    assert(request("/api/send", HTTP_POST) == ESP_OK && response_code == 400);
+    post_body = NULL; post_recv_error = false;
+    last_action = saved_action; ap_used = saved_used;
     assert(portal_idle_ms() == now - 100);
     assert(portal_timeout_ms() == 180000);
     assert(request("/api/status/extra", HTTP_GET) == ESP_OK);
@@ -572,7 +624,7 @@ int main(void) {
     check_posts();
     dns_script = true; dns_step = dns_replies = 0;
     dns_task(NULL); dns_fn = NULL;
-    assert(dns_replies == 4 && dns_reply_len == 35 && dns_fd == -1 && dns_exited);
+    assert(dns_replies == 6 && dns_reply_len == 19 && dns_fd == -1 && dns_exited);
     dns_script = false;
     ir_busy_mock = true;
     assert(portal_stop() == ESP_ERR_INVALID_STATE && portal_is_on());
@@ -619,6 +671,11 @@ int main(void) {
     assert(portal_start() == ESP_FAIL && !portal_is_on());
     assert(!rf_enabled && !wifi_started);
     http_failed = false;
+    for (fail_uri_alloc = 1; fail_uri_alloc <= 2; fail_uri_alloc++) {
+        assert(portal_start() == ESP_ERR_HTTPD_ALLOC_MEM && !portal_is_on());
+        assert(!rf_enabled && !wifi_started && server == NULL && hd.hd_calls == NULL);
+    }
+    fail_uri_alloc = 0;
     assert(portal_start() == ESP_OK);
     stop_failed = true;
     assert(portal_stop() == ESP_FAIL && portal_is_on());
@@ -629,9 +686,19 @@ int main(void) {
     socket_failed = stop_failed = true;
     assert(portal_start() == ESP_FAIL && portal_is_on());
     assert(rf_enabled && wifi_started && server == NULL);
+    assert(portal_start() == ESP_ERR_INVALID_STATE);
     socket_failed = stop_failed = false;
     assert(portal_stop() == ESP_OK && !portal_is_on());
     assert(!rf_enabled && !wifi_started && rf_closes == rf_opens + 1);
+    assert(portal_start() == ESP_OK);
+    hold_dns = true;
+    assert(portal_stop() == ESP_ERR_TIMEOUT && portal_is_on() && server != NULL);
+    assert(portal_start() == ESP_ERR_INVALID_STATE);
+    hold_dns = false;
+    http_stop_error = true;
+    assert(portal_stop() == ESP_FAIL && portal_is_on() && server != NULL);
+    http_stop_error = false;
+    assert(portal_stop() == ESP_OK && !portal_is_on());
 #ifdef CONFIG_APP_PAUSE_NETWORK_TIMERS
     assert(!timers_active && sem_created == sem_freed);
     sem_failed = true;
@@ -657,10 +724,26 @@ int main(void) {
     (void)noise_active; (void)noise_failed; (void)noise_pause_failed;
 #ifdef CONFIG_APP_PAUSE_NOISE_TIMER
     assert(!noise_active);
+    unsigned saved_rf_opens = rf_opens, saved_rf_closes = rf_closes;
+    rf_enabled = true; /* Independent initialization fixture: SDK starts with RF on. */
+    noise_pause_failed = true;
+    assert(portal_init() == ESP_FAIL && !portal_is_on() && !rf_enabled);
+    noise_pause_failed = false;
+    assert(portal_stop() == ESP_OK && !noise_active && !timers_active);
+    rf_opens = saved_rf_opens; rf_closes = saved_rf_closes;
+    socket_failed = noise_pause_failed = true;
+    assert(portal_start() == ESP_FAIL && !portal_is_on() && !rf_enabled);
+    assert(server == NULL && hd.hd_calls == NULL && noise_active && !timers_active);
+    socket_failed = noise_pause_failed = false;
+    assert(portal_stop() == ESP_OK && !noise_active && !timers_active);
     noise_failed = true;
     assert(portal_start() == ESP_FAIL && !portal_is_on() && !rf_enabled);
     assert(!timers_active && !noise_active);
     noise_failed = false;
+    noise_failed = timer_pause_failed = true;
+    assert(portal_start() == ESP_ERR_NO_MEM && !portal_is_on() && timers_active);
+    noise_failed = timer_pause_failed = false;
+    assert(portal_stop() == ESP_OK && !timers_active);
     for (int i = 0; i < 20; i++) {
         assert(portal_start() == ESP_OK && noise_active && timers_active);
         stop_failed = true;
@@ -688,6 +771,28 @@ int main(void) {
     noise_failed = false; timer_failed = ERR_OK;
     assert(portal_stop() == ESP_OK && !noise_active && !timers_active);
 #endif
+    hd.config.max_uri_handlers = 1;
+    hd.hd_calls = calloc(1, sizeof(*hd.hd_calls));
+    const httpd_uri_t route = {.uri="/check", .method=HTTP_GET, .handler=page_get};
+    assert(httpd_register_uri_handler(NULL, &route) == ESP_ERR_INVALID_ARG);
+    assert(httpd_register_uri_handler(&hd, NULL) == ESP_ERR_INVALID_ARG);
+    for (fail_uri_alloc = 1; fail_uri_alloc <= 2; fail_uri_alloc++) {
+        assert(httpd_register_uri_handler(&hd, &route) == ESP_ERR_HTTPD_ALLOC_MEM);
+        assert(hd.hd_calls[0] == NULL);
+    }
+    fail_uri_alloc = 0;
+    assert(httpd_register_uri_handler(&hd, &route) == ESP_OK);
+    assert(httpd_unregister_uri_handler(NULL, "/check", HTTP_GET) == ESP_ERR_INVALID_ARG);
+    assert(httpd_unregister_uri_handler(&hd, NULL, HTTP_GET) == ESP_ERR_INVALID_ARG);
+    assert(httpd_unregister_uri_handler(&hd, "/absent", HTTP_GET) == ESP_ERR_NOT_FOUND);
+    assert(httpd_unregister_uri_handler(&hd, "/check", HTTP_GET) == ESP_OK);
+    assert(httpd_unregister_uri(NULL, "/check") == ESP_ERR_INVALID_ARG);
+    assert(httpd_unregister_uri(&hd, NULL) == ESP_ERR_INVALID_ARG);
+    assert(httpd_unregister_uri(&hd, "/absent") == ESP_ERR_NOT_FOUND);
+    assert(httpd_register_uri_handler(&hd, &route) == ESP_OK);
+    assert(httpd_unregister_uri(&hd, "/check") == ESP_OK);
+    assert(uri_matches("", "", 0));
+    free(hd.hd_calls); hd.hd_calls = NULL;
     puts("portal: routes, redirect, idle time, RF lifecycle, failures and restart passed");
     return 0;
 }
@@ -889,6 +994,9 @@ static int pending_bytes(httpd_handle_t handle, int fd) { return 2; }
 static int timeout_recv(httpd_handle_t handle, int fd, char *buf, size_t len, int flags) {
     return HTTPD_SOCK_ERR_TIMEOUT;
 }
+static int failed_recv(httpd_handle_t handle, int fd, char *buf, size_t len, int flags) {
+    return HTTPD_SOCK_ERR_FAIL;
+}
 static unsigned freed_contexts;
 static void count_context_free(void *ctx) { assert(ctx == (void *)3); freed_contexts++; }
 static void check_parser_guards(void) {
@@ -955,6 +1063,8 @@ static void check_parser_guards(void) {
     assert(read_block(req, 0, 1) == -1);
     assert(strstr(output, "HTTP/1.1 408 Request Timeout"));
     assert(strstr(output + 1, "HTTP/1.1") == NULL);
+    output_pos = 0; output[0] = 0; sd.recv_fn = failed_recv;
+    assert(read_block(req, 0, 1) == -1 && output_pos == 0);
     sd.recv_fn = httpd_default_recv;
     sd.pending_len = 0; socket_errno = EAGAIN;
     assert(read_block(req, 0, 1) == -1);
@@ -978,6 +1088,30 @@ static void check_parser_guards(void) {
 static void check_http_helpers(void) {
     char buffer[64];
     httpd_req_t invalid = {0};
+    httpd_req_t *guard_req = prepare_request();
+    hd.hd_td.handle = (void *)1;
+    assert(!httpd_validate_req_ptr(guard_req));
+    hd.hd_td.handle = &hd;
+    assert(httpd_validate_req_ptr(guard_req));
+    assert(httpd_req_get_url_query_str(guard_req, NULL, 1) == ESP_ERR_INVALID_ARG);
+    assert(httpd_query_key_value("", "x", buffer, sizeof(buffer)) == ESP_ERR_NOT_FOUND);
+    assert(httpd_query_key_value("y=1&", "x", buffer, sizeof(buffer)) == ESP_ERR_NOT_FOUND);
+    const char *empty_headers[] = {"X:", "X:   ", "Y:v"};
+    for (unsigned i = 0; i < 3; i++) {
+        guard_req = prepare_request();
+        strcpy(hd.hd_req_aux.scratch, empty_headers[i]);
+        hd.hd_req_aux.req_hdrs_count = 1;
+        assert(httpd_req_get_hdr_value_len(guard_req, "X") == 0);
+        esp_err_t expected = i == 2 ? ESP_ERR_NOT_FOUND : ESP_OK;
+        assert(httpd_req_get_hdr_value_str(guard_req, "X", buffer, sizeof(buffer)) == expected);
+        if (i != 2) assert(buffer[0] == 0);
+    }
+    guard_req = prepare_request();
+    assert(httpd_resp_send(guard_req, "", 0) == ESP_OK && strstr(output, "Content-Length: 0"));
+    assert(uri_matches("", "", 0));
+    assert(!uri_matches("/abc*", "/ab", 3));
+    assert(!uri_matches("/abc*", "/abd", 4));
+    assert(!uri_matches("/abc", "/abd", 4));
     const char *queries[] = {
         "GET /api/status?x=abc&y=last HTTP/1.1\r\nHost: ap\r\nX-Test:   value\r\n\r\n",
         "GET /api/status HTTP/1.1\r\nHost: ap\r\nX-Test: value\r\n\r\n"};
@@ -1101,6 +1235,25 @@ static void check_http_helpers(void) {
     assert(httpd_query_key_value("x=abc", "missing", buffer, sizeof(buffer)) == ESP_ERR_NOT_FOUND);
     assert(httpd_query_key_value("broken", "missing", buffer, sizeof(buffer)) == ESP_ERR_NOT_FOUND);
     const httpd_uri_t route = {.uri="/new", .method=HTTP_GET, .handler=status_reply};
+    const httpd_uri_t duplicate = {.uri="/api/status", .method=HTTP_GET, .handler=status_reply};
+    assert(httpd_register_uri_handler(&hd, &duplicate) == ESP_ERR_HTTPD_HANDLER_EXISTS);
+    req = prepare_request();
+    strcpy((char *)req->uri, "/api/status"); req->method = HTTP_POST;
+    hd.hd_req_aux.url_parse_res.field_set = 1 << UF_PATH;
+    hd.hd_req_aux.url_parse_res.field_data[UF_PATH].len = strlen(req->uri);
+    assert(httpd_uri(&hd) == ESP_OK && strstr(output, "405 Method Not Allowed"));
+    req = prepare_request();
+    strcpy((char *)req->uri, "/absent"); req->method = HTTP_GET;
+    hd.hd_req_aux.url_parse_res.field_set = 1 << UF_PATH;
+    hd.hd_req_aux.url_parse_res.field_data[UF_PATH].len = strlen(req->uri);
+    assert(httpd_uri(&hd) == ESP_OK && strstr(output, "404 Not Found"));
+    req = prepare_request();
+    strcpy((char *)req->uri, "/api/status"); req->method = HTTP_GET;
+    hd.hd_req_aux.url_parse_res.field_set = 1 << UF_PATH;
+    hd.hd_req_aux.url_parse_res.field_data[UF_PATH].len = strlen(req->uri);
+    fail_send_at = 1;
+    assert(httpd_uri(&hd) == ESP_FAIL);
+    fail_send_at = 0;
     assert(httpd_register_uri_handler(NULL, &route) == ESP_ERR_INVALID_ARG);
     assert(httpd_register_uri_handler(&hd, NULL) == ESP_ERR_INVALID_ARG);
     assert(httpd_register_uri_handler(&hd, &route) == ESP_ERR_HTTPD_HANDLERS_FULL);
@@ -1113,6 +1266,11 @@ static void check_http_helpers(void) {
     assert(httpd_unregister_uri(&hd, NULL) == ESP_ERR_INVALID_ARG);
     assert(httpd_unregister_uri(&hd, "/missing") == ESP_ERR_NOT_FOUND);
     assert(httpd_unregister_uri(&hd, "/new") == ESP_OK);
+    req = prepare_request();
+    strcpy((char *)req->uri, "/absent"); req->method = HTTP_GET;
+    hd.hd_req_aux.url_parse_res.field_set = 1 << UF_PATH;
+    hd.hd_req_aux.url_parse_res.field_data[UF_PATH].len = strlen(req->uri);
+    assert(httpd_uri(&hd) == ESP_OK && strstr(output, "404 Not Found"));
     for (int failure = 1; failure <= 2; failure++) {
         fail_uri_alloc = failure;
         assert(httpd_register_uri_handler(&hd, &route) == ESP_ERR_HTTPD_ALLOC_MEM);

@@ -133,6 +133,15 @@ int main(void)
         assert(extreme.fast_milli == 0 && extreme.interval_ms == 600000);
     }
     test_trend();
+    rule_trend_t limits;
+    rule_trend_reset(&limits);
+    for (unsigned i = 0; i < 3; i++)
+        assert(rule_trend_step(&limits, i * 100, i * 1000));
+    assert(limits.target_ms == 120000 && limits.interval_ms == 120000);
+    rule_trend_reset(&limits);
+    for (unsigned i = 0; i < 3; i++)
+        assert(rule_trend_step(&limits, i, i * 120000));
+    assert(limits.fast_milli == 50 && limits.target_ms == 600000);
     puts("rules_test: threshold equality, repeated sends, startup/recovery and disabled rules passed");
     return 0;
 }

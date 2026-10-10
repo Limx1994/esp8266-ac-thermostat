@@ -129,7 +129,18 @@ def collect_c():
                 rel = source.relative_to(ROOT).as_posix()
                 if not (rel.startswith("main/") or rel.startswith("components/") or rel == "tools/lwip_timers.inc"):
                     continue
-                row = files.setdefault(rel, {"lines": {}, "functions": {}, "branches": []})
+                row = files.setdefault(rel, {"lines": {}, "functions": {}, "branches": [], "graphs": {}})
+                structure = {
+                    "functions": [{key: fn[key] for key in ("name", "start_line", "end_line", "blocks")}
+                                  for fn in entry["functions"]],
+                    "lines": [{"line": line["line_number"], "function": line.get("function_name"),
+                               "blocks": line.get("block_ids", []),
+                               "branches": [{key: value for key, value in branch.items() if key != "count"}
+                                            for branch in line.get("branches", [])]}
+                              for line in entry["lines"]]}
+                graph_id = hashlib.sha256(json.dumps(structure, sort_keys=True).encode()).hexdigest()
+                graph = row["graphs"].setdefault(graph_id, {"variants": [], "branches": {}})
+                graph["variants"].append(exe.stem)
                 for line in entry["lines"]:
                     number = str(line["line_number"])
                     row["lines"][number] = row["lines"].get(number, 0) + line["count"]
@@ -141,6 +152,9 @@ def collect_c():
                             for line in entry["lines"]
                             for index, branch in enumerate(line.get("branches", []))]
                 row["branches"].extend(branches)
+                for branch in branches:
+                    key = f"{branch['line']}:{branch['index']}"
+                    graph["branches"][key] = graph["branches"].get(key, 0) + branch["count"]
                 variants.append({"file": rel, "variant": exe.stem,
                                  "lines": len(entry["lines"]),
                                  "lines_hit": sum(line["count"] > 0 for line in entry["lines"]),
@@ -254,6 +268,14 @@ def report(c_data, py_data):
                          "reason": "当前场景未命中；不能据此认定不可达",
                          "verification": "按源码位置追加输入/错误注入，并复跑对应变体"})
     rows.append(f"| 已插桩 C 总计 | {totals[0]}/{totals[1]} | {totals[2]}/{totals[3]} | {totals[4]}/{totals[5]} |")
+    rows += ["", "## 相同 gcov 图结构汇总", "",
+             "仅将函数块数、源行 block IDs 和全部分支边结构完全相同的图汇总；用于识别重复测量，不代替逐配置验收或语义路径证明。原始分母和缺口保留。", "",
+             "| 模块 | 图结构数 | 汇总命中/总数 |", "|---|---:|---:|"]
+    for name, row in sorted(c_data["files"].items()):
+        graphs = row.get("graphs", {})
+        counts = [count for graph in graphs.values() for count in graph["branches"].values()]
+        if graphs:
+            rows.append(f"| {name} | {len(graphs)} | {sum(count > 0 for count in counts)}/{len(counts)} |")
     rows += ["", "## Python", "", "| 模块 | 行命中/总数 | 分支命中/总数 |", "|---|---:|---:|"]
     for name, entry in py_data["files"].items():
         summary = entry["summary"]
@@ -317,6 +339,8 @@ def report(c_data, py_data):
              "- httpd_uri.c：strdup 分配失败后将已释放槽位置空；先复现悬空槽位，再修复并验证重新注册/注销。",
              "- httpd_parse.c：按主版本拒绝非 HTTP/1.x，修复 2.1 被放行；保留 1.0 和同主版本兼容。日志见 version_repro.log 和 branch_http.log。",
              "- portal.c：部分启动状态再次 start 返回 INVALID_STATE；RF/Wi-Fi 停止后独立清理 noise/network 定时器，避免首个错误跳过第二组清理。日志见 portal_cleanup_repro.log、portal_pause_repro.log 和 portal_cleanup_fixed.log。",
+             "- ir.c：发送脚初始化为低电平失败时立即返回错误，避免忽略 GPIO 故障；10 个初始化步骤独立注入。日志见 ir_init_repro.log 和 ir_init_fixed.log。",
+             "- main.c：关闭热点请求仅在 portal_stop 成功后清除，首次停止失败后仍会重试。日志见 control_stop_repro.log 和 control_stop_fixed.log。",
              "- 复现和修复日志分别为 unrecv_repro.log/unrecv_fixed.log、uri_alloc_repro.log/uri_alloc_fixed.log。",
              "- 固件构建日志见 final_build.log；真实镜像布局、HEX校验及生成配置由本次运行重新验证，哈希见 products.json。",
              "- 关键路径矩阵见 path_matrix.md。所有未命中分支均保留，未自动豁免；不可达判定需逐项源码证明。",
@@ -344,7 +368,7 @@ def main():
     with patch.object(subprocess, "run", side_effect=execute):
         check("规则", rules)
         check("启动诊断", startup)
-        check("功耗 24 组合与 SDK 定时器", lambda: script("test_power.py"))
+        check("功耗 28 组合与 SDK 定时器", lambda: script("test_power.py"))
         check("热点与 HTTP", lambda: script("test_portal.py"))
     cov.stop()
     cov.save()

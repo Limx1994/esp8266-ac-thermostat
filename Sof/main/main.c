@@ -429,8 +429,8 @@ void app_main(void)
         }
         /* 按键关闭请求延后到红外空闲，避免中断学习或发送。 */
         if (close_pending && !ir_is_busy()) {
-            close_pending = false;
             esp_err_t err = portal_stop();
+            close_pending = err != ESP_OK;
             if (err != ESP_OK) ESP_LOGE(TAG, "portal button stop: %s", esp_err_to_name(err));
         }
         if (s1 || s2) {

@@ -138,6 +138,7 @@ New-Item -ItemType Directory -Force build_ascii | Out-Null
 python tests\test_power.py
 python tests\test_portal.py
 python -m unittest discover -s tests -p test_flash_port.py
+python -m unittest discover -s tests -p test_tools.py
 node --check tests\check_page.js
 node tests\check_page.js
 python flash.py --port COM3 --dry-run
@@ -157,7 +158,7 @@ python -m pip install --target build\coverage\packages coverage==7.16.2
 python tests\run_coverage.py *> build\coverage\run.log
 ```
 
-运行器使用 GCC/gcov、Python coverage 和 Node.js V8，复用现有主机测试；每个 C 编译组合保存独立计数。报告位于 `build\coverage\report.md`，关键路径矩阵、未命中源码行/分支、原始统计和产物哈希保存在同目录。C 行/函数按源码位置合并，分支按各变体分别计数；V8 块范围不能等同于 GCC 分支。未插桩源码明确列出，测试、第三方 SDK 和附带工具不纳入业务覆盖率。
+运行器使用 GCC/gcov、Python coverage 和 Node.js V8，复用现有主机测试；每个 C 编译组合保存独立计数。报告位于 `build\coverage\report.md`，关键路径矩阵、未命中源码行/分支、原始统计和产物哈希保存在同目录。C 行/函数按源码位置合并，分支按各变体分别计数；另提供相同 gcov 图结构的汇总，原始分母和缺口保留，不代替逐配置验收。V8 块范围不能等同于 GCC 分支。未插桩源码明确列出，测试、第三方 SDK 和附带工具不纳入业务覆盖率。
 
 0.1J 的 HTTP 修复包括拒绝非 HTTP/1.x、零字节发送报错、接收缓存截断复制和 URI 分配失败槽位清理；相关覆盖统计适用于本次验证源码，不代表 0.1I 发布镜像。
 
@@ -212,96 +213,31 @@ python tests\run_coverage.py *> build\coverage\run.log
 
 [0.1J Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v0.1J) 提供分段烧录包、完整 BIN/HEX 和 SHA256 清单。分段烧录保留未覆盖的 NVS；完整镜像会清除规则、红外编码与共享载波设置。
 
-以下为历史验证记录。
+本地后续修复和测试结果见下一节；它们不改变 `v0.1J` 标签或附件。
 
-### 再次复验 · 2026-10-09
+### 本地后续修复与文档复验 · 2026-10-10
 
-再次检查全部 6 份现有 Markdown，本轮仅更新本文件的验证记录。已有硬件原理图已由独立提交 `8408b15` 保存；本轮不提交源码或测试。当前工作区另包含未提交的 `main/portal.c` 热点状态检查及定时器清理改动：重复启动核对 HTTP/DNS 状态，RF/Wi-Fi 停止后尝试清理两组定时器并保留首个错误。本次结果适用于含这些改动的工作区，不代表 0.1I 发布或仅文档提交可独立复现。
+本次保存红外发送脚初始化错误检查、热点按键关闭失败重试，以及规则、热点/HTTP、功耗和覆盖统计扩展测试。初始化错误由现有 `ESP_ERROR_CHECK(ir_init())` 明确上报；热点停止失败保留现有错误日志。公共 HTTP API、NVS 格式及 `version.txt` 不变。**这些后续改动未包含在现有 `v0.1J` 标签和发布附件中**，本地构建的版本字符串仍为 `v0.1J`，不能据此认定镜像与 Release 相同。
 
-文档 lint、固件构建（Ninja `-j 12`，约 8.6 秒，版本元数据 `v0.1I`）、规则、功耗、热点/HTTP、串口 unittest 6 项、工具 unittest 13 项、页面语法/功能、COM3 烧录 dry-run 及差异空白检查均通过。覆盖运行器验证实际配置与 BIN/HEX：检查组通过 9、失败 0、跳过 0；10 个模块仍有覆盖缺口，返回 `1`，覆盖验收未完成。15 个外部链接未在线核验；实机验收未执行。
+检查全部 6 份受 Git 管理的 Markdown，更新 4 份；两份工具 README 的用法、版本和许可核对后无需修改。根 README 增加实物图，保留配置页面图。压缩重复历史记录并修正过时验证状态，不新增 Markdown 文件。
 
-本轮日志位于忽略目录 `build\docs_repeat_*.log`；覆盖详情在 `build\coverage\report.md`。没有新增功能、修复源码、烧录或推送远程。以下为复验工作区的实际产物，不作为 Release 附件校验值；前一轮产物表仅为历史记录。
-
-| 产物 | 字节数 | SHA256 |
-| --- | --- | --- |
-| `ac_thermostat.bin` | 529008 | `955a07df75ba22cb0cab02898fd1505034f6fc6cf884c06e1f86e4c5b676b531` |
-| `full_flash.bin` | 4194304 | `f6e4a1f8bf7cb01d61b25b518d0aee36c3939a0b17d9bb1cd07b9faa5a4f2ebd` |
-| `full_flash.hex` | 11535372 | `a1ce5a38f12058466352c740de768608783216023418db139dcb679363fc058d` |
-
-
-### 文档保存与工作区验证 · 2026-10-09
-
-检查项目根目录及 Sof 下全部 6 份现有 Markdown，更新其中 4 份，移除已删除 CLAUDE.md/AGENTS.md 的失效链接，明确覆盖工具、HTTP 修复与发布版本的边界。硬件说明及第三方 README 核对后无需修改。本次仅提交文档，已有源码、测试、覆盖工具和原理图改动保留未提交；不新增发布版本或标签，不推送远程。
-
-本次测试使用包含未提交 HTTP 修复和扩展测试的工作区，不能作为 0.1I 发布或本次文档提交独立可复现的验证结果。
-
-| 检查 | 结果 |
+| 检查 | 本次结果 |
 | --- | --- |
-| 文档 lint | 6 份文档的本地链接、锚点、标题、表格、代码围栏及烧录速率通过；15 个外部链接未在线核验 |
-| 固件构建 | `python build.py` 通过，Ninja `-j 12`，约 10.1 秒，版本元数据 `v0.1I`；该版本字符串不能证明源码等同于发布标签 |
-| 单元/主机测试 | 规则、功耗、热点及 HTTP 测试通过；串口 unittest 6 项、工具 unittest 13 项通过 |
-| 静态与冒烟 | 主机编译告警检查、页面语法/功能、COM3 烧录 dry-run、差异空白检查通过；覆盖运行器验证实际配置、BIN/HEX 一致性 |
-| 覆盖统计 | 运行器检查组通过 9、失败 0、跳过 0；覆盖缺口模块 10，返回 `1`，覆盖验收未完成 |
+| 文档 lint | 6 份 Markdown 的链接、锚点、标题、表格、代码围栏及空白检查通过；16 个外部链接未在线核验 |
+| 固件构建 | `python build.py` 通过，Ninja `-j 12`，约 25.8 秒；版本元数据 `v0.1J` |
+| 单元与功能检查 | 19 项 Python 单测、9 组功能检查通过，失败 0、跳过 0；覆盖规则、启动、功耗 28 组合与 SDK 定时器、热点/HTTP及工具 |
+| 静态与冒烟 | C 编译告警检查、页面语法/功能、COM3 烧录 dry-run、实际配置及 BIN/HEX 一致性、差异空白检查通过 |
+| 覆盖验收 | 未完成：8 个模块有分支缺口，运行器返回 `1`；C 行 2322/2322、函数 159/159、逐变体分支机会 6184/7050；Python 工具行/分支全部命中，页面 V8 函数 7/7、块范围 44/44 |
 
-文档 lint 起初因已删除文件的残留链接失败，修正后通过。工具测试直接运行 `python tests\test_tools.py` 因导入路径失败，改用 `python -m unittest discover -s tests -p test_tools.py` 后通过，未修改测试代码。没有为消除覆盖缺口扩展本轮任务。
+本轮未连接设备、烧录或重新进行实机验收。此前用户实机确认不能直接作为本次后续修复镜像的验收结果。日志在忽略目录 `build\docs_update_*.log`，覆盖详情在 `build\coverage\`，本次产物不替换 Release 附件。
 
-检查日志在本地忽略目录 `build\docs_20261009_*.log`；覆盖详情见 `build\coverage\report.md` 与 `results.json`，不随 Git 分发。没有连接设备或烧录；实机待验项见 [实机待验](#实机待验)。
+Release 仅准备更新说明；当前 GitHub CLI 和 Git credential helper 均无可用认证，远程更新未完成，待更新文案保存在本地忽略目录 `build\release_v0_1J_body.txt`。本次仅本地 Git 保存，不推送远程，不移动标签。
 
-以下是该工作区的实际产物，位于 `build\auto\`，不纳入提交，也不作为 0.1I Release 附件校验值：
+### 历史发布与验证记录
 
-| 产物 | 字节数 | SHA256 |
-| --- | --- | --- |
-| `ac_thermostat.bin` | 528976 | `48f85402e1e38e3bd86de7913bbda4968cd29f2ab93d024b3ee7ddb311ecf715` |
-| `full_flash.bin` | 4194304 | `c8cb28126743e41a18cde9db05a2f3dfc08b8d45db55e3e69f02215913654e7c` |
-| `full_flash.hex` | 11535372 | `05fef9cad38c49fcf52c44754f015998a27898c715c9087bb42fc17dd44f8e54` |
-
-
-### 0.1I · 2026-10-07
-
-本次将 Git 管理范围迁移到项目根目录，保留原有 11 次提交，纳入硬件设计、参考资料以及当前已验证的源码和测试。固件目录、公共 HTTP API 和 NVS 格式保持不变；测量 CSV、额外下载工具、构建产物及缓存不提交。
-
-发布前软件检查全部复验通过；本地日志位于忽略目录 `Sof\build\release_*.log`。
-
-| 检查 | 最终结果 |
-| --- | --- |
-| 文档 lint | 8 份 Markdown、53 个本地链接/锚点、结构与烧录速率通过；15 个外部链接跳过在线核验 |
-| 固件预构建 | ESP8266 RTOS SDK 3.4、Ninja `-j 12`，约 19.9 秒；CPU 80 MHz、晶振/Flash 26 MHz、PM 开启 |
-| 单元与主机测试 | 规则/趋势通过；功耗 24 个组合及 5 次 SDK 定时器测试通过；两个热点配置、HTTP 及串口 6 项通过 |
-| 静态与冒烟 | 主机 C 编译告警检查、页面语法/功能、COM3 烧录 dry-run、暂存差异检查通过 |
-| 迁移兼容 | `clean.ps1` 改为检查 Git 工作树；Windows PowerShell 5.1 的 `-WhatIf` 和 `-Apply:$false` 均通过，各删除 0、跳过 7、失败 0 |
-| 提交边界 | 历史及当前暂存文件凭证模式扫描通过；测量 CSV 2 个、额外工具 1 个、硬件预览/备份 3 个及构建/缓存/生成配置排除提交 |
-
-迁移后旧清理脚本的 `.git` 检查曾失败，已修复并复验；SDK 在映射盘符下无法发现上层 Git，已采用原生 `version.txt` 明确版本；Altium 项目保留原导出格式，仅豁免末尾空行检查。固件 C 源码未作本轮修改，已有行为改动随本次发布保存。硬件波形、手机弹页、温度精度、积分平均电流和 24 小时稳定性未验证。
-
-[GitHub Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v0.1I) 提供分段烧录包、`full_flash.bin`、`full_flash.hex` 及 `SHA256SUMS.txt`。分段烧录保留未覆盖的 NVS；从 `0x0` 写入完整镜像会清除规则、红外编码与共享载波。发布版本由 SDK 原生读取 `Sof\version.txt`，0.1I 发布时为 `v0.1I`；映射盘符和源码 ZIP 中无需依赖 Git 自动识别。更新发布版本时同步修改该文件和标签。发布镜像在标签创建后构建，版本应为 `v0.1I`；以 Release 的 SHA256 清单核对下载内容，旧记录的哈希不代表本次附件。
-
-### 历史文档同步 · 2026-10-07
-
-检查全部 8 份现存 Markdown，集中运行说明、功耗验收和验证结果，修复失效章节与已删除文档引用。未新增发布编号、公共 API 或 NVS 字段；该阶段只保存仓库内文档更新及已有功耗文档删除，不提交既有代码、测试及未跟踪文件，不推送远程。工作区根 README 位于仓库外，更新仅保留在本地文件中。
-
-该历史阶段重新执行的软件检查全部通过，失败 0 项；检查日志保存在本地忽略目录 `build\`，不随 Git 分发。
-
-| 检查 | 2026-10-07 结果 |
-| --- | --- |
-| 文档 lint | 8 份 Markdown 的 51 个本地链接/锚点、标题、表格、代码围栏和烧录速率一致性通过；12 个外部链接跳过在线核验 |
-| 固件构建 | `python build.py` 通过，Ninja `-j 12`，约 27.6 秒；`PROJECT_VER=5407fec-dirty` |
-| 单元/主机测试 | 规则及趋势测试通过；功耗 24 个频率/配置/偏移组合及 5 次 SDK 定时器测试通过；两个热点配置与 HTTP 测试通过；串口 unittest 6 项通过 |
-| 静态与冒烟 | 主机 C 编译启用 `-Wall -Wextra -Werror`；`node --check tests\check_page.js`、页面检查、指定 COM3 的烧录 dry-run 及 `git diff --check` 通过 |
-| 配置与产物 | CPU 80 MHz、晶振/Flash 26 MHz、PM 开启、温度偏移 0、日志 115200 baud、HTTP 上限 2048/1024；完整 BIN 的三个分段内容和 0xFF 空白填充核对通过 |
-| 修改范围 | 与本轮检查点比较，所有非 Markdown 跟踪文件内容保持一致；既有代码改动保留在工作区 |
-
-SDK 的 `pkg_resources` 弃用提示和可选 Perl 缺失未阻断构建。dry-run 未检查 esptool 文件、未访问串口或写入 Flash。设备烧录、红外波形、手机弹页、温度精度、积分平均电流与 24 小时运行未执行。
-
-以下为该文档同步阶段读取的历史本地产物；它们包含尚未提交的源码改动，不等同于本次文档提交可复现的固件，也不证明设备已烧录。目录为 `build\auto\`，产物不纳入提交；再次构建的时间与版本元数据可能改变哈希。
-
-| 本地产物 | 字节数 | SHA256 |
-| --- | --- | --- |
-| `ac_thermostat.bin` | 528960 | `8b16fc7e3a9a7b6b976d7e8e66a5658b20c2ae1ead830d820919a2e6fd927ab6` |
-| `bootloader/bootloader.bin` | 9984 | `210ed81cb0160137cd7c7ab183644653af82fcafccb6c19d20370eeb184ea0fb` |
-| `partition_table/partition-table.bin` | 3072 | `5d1dbc1e3c50d7bc93b123215900b57fdfda24131e76da03999a54fe9b554ec3` |
-| `full_flash.bin` | 4194304 | `6afe708d69f0a932adbf16fce8aa7ce545ec183d44e07cc58da38d6deeee4401` |
-| `full_flash.hex` | 11535372 | `fd8921560b7b2e21f6a828307e4580e3d97f3a1d0b719f387345c88111ac8183` |
-| `flasher_args.json` | 815 | `4e5fa5bf7fb2b043f552875f746925d0e3c1600a4fdffd2fca2010c8fc155f13` |
+- **0.1I · 2026-10-07：**Git 管理范围迁移至项目根目录，保留原历史，纳入硬件、参考资料及已验证源码。更新 `clean.ps1` 的工作树检查，并用 `version.txt` 明确发布版本；固件目录、HTTP API 和 NVS 格式保持兼容。[0.1I Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v0.1I) 保留对应固件附件和 SHA256 清单。
+- **0.1J 发布前的文档复验：**当时工作区包含未提交的 HTTP、热点和测试改动；软件检查通过但分支覆盖验收未完成。这些结果及本地重建哈希不能用于证明 0.1I 发布附件或单独文档提交的固件行为。
+- 历史详细记录可从 Git 查询，例如 `git show 5a58cb2:Sof/README.md`；迁移前路径按对应提交树结构查询。当前 `build\auto\` 会被重建覆盖，附件校验以对应 Release 的 SHA256 清单为准。
 
 ### 已有实机依据
 
