@@ -5,6 +5,7 @@ import io
 import json
 import os
 import runpy
+import shutil
 from pathlib import Path
 import struct
 import subprocess
@@ -23,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class ToolsTest(unittest.TestCase):
     def setUp(self):
-        parent = ROOT / "build" / "coverage" / "fixtures"
+        parent = ROOT / "build" / "test_fixtures" / "tools"
         parent.mkdir(parents=True, exist_ok=True)
         self.temp = tempfile.TemporaryDirectory(dir=parent)
         self.addCleanup(self.temp.cleanup)
@@ -359,6 +360,29 @@ class ToolsTest(unittest.TestCase):
         with patch.object(build.os, "name", "posix"), redirect_stdout(io.StringIO()):
             with self.assertRaises(OSError):
                 build.main()
+
+    def test_driver_pin_rejects_old_files(self):
+        library = self.folder / "driver/lib"
+        shutil.copytree(ROOT / "components/esp8266/lib", library)
+        script = self.folder / "driver_check.cmake"
+        script.write_text(
+            'set(BOOTLOADER_BUILD 1)\n'
+            f'set(esp8266_local_dir "{library.parent.as_posix()}")\n'
+            f'include("{(ROOT / "components/esp8266/driver.cmake").as_posix()}")\n',
+            encoding="utf-8")
+        cmake = shutil.which("cmake") or str(build.CMAKE)
+        command = [cmake, "-P", str(script)]
+        result = subprocess.run(command, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        path = library / "libcore.a"
+        path.write_bytes(b"old-driver")
+        result = subprocess.run(command, capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Official driver archive hash mismatch: libcore.a", result.stderr)
+        path.unlink()
+        result = subprocess.run(command, capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("libcore.a", result.stderr)
 
 
 if __name__ == "__main__":

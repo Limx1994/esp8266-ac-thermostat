@@ -1,6 +1,10 @@
 # Pinned official archives; reject missing or changed files.
 set(esp8266_driver_rev "858c7c2eb9004691f2c736c64a23715f6ea900c4")
 set(esp8266_driver_files
+    "libclk.a|47ab77ea65a3d336f00fd31212c940d65aec30790749cc8a460380f9f23bcf8a"
+    "libgcc.a|904bc5046714878327b4cad159fa7d19197ad6914fc0368e1c5f29f2282ccdb9"
+    "libhal.a|c3f5baf07cb52a00ef405a2ffc76eccca88cfb4f5deac37bef46a5677d07fc8f"
+    "libssc.a|e06d7c843ee83ee0a57a8a9ff4c40fd0d6baeb6ef7409c6588e18dabb1da1c4a"
     "VERSION|469aa0250cb011552af1931fd4d55304a3f54578b1f98e2cac5c737716445466"
     "libcore.a|526c23b9079361dcccb6ce3b7807602e899a719728ab347cab7409dbf6db18b7"
     "libcore_dbg.a|987643c203f92a008769daf9e260ecc42d40def3a287789bfe05dec431563b9f"
@@ -25,7 +29,9 @@ foreach(entry ${esp8266_driver_files})
     endif()
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${archive}")
 endforeach()
-foreach(blob core net80211 pp phy rtc espnow smartconfig)
-    set_property(TARGET ${blob} PROPERTY IMPORTED_LOCATION "${esp8266_local_dir}/lib/lib${blob}.a")
-endforeach()
+if(NOT BOOTLOADER_BUILD AND NOT CONFIG_NO_BLOBS)
+    foreach(blob gcc hal core net80211 phy rtc clk pp smartconfig ssc espnow)
+        set_property(TARGET ${blob} PROPERTY IMPORTED_LOCATION "${esp8266_local_dir}/lib/lib${blob}.a")
+    endforeach()
+endif()
 message(STATUS "Official ESP8266 driver: ${esp8266_driver_rev}; PHY 1167.0")

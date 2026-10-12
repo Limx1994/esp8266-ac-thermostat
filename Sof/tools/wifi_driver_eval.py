@@ -1,7 +1,7 @@
 r"""Build a production-function evaluation with pinned official WiFi archives.
 
 Run from Sof: python tools\wifi_driver_eval.py
-The installed SDK and default build are never written. Hardware pending.
+默认及 --latest 均只使用固定新驱动；不修改已安装 SDK 或生产构建。
 """
 import hashlib
 import argparse
@@ -20,18 +20,13 @@ import urllib.error
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "build" / "wifi_driver_eval"
 BASE = "89a3f254b63819035f65d9c5dcdae8864f1a6a8a"
-REV = "620605a39f83ec546d75c52bf42ae58ba552b46b"
-REPO = "https://github.com/espressif/ESP8266_RTOS_SDK"
+REV = "858c7c2eb9004691f2c736c64a23715f6ea900c4"
 FILES = {
-    "VERSION": "8d717f964b89143db731f4163c87d7e4de136faa",
-    "libpp.a": "aa59f60fd5f95b5d2039d38664bd642a2c66c5c7",
-    "libpp_dbg.a": "87a04bcc8585b81e3c318bd686dfa6cf2985bb75",
-    "libnet80211.a": "1b6d53fd510d4165cfb6d6a31295871ab5651380",
-    "libnet80211_dbg.a": "65fc6a233e42d360092355a8a378eb7210c5e53f",
-}
-LATER_REV = "858c7c2eb9004691f2c736c64a23715f6ea900c4"
-LATER_FILES = {
     "VERSION": "2873e0c84d99387b79a09890f9f305ebfb797690",
+    "libclk.a": "fb911f79fcbee5f59abd9a57a392d5e34b23b2f5",
+    "libgcc.a": "050268e658b2360f06a7611a192c429f3fe5ac89",
+    "libhal.a": "9408dec005663767163381d31ad449491d7b0c96",
+    "libssc.a": "b9918d9973b4f070fa6456bbf11c71d075ed6fd2",
     "libcore.a": "8beb25fae1a526487b1312062de4712ec4ad02ad",
     "libcore_dbg.a": "45b00afe0339b849dc96a0e44addc88d216827f1",
     "libespnow.a": "e1af2020a78dd5130e4fbc29d273d01f8286d6c9",
@@ -93,11 +88,10 @@ def main():
     global OUT, REV, FILES
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--latest", action="store_true",
-                        help="Evaluate pinned 858c7c2 WiFi/PHY libraries, not a full SDK upgrade")
+                        help="兼容旧命令；默认与此选项均使用固定 858c7c2 新驱动")
     args = parser.parse_args()
     if args.latest:
         OUT = ROOT / "build" / "wifi_driver_later"
-        REV, FILES = LATER_REV, LATER_FILES
     project = load_module("project_build", ROOT / "build.py")
     sdk = Path(os.environ.get("IDF_PATH") or project.SDK)
     actual = run_text(["git", "-C", str(sdk), "rev-parse", "HEAD"]).strip()
@@ -184,7 +178,7 @@ def main():
         # application ELF, SDK C/header callers, or candidate library imports.
         debug_removed = set(removed) <= {"phy_debug_print", "rx_blocking_test"}
         unused = not set(removed) & (used_exports | candidate_undefined)
-        if removed and not (args.latest and name == "libphy.a" and debug_removed and unused):
+        if removed and not (name == "libphy.a" and debug_removed and unused):
             raise ValueError(f"Exported symbols removed: {name}: {removed}")
         abi[name] = {"exports_removed": removed,
                      "removal_check": "unused PHY debug/test exports only" if removed else "none",

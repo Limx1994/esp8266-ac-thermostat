@@ -33,7 +33,7 @@ Release 附件包含分段 ZIP、完整 BIN/HEX 及 `SHA256SUMS.txt`；下载后
 
 ## Wi-Fi 驱动评估
 
-`wifi_driver_eval.py` 为独立评估入口。候选 archive、revision/hash pin 和 timer alias 必须来自同一候选组件；来源或哈希不匹配会报错。生产构建继续使用固定官方库，详见 [构建与烧录](../README.md#构建与烧录)。
+`wifi_driver_eval.py` 为独立验证入口，默认及兼容选项 `--latest` 均只使用固定 `858c7c2` 新驱动，不再选择旧版本。完整 archive、revision/hash pin 和 timer alias 来自同一组件，来源或哈希不匹配直接报错；生产应用和 bootloader 同样只链接项目内固定库，详见 [构建与烧录](../README.md#构建与烧录)。
 
 ## 本地额外工具
 

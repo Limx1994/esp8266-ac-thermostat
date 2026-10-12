@@ -144,7 +144,7 @@ python flash.py --port COM3 --dry-run
 
 构建脚本扫描 `main` 的 C 源文件并更新组件源文件列表，临时映射空闲的 `Z:`，使用 CMake 和 Ninja `-j 12`，产物位于 `build\auto\`。SDK 可通过 `IDF_PATH` 覆盖，工具路径见 [编译环境说明](ESP8266编译环境路径.md)。从其他目录运行时使用脚本的绝对路径。
 
-默认构建保留本次官方驱动更新：`components\esp8266\lib` 固定使用 ESP8266_RTOS_SDK 提交 `858c7c2eb9004691f2c736c64a23715f6ea900c4` 的 core、net80211、pp、PHY、RTC、ESP-NOW、SmartConfig 库组合及配套 debug 库，实际 PHY 为 `1167.0`（上游 `VERSION` 文本仍写 `1166.0`）。文件来源、Git blob SHA1 和 SHA256 见该目录的 `manifest.json`；CMake 校验所有固定文件的 SHA256，缺失或不匹配时停止构建。SDK C 源码、头文件与 bootloader 继续使用原 v3.4 SDK，已安装 SDK 不被修改。定时器别名从项目内更新后的 core/pp 库生成。常规 `python build.py` 与 `python flash.py` 已使用这组库，无需评估入口。
+默认构建保留本次官方驱动更新：`components\esp8266\lib` 固定使用 ESP8266_RTOS_SDK 提交 `858c7c2eb9004691f2c736c64a23715f6ea900c4` 的 core、net80211、pp、PHY、RTC、ESP-NOW、SmartConfig 库组合及配套 debug 库，实际 PHY 为 `1167.0`（上游 `VERSION` 文本仍写 `1166.0`）。文件来源、Git blob SHA1 和 SHA256 见该目录的 `manifest.json`；CMake 校验所有固定文件的 SHA256，缺失或不匹配时停止构建。SDK C 源码及头文件继续使用原 v3.4，已安装 SDK 不被修改。当前工作区已补齐 gcc、hal、clk、ssc，连同已有库共 15 个 archive 和 VERSION 均在项目内固定、校验；应用和重新构建的 bootloader 均从项目内链接，禁止回退 SDK 旧库。已发布 v1.0A 的原附件和下方历史记录保留原状。定时器别名从项目内更新后的 core/pp 库生成。常规 `python build.py` 与 `python flash.py` 已使用这组库，无需评估入口。
 
 2026-10-11，用户确认此前 DHCP 故障为个别芯片问题。后续 14:53 日志显示 PHY `1167.0`，3 次热点开启均收到 HTTP 探测；1 次 DHCP OFFER 和 3 次 ACK 单播完成均为 `result=1 src=0 lrc=0`，未出现发送重试超限、广播回退或 `bind (112)`。首次 DHCP 请求至首次 HTTP 探测分别为 477、295、415 ms，不等同于手机界面获取 IP 耗时。该记录支持本次设备连接恢复，不扩大为整个批次缺陷，也不归功于驱动升级；此前失败日志继续保留。2026-10-12 用户补充确认全部功能实机验证通过；上述 3 轮日志仍仅作为对应时刻的连接证据。
 
@@ -166,6 +166,7 @@ python tests\test_power.py
 python tests\test_portal.py
 python tests\test_http_main.py
 python tests\test_dhcps.py
+python tests\check_build.py
 python -m unittest discover -s tests -p test_flash_port.py
 python -m unittest discover -s tests -p test_tools.py
 python -m unittest discover -s tests -p test_wifi_eval.py
@@ -178,11 +179,11 @@ git diff --check
 
 规则测试检查阈值、等号、首次满足、重复满足及禁用规则；功耗主机测试检查实际控制、传感器和红外代码的流程与错误处理；HTTP 主机测试检查路由、解析、请求体清理、超时与 socket 错误；完整 HTTP 主循环测试检查资源分配、启动停止及 socket 清理；DHCP/ARP/WiFi 测试检查实际生成源码、重试回退和缓存复位；驱动评估单测检查候选库来源、哈希及失败清理。串口测试检查自动选择条件；页面检查验证六个 API 路径、2 秒刷新、共享载波保存、隐藏校准及温度/电池错误显示。
 
-主机测试使用现有 GCC 和 SDK mocks，C 编译启用 `-Wall -Wextra -Werror`，产物保存在 `build_ascii\`。功耗测试需要本次构建生成的 SDK 副本，须先运行 `python build.py`。测试覆盖 80/160 MHz、基线/测量配置及温度偏移，另检查实际 SDK 定时器表、暂停/恢复与失败回退。启动诊断另用 `tests\startup_test.c` 配合现有最小 SDK mock 直接编译运行，不调用覆盖运行器。这些主机测试不测量实际睡眠、电流、红外波形或手机弹页；最新软件结果与用户实机确认见 [本地发布](#本地发布)。
+主机测试使用现有 GCC 和 SDK mocks，C 编译启用 `-Wall -Wextra -Werror`，产物保存在 `build_ascii\`。功耗测试需要本次构建生成的 SDK 副本，须先运行 `python build.py`。测试覆盖 80/160 MHz、基线/测量配置及温度偏移，另检查实际 SDK 定时器表、暂停/恢复与失败回退。`python tests\check_build.py` 核对应用与 bootloader 的固定驱动来源、完整 BIN/HEX 与版本，并用现有 `tests\startup_test.c` 和最小 SDK mock 直接编译启动诊断，不依赖覆盖工具。这些主机测试不测量实际睡眠、电流、红外波形或手机弹页；最新软件结果与用户实机确认见 [本地发布](#本地发布)。
 
 ### 覆盖统计（停用）
 
-自 2026-10-12 起，按用户要求，本项目后续不执行路径覆盖测试，不生成或追求覆盖率及路径矩阵验收；继续执行相关构建和功能回归测试。现有覆盖运行器和历史报告保留，仅供历史追溯，不作为后续验收要求。主机功能测试不能代替实机波形、功耗和精度验证。
+自 2026-10-12 起，按用户要求，本项目后续不执行路径覆盖测试，不生成或追求覆盖率及路径矩阵验收；继续执行相关构建和功能回归测试。覆盖运行器已删除，coverage/gcov/V8 覆盖采集及插桩退出活动工程；历史报告和证据仅归档保留，不执行、不更新，也不作为后续验收要求。主机功能测试不能代替实机波形、功耗和精度验证。
 
 ## 清理
 
@@ -222,6 +223,14 @@ git diff --check
 - 稳定性：连续运行至少 24 小时，记录采样周期、计时漂移、复位、异常和漏发/重复发送；报告失败与跳过数量及原因。
 
 ## 本地发布
+
+### 旧驱动与覆盖工具弃用 · 2026-10-12（发布后的本地更新）
+
+应用的全部官方二进制库及 bootloader 的 core 库统一从项目 `components\esp8266\lib` 链接，来源仍固定为 `858c7c2`，实际 PHY `1167.0`；源码和头文件继续使用 v3.4 SDK。16 个固定文件核验 SHA256，损坏或缺失直接停止构建，无旧库回退。定时器别名仍来自同一组新 core/pp 库。
+
+`wifi_driver_eval.py` 默认及兼容选项 `--latest` 均选择这组新驱动，旧版本选择已移除。覆盖运行器删除，普通测试目录改为 `build\test_fixtures`；启动和镜像检查独立为 `tests\check_build.py`，不插桩、不产生覆盖率或路径矩阵。历史覆盖与审查证据不改写。
+
+本轮真实固件 Ninja `-j 12` 构建通过；11 份 Markdown lint、24 项 Python 单测及 16 个软件检查项通过，失败 0、跳过 0。包含固定驱动 pin 与缺失/损坏拒绝、应用和 bootloader 链接来源、规则、功耗 28 组合与 SDK 定时器、热点/HTTP、完整 HTTP 主循环、DHCP/ARP/WiFi、页面、启动诊断、BIN/HEX 及分段/全量烧录 dry-run。活动代码中的旧版本选择、覆盖依赖和插桩扫描无命中；外部 SDK、业务源码及历史证据哈希保持不变。日志位于 `build\retire_legacy\driver_build.log`、`checks.json` 和各项 `.log`。本次不修改版本、标签或 v1.0A Release 附件，不连接设备、不把先前实机确认当作本次变更镜像的重新验收。
 
 ### 1.0A · 2026-10-12
 

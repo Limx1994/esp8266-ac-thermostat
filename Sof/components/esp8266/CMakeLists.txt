@@ -18,6 +18,8 @@ string(REPLACE "set(COMPONENT_SRCS source/ets_printf.c source/crc.c source/esp_f
     esp8266_cmake "${esp8266_cmake}")
 string(REPLACE "\${CMAKE_CURRENT_SOURCE_DIR}" "\${esp8266_sdk_dir}" esp8266_cmake "${esp8266_cmake}")
 string(REPLACE "\${CMAKE_CURRENT_LIST_DIR}" "\${esp8266_sdk_dir}" esp8266_cmake "${esp8266_cmake}")
+string(REPLACE "\${esp8266_sdk_dir}/lib" "\${esp8266_local_dir}/lib"
+    esp8266_cmake "${esp8266_cmake}")
 string(REPLACE "\"ld/" "\"\${esp8266_sdk_dir}/ld/" esp8266_cmake "${esp8266_cmake}")
 string(REPLACE "set(fragments linker.lf ld/esp8266_fragments.lf ld/esp8266_bss_fragments.lf)"
     "set(fragments \${esp8266_sdk_dir}/linker.lf \${esp8266_sdk_dir}/ld/esp8266_fragments.lf \${esp8266_sdk_dir}/ld/esp8266_bss_fragments.lf)"
@@ -28,7 +30,7 @@ include("${esp8266_generated}")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${esp8266_sdk_dir}/CMakeLists.txt")
 set(COMPONENT_DIR "${esp8266_local_component}")
 
-if(NOT CMAKE_BUILD_EARLY_EXPANSION AND NOT BOOTLOADER_BUILD AND NOT CONFIG_NO_BLOBS)
+if(NOT CMAKE_BUILD_EARLY_EXPANSION)
     include("${esp8266_local_dir}/driver.cmake")
 endif()
 

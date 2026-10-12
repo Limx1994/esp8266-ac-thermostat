@@ -2,7 +2,7 @@
   "base_sdk": "89a3f254b63819035f65d9c5dcdae8864f1a6a8a",
   "official_driver_commit": "858c7c2eb9004691f2c736c64a23715f6ea900c4",
   "actual_phy_version": "1167.0",
-  "scope": "Official driver archives only; v3.4 SDK C sources and headers retained",
+  "scope": "All official binary archives pinned for application and bootloader; v3.4 SDK C sources and headers retained",
   "archives": {
     "VERSION": {
       "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/VERSION",
@@ -75,6 +75,30 @@
       "git_blob": "cdadb3a398e749ebe49d0c24e5863c709d4fcb6a",
       "bytes": 156402,
       "sha256": "89e417befc8cea4eda72f16e6529bd02536f2c5893018639d927ce1b9bde4941"
+    },
+    "libclk.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libclk.a",
+      "git_blob": "fb911f79fcbee5f59abd9a57a392d5e34b23b2f5",
+      "bytes": 4976,
+      "sha256": "47ab77ea65a3d336f00fd31212c940d65aec30790749cc8a460380f9f23bcf8a"
+    },
+    "libgcc.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libgcc.a",
+      "git_blob": "050268e658b2360f06a7611a192c429f3fe5ac89",
+      "bytes": 600904,
+      "sha256": "904bc5046714878327b4cad159fa7d19197ad6914fc0368e1c5f29f2282ccdb9"
+    },
+    "libhal.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libhal.a",
+      "git_blob": "9408dec005663767163381d31ad449491d7b0c96",
+      "bytes": 162888,
+      "sha256": "c3f5baf07cb52a00ef405a2ffc76eccca88cfb4f5deac37bef46a5677d07fc8f"
+    },
+    "libssc.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libssc.a",
+      "git_blob": "b9918d9973b4f070fa6456bbf11c71d075ed6fd2",
+      "bytes": 11996,
+      "sha256": "e06d7c843ee83ee0a57a8a9ff4c40fd0d6baeb6ef7409c6588e18dabb1da1c4a"
     }
   }
 }

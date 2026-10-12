@@ -23,7 +23,7 @@ SOURCE = ROOT / "tools/wifi_driver_eval.py"
 
 class WifiEvalTest(unittest.TestCase):
     def run_case(self, case="normal", latest=False, entry=False):
-        parent = ROOT / "build/full_coverage/wifi_fixtures"
+        parent = ROOT / "build/test_fixtures/wifi"
         parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(dir=parent) as directory:
             root = Path(directory)
@@ -66,7 +66,6 @@ class WifiEvalTest(unittest.TestCase):
             module.ROOT = root
             module.OUT = out
             module.FILES = dict(pins)
-            module.LATER_FILES = dict(pins)
             if case == "archive":
                 data["libpp.a"] = b"invalid archive"
                 pins["libpp.a"] = hashlib.sha1(b"blob 15\0" + data["libpp.a"]).hexdigest()
@@ -87,8 +86,8 @@ class WifiEvalTest(unittest.TestCase):
                 old = path.parent == libs
                 if command[2] == "--undefined-only":
                     return "         U imported\n"
-                removed = case in ("removed", "used_phy", "phy_debug", "phy_other", "old_phy")
-                symbol = "phy_debug_print" if case in ("used_phy", "phy_debug", "old_phy") else "lost"
+                removed = case in ("removed", "used_phy", "phy_debug", "phy_other")
+                symbol = "phy_debug_print" if case in ("used_phy", "phy_debug") else "lost"
                 if removed and old and path.name == "libphy.a":
                     return "0 T retained\n0 T " + symbol + "\ninvalid\n"
                 return "0 T retained\ninvalid\n"
@@ -167,8 +166,7 @@ class WifiEvalTest(unittest.TestCase):
                     while frame.f_code.co_name != "main":
                         frame = frame.f_back
                     scope = frame.f_globals
-                    scope.update(ROOT=root, OUT=out, FILES=dict(module.FILES),
-                                 LATER_FILES=dict(module.LATER_FILES))
+                    scope.update(ROOT=root, OUT=out, FILES=dict(module.FILES))
                 return argparse.Namespace(latest=latest)
 
             with ExitStack() as stack, redirect_stdout(io.StringIO()):
@@ -197,7 +195,7 @@ class WifiEvalTest(unittest.TestCase):
                 stack.enter_context(patch.object(module.importlib.util, "spec_from_file_location",
                                                 return_value=fake_spec))
                 errors = {"revision", "hash", "archive", "encoding", "unrelated", "removed",
-                          "used_phy", "phy_other", "old_phy", "drive", "build", "boot_config",
+                          "used_phy", "phy_other", "drive", "build", "boot_config",
                           "link_net", "link_timer", "hooks", "sdk_changed", "production_changed",
                           "snapshot_changed", "candidate_changed"}
                 if case in errors:
@@ -217,16 +215,26 @@ class WifiEvalTest(unittest.TestCase):
                     result = json.loads((out / "validation.json").read_text())
                     self.assertEqual(result["status"], "built; regressions pending")
                     self.assertTrue(result["installed_sdk_unchanged"] and result["production_unchanged"])
+                    self.assertEqual(result["official_driver_commit"], module.REV)
                     self.assertEqual(result["ninja_jobs"], 12)
                     self.assertEqual(mapper.call_count, 2)
                 if case == "build":
                     self.assertEqual(mapper.call_count, 2)  # Mapping is released on build error.
 
+    def test_current_driver_pin(self):
+        spec = importlib.util.spec_from_file_location("wifi_eval_pin", SOURCE)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        manifest = json.loads((ROOT / "components/esp8266/lib/manifest.json").read_text())
+        self.assertEqual(module.REV, manifest["official_driver_commit"])
+        self.assertEqual(module.FILES, {name: info["git_blob"]
+                                      for name, info in manifest["archives"].items()})
+
     def test_scenarios(self):
         for case in ("normal", "cached", "fallback", "timeout", "no_env", "revision", "hash",
                      "archive", "encoding", "unrelated", "removed", "drive", "build", "boot_config",
                      "link_net", "link_timer", "hooks", "sdk_changed", "production_changed",
-                     "snapshot_changed", "candidate_changed", "old_phy"):
+                     "snapshot_changed", "candidate_changed", "phy_debug"):
             with self.subTest(case=case):
                 self.run_case(case)
         for case in ("normal", "phy_debug", "used_phy", "phy_other"):
