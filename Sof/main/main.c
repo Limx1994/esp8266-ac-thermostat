@@ -644,11 +644,15 @@ void app_main(void)
             close_pending = true;
             ESP_LOGI(TAG, "S2: low-power control requested; temperature monitoring continues");
         }
-        /* 按键关闭请求延后到红外空闲，避免中断学习或发送。 */
+        if (portal_has_failed()) {
+            if (!close_pending) ESP_LOGE(TAG, "DNS task exited; portal cleanup requested");
+            close_pending = true;
+        }
+        /* 按键或故障关闭请求延后到红外空闲，避免中断学习或发送。 */
         if (close_pending && !ir_is_busy()) {
             esp_err_t err = portal_stop();
             close_pending = err != ESP_OK;
-            if (err != ESP_OK) ESP_LOGE(TAG, "portal button stop: %s", esp_err_to_name(err));
+            if (err != ESP_OK) ESP_LOGE(TAG, "portal stop request: %s", esp_err_to_name(err));
         }
         if (s1 || s2) {
             trace_buttons("button-action-done", 0, 0);

@@ -94,7 +94,10 @@ def main():
         OUT = ROOT / "build" / "wifi_driver_later"
     project = load_module("project_build", ROOT / "build.py")
     sdk = Path(os.environ.get("IDF_PATH") or project.SDK)
-    actual = run_text(["git", "-C", str(sdk), "rev-parse", "HEAD"]).strip()
+    if (sdk / "manifest.json").is_file():
+        actual = project.verify_sdk(sdk)
+    else:
+        actual = run_text(["git", "-C", str(sdk), "rev-parse", "HEAD"]).strip()
     if actual != BASE:
         raise ValueError(f"Expected SDK {BASE}; got {actual}")
     local_lib = sdk / "components/esp8266/lib"
@@ -187,6 +190,12 @@ def main():
                                              - read_symbols(nm, local_lib / name, False))}
     report.update(archives=manifest, symbol_checks=abi, status="building")
     report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    if (shadow / "manifest.json").is_file():
+        snapshot = json.loads((shadow / "manifest.json").read_text(encoding="utf-8"))
+        for name in FILES:
+            snapshot["files"]["components/esp8266/lib/" + name] = sha256(shadow / "components/esp8266/lib" / name)
+        snapshot["files"]["version.txt"] = sha256(shadow / "version.txt")
+        (shadow / "manifest.json").write_text(json.dumps(snapshot, indent=2), encoding="utf-8")
     # Reuse build.py's environment, drive mapping, Ninja and image generation.
     print("[3/4] Build the full application using existing build.py", flush=True)
     project.ROOT = OUT

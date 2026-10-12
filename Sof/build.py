@@ -1,7 +1,7 @@
 r"""构建 ESP8266 固件，并避开项目路径中的非 ASCII 字符。
 
 使用方法（Windows PowerShell）：在项目目录运行 `python build.py`；无需设置环境变量。
-从其他目录运行时，传入本脚本的绝对路径。默认使用下方配置的 SDK 和工具路径。
+从其他目录运行时，传入本脚本的绝对路径。默认使用项目 vendor 内 SDK 和下方工具路径。
 仅当 SDK 不在默认路径时，才需在当前 PowerShell 会话中临时设置
 `$env:IDF_PATH = 'SDK 路径'`；其他工具找不到时会从 PATH 查找。
 脚本只向构建子进程传递所需环境，不修改用户或系统环境变量。
@@ -9,6 +9,7 @@ r"""构建 ESP8266 固件，并避开项目路径中的非 ASCII 字符。
 包括分段固件、full_flash.bin、full_flash.hex 和 flasher_args.json。
 """
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -20,7 +21,7 @@ import time
 
 ROOT = Path(__file__).resolve().parent
 DRIVE = "Z:"
-SDK = Path(r"D:\APPS\Espressif\frameworks\ESP8266_RTOS_SDK")
+SDK = ROOT / "vendor" / "ESP8266_RTOS_SDK"
 TOOLCHAIN = Path(
     r"D:\APPS\Espressif\tools\xtensa-lx106-elf"
     r"\esp-2020r3-49-gd5524c1-8.4.0\xtensa-lx106-elf\bin"
@@ -37,6 +38,18 @@ def find_tool(default, name):
     if found:
         return Path(found)
     raise FileNotFoundError(f"找不到 {name}；请按 ESP8266编译环境路径.md 配置工具链")
+
+
+def verify_sdk(sdk):
+    manifest = json.loads((sdk / "manifest.json").read_text(encoding="utf-8"))
+    if manifest["revision"] != "89a3f254b63819035f65d9c5dcdae8864f1a6a8a":
+        raise ValueError("项目 SDK revision 不匹配")
+    for name, expected in manifest["files"].items():
+        path = sdk / name
+        if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+            raise ValueError(f"项目 SDK SHA256 不匹配：{name}")
+    print(f"  SDK 来源与 SHA256：{len(manifest['files'])} 个文件通过", flush=True)
+    return manifest["revision"]
 
 
 # Intel HEX 校验和取记录字节和的二补数，地址字段仅保存低 16 位。
@@ -111,6 +124,8 @@ def main():
     sdk = Path(os.environ.get("IDF_PATH") or SDK)
     if not (sdk / "tools" / "cmake" / "project.cmake").is_file():
         raise FileNotFoundError(f"无效的 IDF_PATH：{sdk}")
+    if sdk == ROOT / "vendor" / "ESP8266_RTOS_SDK" or (sdk / "manifest.json").is_file():
+        verify_sdk(sdk)
     cmake = find_tool(CMAKE, "cmake.exe")
     ninja = find_tool(NINJA, "ninja.exe")
     python = find_tool(PYTHON, "python.exe")
@@ -133,6 +148,8 @@ def main():
     # 临时映射 ASCII 盘符供 SDK 构建使用；finally 保证构建失败时也解除映射。
     mapped = Path(DRIVE + "\\")
     build = mapped / "build" / "auto"
+    if sdk.is_relative_to(ROOT):
+        env["IDF_PATH"] = str(mapped / sdk.relative_to(ROOT))
     subprocess.run([str(subst), DRIVE, str(ROOT)], check=True)
     try:
         print(f"[2/4] 配置 CMake：{build}", flush=True)

@@ -1,2 +1,5 @@
 # 保留 Altium 项目原始导出格式
 Ad/PCB_Project.PrjPcb whitespace=-blank-at-eof
+
+# SDK 快照按原始字节保存，避免 checkout 换行转换破坏 SHA256
+Sof/vendor/ESP8266_RTOS_SDK/** -text

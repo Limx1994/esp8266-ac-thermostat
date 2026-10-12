@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/time.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -307,16 +308,19 @@ static void dns_task(void *arg)
     uint8_t query[256], response[300];
     /* question_end <= 接收长度 <= sizeof(query)，保证追加答案不会越界。 */
     _Static_assert(sizeof(response) >= sizeof(query) + 16, "DNS response buffer too small");
-    struct timeval timeout = { .tv_sec = 0, .tv_usec = 200000 };
-    if (setsockopt(dns_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
-        ESP_LOGE(TAG, "DNS receive timeout setup failed");
-        dns_running = false;
-    }
     while (dns_running) {
         struct sockaddr_in peer;
         socklen_t peer_len = sizeof(peer);
         int n = recvfrom(dns_fd, query, sizeof(query), 0,
                          (struct sockaddr *)&peer, &peer_len);
+        if (n < 0) {
+            int recv_error = errno;
+            if (recv_error == EAGAIN || recv_error == EWOULDBLOCK || recv_error == EINTR)
+                continue;
+            ESP_LOGE(TAG, "DNS receive failed: errno=%d; task stopping", recv_error);
+            dns_running = false;
+            break;
+        }
         if (n < 17) continue;
         int pos = 12;
         while (pos < n && query[pos] && query[pos] <= 63) pos += query[pos] + 1;
@@ -473,6 +477,14 @@ esp_err_t portal_start(void)
         close(dns_fd); dns_fd = -1;
         goto fail_http;
     }
+    /* 创建任务前确认超时设置成功，失败沿用热点启动清理路径。 */
+    struct timeval timeout = { .tv_sec = 0, .tv_usec = 200000 };
+    if (setsockopt(dns_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+        ESP_LOGE(TAG, "DNS receive timeout setup failed: errno=%d", errno);
+        err = ESP_FAIL;
+        close(dns_fd); dns_fd = -1;
+        goto fail_http;
+    }
     dns_running = true;
     dns_exited = false;
     if (xTaskCreate(dns_task, "dns", 3072, NULL, 5, NULL) != pdPASS) {
@@ -539,6 +551,7 @@ esp_err_t portal_stop(void)
 }
 
 bool portal_is_on(void) { return ap_on; }
+bool portal_has_failed(void) { return ap_on && dns_exited; }
 uint32_t portal_idle_ms(void)
 {
     return (xTaskGetTickCount() - last_action) * portTICK_PERIOD_MS;

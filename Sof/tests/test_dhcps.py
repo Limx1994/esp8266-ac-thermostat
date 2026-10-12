@@ -11,7 +11,7 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "build_ascii" / "dhcps_test"
 SDK = Path(os.environ.get("IDF_PATH") or
-           r"D:\APPS\Espressif\frameworks\ESP8266_RTOS_SDK")
+           ROOT / "vendor/ESP8266_RTOS_SDK")
 
 MOCK = r'''
 #pragma once

@@ -13,7 +13,7 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "build_ascii" / "portal_test"
 SDK_PATH = Path(os.environ.get("IDF_PATH") or
-                r"D:\APPS\Espressif\frameworks\ESP8266_RTOS_SDK")
+                ROOT / "vendor/ESP8266_RTOS_SDK")
 HEADERS = ["esp_err.h", "esp_log.h", "esp_event.h", "esp_wifi.h", "driver/rtc.h",
            "tcpip_adapter.h", "esp_http_server.h", "esp_httpd_priv.h",
            "freertos/FreeRTOS.h", "freertos/task.h", "lwip/sockets.h", "lwip/tcpip.h",
@@ -241,6 +241,10 @@ static void (*dns_fn)(void *);
 static bool socket_failed;
 static bool dns_script, dns_timeout_error, bind_error, dns_task_error, ir_busy_mock;
 static unsigned dns_step, dns_replies;
+static unsigned dns_tasks, dns_closes, dns_recv_calls;
+static unsigned dns_timeout_logs, dns_recv_logs;
+static int dns_recv_error, dns_log_error;
+static unsigned dns_retry_count;
 static unsigned char dns_reply[64];
 static size_t dns_reply_len;
 static bool rf_enabled = true, wifi_started;
@@ -292,7 +296,15 @@ err_t app_lwip_timers_set(int active, unsigned counts[3]) {
     timers_active = active; return ERR_OK;
 }
 
-void test_log(const char *tag, const char *fmt, ...) {}
+void test_log(const char *tag, const char *fmt, ...) {
+    if (strstr(fmt, "DNS receive timeout setup failed") || strstr(fmt, "DNS receive failed")) {
+        va_list args; va_start(args, fmt);
+        dns_log_error = va_arg(args, int);
+        va_end(args);
+        if (strstr(fmt, "timeout setup")) dns_timeout_logs++;
+        else dns_recv_logs++;
+    }
+}
 void test_warn(const char *tag, const char *fmt, ...) { warnings++; }
 TickType_t xTaskGetTickCount(void) { return now; }
 void vTaskDelete(void *task) {}
@@ -303,6 +315,7 @@ void vTaskDelay(TickType_t ticks) {
 int xTaskCreate(void (*fn)(void *), const char *name, unsigned stack,
                 void *arg, unsigned priority, void *task) {
     if (dns_task_error) return 0;
+    dns_tasks++;
     dns_fn = fn;
     return pdPASS;
 }
@@ -418,16 +431,29 @@ void phy_close_rf(void) {
 }
 int test_socket(int domain, int type, int proto) { return socket_failed ? -1 : 5; }
 int test_bind(int fd, const struct sockaddr *addr, size_t len) { return bind_error ? -1 : 0; }
-int test_close(int fd) { return 0; }
-int test_setsockopt(int fd, int level, int opt, const void *val, size_t len) { return dns_timeout_error ? -1 : 0; }
+int test_close(int fd) { dns_closes++; return 0; }
+int test_setsockopt(int fd, int level, int opt, const void *val, size_t len) {
+    assert(fd == dns_fd && level == SOL_SOCKET && opt == SO_RCVTIMEO);
+    assert(len == sizeof(struct timeval));
+    const struct timeval *timeout = val;
+    assert(timeout->tv_sec == 0 && timeout->tv_usec == 200000);
+    if (dns_timeout_error) { errno = EINVAL; return -1; }
+    return 0;
+}
 int test_recvfrom(int fd, void *buf, size_t len, int flags,
                   struct sockaddr *peer, socklen_t *peer_len) {
-    if (!dns_script) return -1;
+    dns_recv_calls++;
+    if (dns_recv_error) {
+        errno = dns_recv_error;
+        if (dns_retry_count && --dns_retry_count == 0) dns_recv_error = 0;
+        return -1;
+    }
+    if (!dns_script) { errno = EWOULDBLOCK; return -1; }
     unsigned step = dns_step++;
-    if (step >= 11) { dns_running = false; return -1; }
+    if (step >= 11) { dns_running = false; errno = EWOULDBLOCK; return -1; }
     unsigned char query[19] = {0x12, 0x34, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0,
                                1, 'a', 0, 0, 1, 0, 1};
-    if (step == 0) return -1;
+    if (step == 0) { errno = EWOULDBLOCK; return -1; }
     if (step == 2) query[12] = 64;
     if (step == 5) query[16] = 28;
     if (step == 6) query[18] = 2;
@@ -605,6 +631,7 @@ int main(void) {
     assert(portal_stop() == ESP_OK && rf_closes == 1);
     now = 100;
     assert(portal_start() == ESP_OK && portal_is_on());
+    assert(!portal_has_failed());
     assert(rf_enabled && wifi_started && rf_opens == 1);
     assert(portal_start() == ESP_OK && rf_opens == 1);
     assert(portal_timeout_ms() == 180000);
@@ -722,12 +749,47 @@ int main(void) {
     bind_error = false; dns_task_error = true;
     assert(portal_start() == ESP_ERR_NO_MEM && !portal_is_on() && dns_fd == -1);
     dns_task_error = false;
-    assert(portal_start() == ESP_OK);
     dns_timeout_error = true;
-    dns_task(NULL); dns_fn = NULL;
-    assert(!dns_running && dns_exited && dns_fd == -1);
+    unsigned tasks_before = dns_tasks, closes_before = dns_closes;
+    assert(portal_start() == ESP_FAIL && !portal_is_on());
+    assert(!dns_running && dns_exited && dns_fd == -1 && dns_fn == NULL);
+    assert(!rf_enabled && !wifi_started && server == NULL && hd.hd_calls == NULL);
+    assert(dns_tasks == tasks_before && dns_closes == closes_before + 1);
+    assert(dns_timeout_logs == 1 && dns_log_error == EINVAL);
     dns_timeout_error = false;
-    assert(portal_stop() == ESP_OK && !portal_is_on());
+    /* 接收超时和中断继续处理下一包；不可恢复错误必须一次退出并记录 errno。 */
+    const int retry_errors[] = { EAGAIN, EWOULDBLOCK, EINTR };
+    for (unsigned i = 0; i < sizeof(retry_errors) / sizeof(retry_errors[0]); i++) {
+        assert(portal_start() == ESP_OK);
+        dns_script = true; dns_step = dns_replies = 0;
+        dns_recv_error = retry_errors[i]; dns_retry_count = 1;
+        dns_task(NULL); dns_fn = NULL;
+        assert(dns_replies == 6 && dns_recv_logs == 0 && dns_exited && dns_fd == -1);
+        dns_script = false;
+        assert(portal_stop() == ESP_OK && !portal_is_on());
+    }
+    const int fatal_errors[] = { EBADF, ENOTCONN };
+    for (unsigned i = 0; i < sizeof(fatal_errors) / sizeof(fatal_errors[0]); i++) {
+        assert(portal_start() == ESP_OK);
+        dns_recv_error = fatal_errors[i]; dns_retry_count = 0;
+        unsigned calls_before = dns_recv_calls;
+        closes_before = dns_closes;
+        dns_task(NULL); dns_fn = NULL;
+        assert(!dns_running && dns_exited && dns_fd == -1);
+        assert(dns_recv_calls == calls_before + 1 && dns_closes == closes_before + 1);
+        assert(dns_recv_logs == i + 1 && dns_log_error == fatal_errors[i]);
+        assert(portal_has_failed());
+        ir_busy_mock = true;
+        assert(portal_stop() == ESP_ERR_INVALID_STATE && portal_has_failed());
+        ir_busy_mock = false;
+        http_stop_error = true;
+        assert(portal_stop() == ESP_FAIL && portal_has_failed());
+        http_stop_error = false;
+        dns_recv_error = 0;
+        assert(portal_stop() == ESP_OK && !portal_is_on());
+        assert(!portal_has_failed() && !rf_enabled && !wifi_started && server == NULL);
+    }
+    puts("DNS 初始化失败清理、接收超时/中断重试、不可恢复错误退出及重启检查通过");
     bind_error = http_stop_error = true;
     assert(portal_start() == ESP_FAIL && portal_is_on() && server != NULL);
     assert(portal_start() == ESP_ERR_INVALID_STATE);

@@ -446,7 +446,8 @@ static TickType_t start_tick;
 static uint32_t now_ms, end_ms, notified, ap_start, hold_until[17];
 static uint32_t sample_times[512], send_times[512];
 static int sample_count, send_count, pm_calls, blocked_keys;
-static int ap_starts, ap_stops;
+static int ap_starts, ap_stops, stop_attempts;
+static bool dns_failed;
 static uint8_t ap_channel = 1;
 static esp_err_t wifi_get_error, wifi_set_error;
 static unsigned wifi_get_calls, wifi_set_calls;
@@ -504,6 +505,7 @@ static void advance_time(uint32_t target) {
         now_ms = ev.ms;
         if (ev.action == 5) { ap_used = true; ap_start = now_ms; }
         else if (ev.action == 6) { /* Status polling is not an action. */ }
+        else if (ev.action == 7) { assert(ap); dns_failed = true; }
         else if (ev.action == 3 || ev.action == 4) ir_busy = ev.action == 3;
         else {
             int pin = ev.action == 1 ? 12 : 13;
@@ -715,16 +717,18 @@ esp_err_t esp_wifi_set_config(wifi_interface_t interface, wifi_config_t *cfg) {
 }
 esp_err_t portal_start(void) {
     if (fail_portal_start_once) { fail_portal_start_once = false; return ESP_FAIL; }
-    assert(!auto_sleep); ap = true; ap_used = false;
+    assert(!auto_sleep); ap = true; ap_used = dns_failed = false;
     ap_start = now_ms; ap_starts++; return ESP_OK;
 }
 esp_err_t portal_stop(void) {
     assert(!auto_sleep && !ir_busy);
+    stop_attempts++;
     if (fail_portal_stop_once) { fail_portal_stop_once = false; return ESP_FAIL; }
     if (ap) { ap_stops++; stopped_at = now_ms; }
     ap = false; return ESP_OK;
 }
 bool portal_is_on(void) { return ap; }
+bool portal_has_failed(void) { return ap && dns_failed; }
 uint32_t portal_idle_ms(void) { return now_ms - ap_start; }
 uint32_t portal_timeout_ms(void) { return ap_used ? 600000 : 180000; }
 /* 每个场景重置状态并用事件脚本推进主循环，覆盖采样、按键、限频与休眠降级。 */
@@ -744,7 +748,7 @@ static void run_control(uint32_t duration, const event_t *script, size_t count,
     wait_enter_logs = wait_done_logs = wait_key_logs = 0;
     conversion_enter_logs = conversion_done_logs = dispatch_logs = 0;
     release_enter_logs = release_done_logs = 0;
-    ap = ap_used = ir_busy = false;
+    ap = ap_used = ir_busy = dns_failed = false;
     ir_busy = boot_ir_busy;
     fail_pm = pm_error; fail_wakeup = wake_error; sensor_error = temp_error;
     sample_count = send_count = pm_calls = blocked_keys = 0;
@@ -754,7 +758,7 @@ static void run_control(uint32_t duration, const event_t *script, size_t count,
     fast_reads = single_reads = critical_depth = 0;
     conversion_pending = false;
     conversion_sleeps = conversion_awake = 0;
-    ap_starts = ap_stops = 0; stopped_at = 0;
+    ap_starts = ap_stops = stop_attempts = 0; stopped_at = 0;
     wifi_get_calls = wifi_set_calls = 0;
     memset(button_wakes, 0, sizeof(button_wakes));
     now_ms = notified = 0; start_tick = base; end_ms = duration;
@@ -1009,6 +1013,26 @@ int main(void) {
     assert(ap_stops == 1 && stopped_at >= 7000 && stopped_at <= 7100);
     assert(!ap && !led_enabled && auto_sleep && sample_count == 2);
     assert(sample_times[1] - sample_times[0] == 60000);
+    /* DNS 故障无需按键或等待热点超时，自动关闭并恢复温控及休眠。 */
+    const event_t dns_fault[] = {{1000,1,0}, {3000,7,0}};
+    run_control(130000, dns_fault, 2, false, false, false, 0);
+    assert(ap_stops == 1 && stop_attempts == 1 && stopped_at >= 3000 && stopped_at <= 5000);
+    assert(!ap && !led_enabled && auto_sleep && sample_count == 3);
+    assert(sample_times[1] == 60000 && send_count == 1 && send_times[0] == 60760);
+    fail_portal_stop_once = true;
+    run_control(130000, dns_fault, 2, false, false, false, 0);
+    assert(ap_stops == 1 && stop_attempts == 2 && stopped_at <= 5100);
+    assert(!ap && auto_sleep && send_count == 1);
+    const event_t dns_busy[] = {{1000,1,0}, {2000,3,0}, {3000,7,0},
+        {4000,1,0}, {7000,4,0}};
+    run_control(70000, dns_busy, 5, false, false, false, 0);
+    assert(ap_stops == 1 && stopped_at >= 7000 && stopped_at <= 7100);
+    assert(!ap && auto_sleep && send_count == 1);
+    const event_t dns_reopen[] = {{1000,1,0}, {3000,7,0}, {6000,1,0}};
+    run_control(9000, dns_reopen, 3, false, false, false, 0);
+    assert(ap_starts == 2 && ap_stops == 1 && ap && !portal_has_failed());
+    assert(led_enabled && !auto_sleep);
+    puts("DNS 故障自动清理、停止失败重试、红外忙碌延后、温控休眠恢复及重新开启检查通过");
     const event_t toggle[] = {{1000,1,0}, {11000,1,300}, {11010,1,0}};
     run_control(72000, toggle, 3, false, false, false, 0);
     assert(ap_starts == 1 && ap_stops == 1 && stopped_at == 11000 && blocked_keys == 1);
@@ -2698,7 +2722,7 @@ int main(void) {
 
 
 def check_lwip_timers(gcc):
-    sdk = Path(os.environ.get("IDF_PATH", r"D:\APPS\Espressif\frameworks\ESP8266_RTOS_SDK"))
+    sdk = Path(os.environ.get("IDF_PATH") or ROOT / "vendor/ESP8266_RTOS_SDK")
     original = (sdk / "components/lwip/lwip/src/core/timeouts.c").read_text(encoding="utf-8")
     generated = (ROOT / "build/auto/lwip_timeouts.c").read_text(encoding="utf-8")
     block = ("#if LWIP_DHCP\n"

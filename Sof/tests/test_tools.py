@@ -1,5 +1,6 @@
 """Actual build/flash helpers, with all files confined to ignored build output."""
 import argparse
+import hashlib
 from contextlib import redirect_stdout
 import io
 import json
@@ -23,6 +24,30 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ToolsTest(unittest.TestCase):
+    def test_sdk_manifest(self):
+        parent = ROOT / "build" / "test_fixtures"
+        parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=parent) as name:
+            sdk = Path(name)
+            source = sdk / "source.c"
+            source.write_bytes(b"original")
+            manifest = {"revision": "89a3f254b63819035f65d9c5dcdae8864f1a6a8a",
+                        "files": {"source.c": hashlib.sha256(b"original").hexdigest()}}
+            path = sdk / "manifest.json"
+            path.write_text(json.dumps(manifest))
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(build.verify_sdk(sdk), manifest["revision"])
+            source.write_bytes(b"changed")
+            with self.assertRaisesRegex(ValueError, "SHA256"):
+                build.verify_sdk(sdk)
+            source.unlink()
+            with self.assertRaises(FileNotFoundError):
+                build.verify_sdk(sdk)
+            manifest["revision"] = "wrong"
+            path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, "revision"):
+                build.verify_sdk(sdk)
+
     def setUp(self):
         parent = ROOT / "build" / "test_fixtures" / "tools"
         parent.mkdir(parents=True, exist_ok=True)

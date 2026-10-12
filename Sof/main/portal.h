@@ -11,6 +11,8 @@ esp_err_t portal_start(void);
 esp_err_t portal_stop(void);
 /* 报告模块记录的 AP 开启状态；停止失败时可能仍为 true。 */
 bool portal_is_on(void);
+/* DNS 已退出但热点仍开启时返回 true，由主循环调用停止流程清理。 */
+bool portal_has_failed(void);
 /* 距最近一次页面访问或控制操作的毫秒数；状态轮询和系统探测不刷新计时。 */
 uint32_t portal_idle_ms(void);
 /* 未使用热点时为 180000 ms，发生页面访问或控制操作后为 600000 ms。 */
