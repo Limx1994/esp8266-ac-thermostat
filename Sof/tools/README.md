@@ -23,9 +23,9 @@
 
 ## 全量烧录与发布校验
 
-1.0A 保留默认分段烧录，并提供 `python flash.py --full --port COM3`：从 `0x0` 写入 `build\auto\full_flash.bin`，要求镜像恰为 4 MB 且内容与当前分段固件一致。该操作会清除规则、红外编码、共享载波及网页校准参数；仅预检使用 `python flash.py --full --port COM3 --dry-run`。
+1.0B 延续 1.0A 的默认分段烧录及 `python flash.py --full --port COM3`：从 `0x0` 写入 `build\auto\full_flash.bin`，要求镜像恰为 4 MB 且内容与当前分段固件一致。该操作会清除规则、红外编码、共享载波及网页校准参数；仅预检使用 `python flash.py --full --port COM3 --dry-run`。
 
-Release 附件包含分段 ZIP、完整 BIN/HEX 及 `SHA256SUMS.txt`；下载后用 `Get-FileHash -Algorithm SHA256` 与清单逐项比对。ZIP 内含布局、esptool、许可及 TXT 操作说明。用户于 2026-10-12 确认全部功能实机通过；本轮 dry-run 和校验不执行设备烧写。
+Release 附件包含分段 ZIP、完整 BIN/HEX 及 `SHA256SUMS.txt`；下载后用 `Get-FileHash -Algorithm SHA256` 与清单逐项比对。ZIP 内含布局、esptool、许可、TXT 操作说明及记录版本和提交的 `release_manifest.json`；解压后也须核对包内校验清单。发布验证检查 ZIP CRC、逐文件 SHA256 和包内分段/全量 dry-run。用户于 2026-10-12 确认全部功能实机通过；该反馈不是本轮 1.0B 镜像重新烧录的记录。
 
 ## SDK 定时器构建工具
 
