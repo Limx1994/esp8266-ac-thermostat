@@ -1,0 +1,32 @@
+ M Sof/CMakeLists.txt
+ M Sof/README.md
+ M Sof/components/esp8266/CMakeLists.txt
+ M Sof/components/esp_http_server/CMakeLists.txt
+ M Sof/components/esp_http_server/httpd_parse.c
+ M Sof/flash.py
+ M Sof/main/ir.c
+ M Sof/main/main.c
+ M Sof/main/portal.c
+ M Sof/main/sensor.c
+ M Sof/sdkconfig.defaults
+ M Sof/tests/rules_test.c
+ M Sof/tests/run_coverage.py
+ M Sof/tests/test_portal.py
+ M Sof/tests/test_power.py
+ M Sof/tests/test_tools.py
+ M Sof/tools/esptool-v4.12.0/README.md
+ M Sof/tools/noise_power.cmake
+?? Sof/components/esp8266/driver.cmake
+?? Sof/components/esp8266/lib/
+?? Sof/components/esp_http_server/httpd_main.c
+?? Sof/tests/dhcps_wifi_test.c
+?? Sof/tests/rules_cases.h
+?? Sof/tests/test_dhcps.py
+?? Sof/tests/test_http_main.py
+?? Sof/tests/test_wifi_eval.py
+?? Sof/tools/dhcps_arp.inc
+?? Sof/tools/dhcps_trace.cmake
+?? Sof/tools/dhcps_trace.inc
+?? Sof/tools/dhcps_wifi.inc
+?? Sof/tools/wifi_driver_eval.py
+?? "\345\256\241\346\237\245\346\212\245\345\221\212/"

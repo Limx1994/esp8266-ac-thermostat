@@ -6,6 +6,7 @@ This checks HTTP dispatch and idle accounting, not Android's login UI.
 
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 
@@ -161,6 +162,8 @@ esp_err_t esp_wifi_set_storage(int);
 esp_err_t esp_wifi_set_mode(int);
 esp_err_t esp_wifi_set_config(int, const wifi_config_t *);
 esp_err_t esp_wifi_start(void);
+esp_err_t esp_wifi_set_max_tx_power(int8_t);
+esp_err_t esp_wifi_get_max_tx_power(int8_t *);
 esp_err_t esp_wifi_stop(void);
 void phy_open_rf(void);
 void phy_close_rf(void);
@@ -198,9 +201,22 @@ static char *uri_strdup(const char *text);
 #undef malloc
 #undef strdup
 static int portal_snprintf(char *buf, size_t size, const char *fmt, ...);
+#include "cJSON.h"
+static bool null_cal_string;
+static cJSON *portal_json_item(const cJSON *json, const char *name);
+#define cJSON_GetObjectItemCaseSensitive portal_json_item
 #define snprintf portal_snprintf
 #include "../../main/portal.c"
 #undef snprintf
+#undef cJSON_GetObjectItemCaseSensitive
+/* 注入损坏的字符串节点，检查现有防御判断及 cJSON 清理。 */
+static cJSON *portal_json_item(const cJSON *json, const char *name) {
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(json, name);
+    if (null_cal_string && strcmp(name, "type") == 0 && cJSON_IsString(item)) {
+        free(item->valuestring); item->valuestring = NULL;
+    }
+    return item;
+}
 static unsigned status_format_error;
 static int portal_snprintf(char *buf, size_t size, const char *fmt, ...) {
     if (status_format_error && strstr(fmt, "\"temperature10\""))
@@ -229,6 +245,8 @@ static unsigned char dns_reply[64];
 static size_t dns_reply_len;
 static bool rf_enabled = true, wifi_started;
 static bool start_failed, stop_failed, http_failed;
+static bool tx_set_failed, tx_get_failed, tx_mismatch;
+static int tx_sets, tx_gets;
 static bool http_stop_error;
 static int rf_opens, rf_closes;
 static bool timers_active = true, core_owned, sem_failed, callback_failed;
@@ -370,6 +388,18 @@ esp_err_t esp_wifi_stop(void) {
     wifi_started = false;
     return ESP_OK;
 }
+esp_err_t esp_wifi_set_max_tx_power(int8_t power) {
+    assert(wifi_started && rf_enabled && power == 60);
+    tx_sets++;
+    return tx_set_failed ? ESP_FAIL : ESP_OK;
+}
+esp_err_t esp_wifi_get_max_tx_power(int8_t *power) {
+    assert(wifi_started && rf_enabled && tx_sets == tx_gets + 1);
+    tx_gets++;
+    if (tx_get_failed) return ESP_FAIL;
+    *power = tx_mismatch ? 56 : 60;
+    return ESP_OK;
+}
 void phy_open_rf(void) {
     assert(!rf_enabled && !wifi_started);
 #ifdef CONFIG_APP_PAUSE_NOISE_TIMER
@@ -481,6 +511,12 @@ static void check_posts(void) {
     action_error = ESP_OK;
     assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 200);
     assert(!action_battery && action_reference == 255);
+    int before_null_string = action_calls;
+    null_cal_string = true;
+    assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 400);
+    assert(action_calls == before_null_string);
+    null_cal_string = false;
+    puts("校准字符串节点损坏时拒绝操作并清理检查通过");
     post_body = "{\"type\":\"battery\",\"referenceMv\":3595}";
     assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 200);
     assert(action_battery && action_reference == 3595);
@@ -573,6 +609,9 @@ int main(void) {
     assert(portal_start() == ESP_OK && rf_opens == 1);
     assert(portal_timeout_ms() == 180000);
     assert(hd.config.max_uri_handlers == 16);
+    dns_exited = true;
+    assert(portal_start() == ESP_ERR_INVALID_STATE && portal_is_on());
+    dns_exited = false;
     for (int i = 0; i < 16; i++) assert(hd.hd_calls[i]);
     assert(httpd_register_uri_handler(&hd, hd.hd_calls[0]) ==
            ESP_ERR_HTTPD_HANDLER_EXISTS);
@@ -703,6 +742,20 @@ int main(void) {
     assert(portal_start() == ESP_FAIL && !portal_is_on());
     assert(!rf_enabled && !wifi_started);
     start_failed = false;
+    tx_set_failed = true;
+    assert(portal_start() == ESP_FAIL && !portal_is_on());
+    assert(!rf_enabled && !wifi_started && server == NULL);
+    assert(tx_sets == tx_gets + 1);
+    tx_sets--; /* Failed set must not trigger a read. */
+    tx_set_failed = false;
+    tx_get_failed = true;
+    assert(portal_start() == ESP_FAIL && !portal_is_on());
+    assert(!rf_enabled && !wifi_started && server == NULL);
+    tx_get_failed = false;
+    tx_mismatch = true;
+    assert(portal_start() == ESP_ERR_INVALID_STATE && !portal_is_on());
+    assert(!rf_enabled && !wifi_started && server == NULL);
+    tx_mismatch = false;
     http_failed = true;
     assert(portal_start() == ESP_FAIL && !portal_is_on());
     assert(!rf_enabled && !wifi_started);
@@ -828,7 +881,28 @@ int main(void) {
     assert(httpd_register_uri_handler(&hd, &route) == ESP_OK);
     assert(httpd_unregister_uri(&hd, "/check") == ESP_OK);
     assert(uri_matches("", "", 0));
+    free(hd.hd_calls);
+    hd.config.max_uri_handlers = 2;
+    hd.hd_calls = calloc(2, sizeof(*hd.hd_calls));
+    assert(hd.hd_calls);
+    const httpd_uri_t other = {.uri="/other", .method=HTTP_POST, .handler=page_get};
+    const httpd_uri_t full = {.uri="/full", .method=HTTP_GET, .handler=page_get};
+    assert(httpd_register_uri_handler(&hd, &route) == ESP_OK);
+    assert(httpd_register_uri_handler(&hd, &route) == ESP_ERR_HTTPD_HANDLER_EXISTS);
+    assert(httpd_register_uri_handler(&hd, &other) == ESP_OK);
+    assert(httpd_register_uri_handler(&hd, &full) == ESP_ERR_HTTPD_HANDLERS_FULL);
+    assert(request("/check", HTTP_POST) == ESP_OK && response_code == 405);
+    fail_call = 1;
+    assert(request("/check", HTTP_GET) == ESP_FAIL);
+    fail_call = 0;
+    hd.hd_req_aux.url_parse_res.field_set = 0;
+    assert(httpd_uri(&hd) == ESP_FAIL);
+    assert(httpd_unregister_uri(&hd, "/check") == ESP_OK);
+    assert(httpd_unregister_uri(&hd, "/check") == ESP_ERR_NOT_FOUND);
+    assert(request("/check", HTTP_GET) == ESP_OK && response_code == 404);
+    httpd_unregister_all_uri_handlers(&hd);
     free(hd.hd_calls); hd.hd_calls = NULL;
+    puts("各热点变体的路由满槽、注销、405、路径缺失及失败清理检查通过");
     puts("portal: routes, redirect, idle time, RF lifecycle, failures and restart passed");
     return 0;
 }
@@ -1315,6 +1389,7 @@ static void check_http_helpers(void) {
     fail_uri_alloc = 0;
     assert(httpd_register_uri_handler(&hd, &route) == ESP_OK);
     assert(httpd_unregister_uri(&hd, "/new") == ESP_OK);
+    assert(httpd_unregister_uri(&hd, "/new") == ESP_ERR_NOT_FOUND);
 }
 int main(void) {
     hd.config = (httpd_config_t){.max_uri_handlers=3, .max_resp_headers=8};
@@ -1334,7 +1409,10 @@ int main(void) {
     http_parser_settings settings;
     http_parser_settings_init(&settings);
     for (unsigned int ch = 0; ch <= 255; ch++) {
-        if (ch == '\r' || ch == '\n') continue;
+        /* SDK 会跳过空行；方法首字符检测本身仍须拒绝 CR/LF。 */
+        if (ch == '\r' || ch == '\n') {
+            assert(!method_start(ch)); continue;
+        }
         http_parser parser;
         http_parser_init(&parser, HTTP_REQUEST);
         char byte = (char)ch;
@@ -1457,6 +1535,372 @@ int main(void) {
 '''
 
 
+RESTART = r'''
+#include <winsock2.h>
+#include <assert.h>
+#include <errno.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
+typedef int esp_err_t;
+typedef int err_t;
+typedef uint16_t u16_t;
+typedef struct { uint32_t addr; } ip_addr_t;
+enum { ESP_OK, ESP_FAIL, ERR_OK=0, ERR_USE=-8, ERR_VAL=-6, ERR_ARG=-16, ERR_BUF=-2 };
+enum { CLOSED, LISTEN, ESTABLISHED, TIME_WAIT };
+struct tcp_pcb {
+    struct tcp_pcb *next;
+    ip_addr_t local_ip;
+    u16_t local_port;
+    int state, options;
+};
+static struct tcp_pcb *tcp_bound_pcbs, *tcp_listen_pcbs, *tcp_active_pcbs, *tcp_tw_pcbs;
+static struct tcp_pcb **tcp_pcb_lists[] = {
+    &tcp_bound_pcbs, &tcp_listen_pcbs, &tcp_active_pcbs, &tcp_tw_pcbs
+};
+static const ip_addr_t any_ip = {0};
+#define LWIP_IPV4 1
+#define LWIP_IPV6 0
+#define SO_REUSE 1
+#define SOF_REUSEADDR 1
+#define NUM_TCP_PCB_LISTS 4
+#define NUM_TCP_PCB_LISTS_NO_TIME_WAIT 3
+#define IP4_ADDR_ANY (&any_ip)
+#define IP_IS_V6(ip) 0
+#define IP_IS_V6_VAL(ip) 0
+#define ip_get_option(pcb, option) ((pcb)->options & (option))
+#define ip_addr_isany(ip) ((ip)->addr == 0)
+#define ip_addr_cmp(a, b) ((a)->addr == (b)->addr)
+#define ip_addr_set(a, b) (*(a) = *(b))
+#define LWIP_ASSERT_CORE_LOCKED() ((void)0)
+#define LWIP_ERROR(msg, check, action) do { if (!(check)) { action; } } while (0)
+#define LWIP_DEBUGF(flag, args) ((void)0)
+#define TCP_REG(list, pcb) do { (pcb)->next = *(list); *(list) = (pcb); } while (0)
+static u16_t tcp_new_port(void) { return 12345; }
+__TCP_BIND__
+
+struct httpd_data {
+    struct { uint16_t server_port, ctrl_port; int backlog_conn; } config;
+    int listen_fd, ctrl_fd, msg_fd;
+};
+static struct { bool open; int type; struct tcp_pcb pcb; } sockets[16];
+static bool option_failed;
+static unsigned socket_calls, socket_fail_at;
+static unsigned bind_calls, option_calls, close_calls;
+static char last_error[160];
+static const char *TAG = "httpd";
+#define LOG_FMT(x) "%s: " x, __func__
+static void log_error(const char *tag, const char *fmt, ...) {
+    (void)tag;
+    va_list args; va_start(args, fmt);
+    vsnprintf(last_error, sizeof(last_error), fmt, args);
+    va_end(args);
+}
+#define ESP_LOGE(tag, ...) log_error(tag, __VA_ARGS__)
+static uint16_t swap16(uint16_t value) { return (value << 8) | (value >> 8); }
+#define htons swap16
+#define htonl(value) ((uint32_t)(value))
+static int mock_socket(int domain, int type, int protocol) {
+    (void)protocol; assert(domain == PF_INET);
+    if (++socket_calls == socket_fail_at) { errno = EMFILE; return -1; }
+    for (unsigned i = 1; i < 16; i++) {
+        if (!sockets[i].open) {
+            memset(&sockets[i], 0, sizeof(sockets[i]));
+            sockets[i].open = true; sockets[i].type = type;
+            return i;
+        }
+    }
+    assert(!"socket leak"); return -1;
+}
+static int mock_setsockopt(int fd, int level, int opt, const void *value, size_t len) {
+    assert(sockets[fd].open && sockets[fd].type == SOCK_STREAM);
+    assert(level == SOL_SOCKET && opt == SO_REUSEADDR);
+    assert(len == sizeof(int) && *(const int *)value == 1);
+    option_calls++;
+    if (option_failed) { errno = EINVAL; return -1; }
+    sockets[fd].pcb.options |= SOF_REUSEADDR; return 0;
+}
+static int mock_bind(int fd, const struct sockaddr *addr, size_t len) {
+    const struct sockaddr_in *ip = (const struct sockaddr_in *)addr;
+    assert(sockets[fd].open && sockets[fd].type == SOCK_STREAM);
+    assert(len == sizeof(*ip) && ip->sin_family == PF_INET);
+    assert(swap16(ip->sin_port) == 80);
+    bind_calls++;
+    ip_addr_t local = { .addr = ip->sin_addr.s_addr };
+    err_t err = tcp_bind(&sockets[fd].pcb, &local, swap16(ip->sin_port));
+    if (err == ERR_USE) { errno = EADDRINUSE; return -1; }
+    assert(err == ERR_OK); return 0;
+}
+static void unlink_pcb(struct tcp_pcb *pcb) {
+    for (unsigned i = 0; i < NUM_TCP_PCB_LISTS; i++) {
+        struct tcp_pcb **link = tcp_pcb_lists[i];
+        while (*link && *link != pcb) link = &(*link)->next;
+        if (*link) { *link = pcb->next; pcb->next = NULL; return; }
+    }
+}
+static int mock_listen(int fd, int backlog) {
+    assert(backlog == 5);
+    struct tcp_pcb *pcb = &sockets[fd].pcb;
+    /* lwIP rejects a duplicate listener even when both sockets use reuse. */
+    for (struct tcp_pcb *old = tcp_listen_pcbs; old; old = old->next) {
+        if (old->local_port == pcb->local_port) { errno = EADDRINUSE; return -1; }
+    }
+    unlink_pcb(pcb); pcb->state = LISTEN; TCP_REG(&tcp_listen_pcbs, pcb);
+    return 0;
+}
+static int mock_close(int fd) {
+    assert(sockets[fd].open);
+    unlink_pcb(&sockets[fd].pcb); sockets[fd].open = false; close_calls++;
+    return 0;
+}
+static int cs_create_ctrl_sock(uint16_t port) {
+    assert(port == 32768); return mock_socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+}
+#define socket mock_socket
+#define setsockopt mock_setsockopt
+#define bind mock_bind
+#define listen mock_listen
+#define close mock_close
+__HTTP_INIT__
+
+static void close_server(struct httpd_data *hd) {
+    mock_close(hd->listen_fd); mock_close(hd->ctrl_fd); mock_close(hd->msg_fd);
+}
+static void assert_no_sockets(void) {
+    for (unsigned i = 1; i < 16; i++) assert(!sockets[i].open);
+    assert(!tcp_bound_pcbs && !tcp_listen_pcbs);
+}
+int main(void) {
+    struct httpd_data hd = { .config = {80, 32768, 5},
+                             .listen_fd=-1, .ctrl_fd=-1, .msg_fd=-1 };
+    struct tcp_pcb old = { .local_port=80, .state=TIME_WAIT };
+    struct tcp_pcb probe = {0};
+    tcp_tw_pcbs = &old;
+    assert(tcp_bind(&probe, &any_ip, 80) == ERR_USE); /* Reproduce the old failure. */
+    for (unsigned i = 0; i < 20; i++) {
+        assert(httpd_server_init(&hd) == ESP_OK);
+        assert(tcp_tw_pcbs == &old && old.state == TIME_WAIT);
+        assert(sockets[hd.listen_fd].pcb.options & SOF_REUSEADDR);
+        close_server(&hd); assert_no_sockets();
+    }
+    option_failed = true;
+    unsigned before_bind = bind_calls, before_close = close_calls;
+    hd.listen_fd = hd.ctrl_fd = hd.msg_fd = -1;
+    assert(httpd_server_init(&hd) == ESP_FAIL);
+    assert(bind_calls == before_bind && close_calls == before_close + 1);
+    assert(hd.listen_fd == -1 && hd.ctrl_fd == -1 && hd.msg_fd == -1);
+    char expected[80];
+    snprintf(expected, sizeof(expected), "SO_REUSEADDR (%d)", EINVAL);
+    assert(strstr(last_error, expected)); assert_no_sockets();
+    option_failed = false;
+    old.state = ESTABLISHED; tcp_tw_pcbs = NULL; tcp_active_pcbs = &old;
+    assert(httpd_server_init(&hd) == ESP_FAIL);
+    snprintf(expected, sizeof(expected), "error in bind (%d)", EADDRINUSE);
+    assert(strstr(last_error, expected)); assert_no_sockets();
+    tcp_active_pcbs = NULL;
+    old.state = LISTEN; old.options = SOF_REUSEADDR; tcp_listen_pcbs = &old;
+    assert(httpd_server_init(&hd) == ESP_FAIL);
+    snprintf(expected, sizeof(expected), "error in listen (%d)", EADDRINUSE);
+    assert(strstr(last_error, expected) && tcp_listen_pcbs == &old);
+    tcp_listen_pcbs = NULL; assert_no_sockets();
+    assert(httpd_server_init(&hd) == ESP_OK);
+    close_server(&hd); assert_no_sockets();
+    assert(option_calls == 24 && bind_calls == 23);
+    for (unsigned fail = 1; fail <= 3; fail++) {
+        socket_calls = 0; socket_fail_at = fail;
+        assert(httpd_server_init(&hd) == ESP_FAIL);
+        assert_no_sockets();
+    }
+    puts("HTTP restart: actual lwIP bind, TIME_WAIT/20 restarts, option failure, port conflicts and recovery passed; failures=0 skipped=0");
+    return 0;
+}
+'''
+
+
+def check_http_restart(gcc):
+    # Compile the actual init and SDK tcp_bind, with socket/resource adapters.
+    http_path = ROOT / "components/esp_http_server/httpd_main.c"
+    tcp_path = SDK_PATH / "components/lwip/lwip/src/core/tcp.c"
+    init = re.search(r"static esp_err_t httpd_server_init\(.*?\n}\n",
+                     http_path.read_text(encoding="utf-8"), re.S)
+    bind = re.search(r"err_t\s+tcp_bind\(.*?\n}\n",
+                     tcp_path.read_text(encoding="utf-8"), re.S)
+    if not init or not bind:
+        raise AssertionError("HTTP 初始化或 SDK tcp_bind 不匹配，无法运行重启回归")
+    harness = RESTART
+    for marker, match, source in [("__HTTP_INIT__", init, http_path),
+                                   ("__TCP_BIND__", bind, tcp_path)]:
+        line = source.read_text(encoding="utf-8").count("\n", 0, match.start()) + 1
+        harness = harness.replace(marker, f'\n#line {line} "{source.as_posix()}"\n'
+                                  + match[0] + '\n#line 1 "http_restart_harness"\n')
+    path = OUT / "http_restart_test.c"
+    exe = OUT / "http_restart_test.exe"
+    path.write_text(harness, encoding="utf-8")
+    subprocess.run([gcc, "-std=c11", "-Wall", "-Wextra", "-Werror",
+                    str(path), "-o", str(exe)], check=True, cwd=ROOT)
+    subprocess.run([str(exe)], check=True, cwd=ROOT)
+
+
+LIFECYCLE = r'''
+#include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+typedef int esp_err_t;
+typedef void *httpd_handle_t;
+typedef void (*httpd_work_fn_t)(void *);
+enum { ESP_OK, ESP_FAIL, ESP_ERR_INVALID_ARG, ESP_ERR_HTTPD_ALLOC_MEM,
+       ESP_ERR_HTTPD_TASK, THREAD_RUNNING, THREAD_STOPPED };
+typedef struct { int unused; } httpd_uri_t;
+struct sock_db { int unused; };
+struct resp_hdr { int unused; };
+typedef struct {
+    unsigned max_uri_handlers, max_open_sockets, max_resp_headers;
+    unsigned stack_size, task_priority, ctrl_port;
+    void *global_user_ctx, *global_transport_ctx;
+    void (*global_user_ctx_free_fn)(void *);
+    void (*global_transport_ctx_free_fn)(void *);
+} httpd_config_t;
+struct httpd_data {
+    httpd_config_t config;
+    httpd_uri_t **hd_calls;
+    struct sock_db *hd_sd;
+    struct httpd_req_aux { struct resp_hdr *resp_hdrs; } hd_req_aux;
+    struct { void *handle; int status; } hd_td;
+    int listen_fd, ctrl_fd, msg_fd;
+};
+#define ESP_LOGE(...) (++error_logs)
+#define ESP_LOGD(...) ((void)0)
+static unsigned error_logs, send_calls, sleep_calls, context_frees;
+static bool sockets[3], task_failed, stop_requested, init_failed;
+static unsigned alloc_calls, alloc_fail_at;
+static void *mock_calloc(size_t n, size_t size) {
+    if (++alloc_calls == alloc_fail_at) return NULL;
+    return calloc(n, size);
+}
+#define calloc mock_calloc
+static int send_result = -1;
+static struct httpd_data *live_server;
+static void httpd_unregister_all_uri_handlers(struct httpd_data *hd) { (void)hd; }
+static esp_err_t httpd_server_init(struct httpd_data *hd) {
+    if (init_failed) return ESP_FAIL;
+    for (unsigned i=0; i<3; i++) { assert(!sockets[i]); sockets[i]=true; }
+    hd->listen_fd=0; hd->ctrl_fd=1; hd->msg_fd=2;
+    return ESP_OK;
+}
+static int mock_close(int fd) {
+    assert(fd>=0 && fd<3 && sockets[fd]); sockets[fd]=false; return 0;
+}
+#define close mock_close
+static void cs_free_ctrl_sock(int fd) { assert(fd==1); mock_close(fd); }
+static void httpd_sess_init(struct httpd_data *hd) { hd->hd_td.status=THREAD_RUNNING; }
+static void httpd_thread(void *arg) { (void)arg; }
+static esp_err_t httpd_os_thread_create(void **handle, const char *name, unsigned stack,
+                                       unsigned pri, void (*fn)(void *), void *arg) {
+    (void)handle; (void)name; (void)stack; (void)pri; (void)fn; (void)arg;
+    return task_failed ? ESP_FAIL : ESP_OK;
+}
+static int cs_send_to_ctrl_sock(int fd, unsigned port, void *data, unsigned len) {
+    (void)port; (void)data; assert(fd==2 && sockets[fd]); send_calls++;
+    if (send_result<0) return send_result;
+    if (!send_result) return (int)len-1;
+    stop_requested=true; return (int)len;
+}
+static void httpd_os_thread_sleep(unsigned ms) {
+    assert(ms==100 && stop_requested && live_server); sleep_calls++;
+    for (unsigned i=0; i<3; i++) mock_close(i);
+    live_server->hd_td.status=THREAD_STOPPED;
+}
+static void free_context(void *context) { context_frees++; free(context); }
+__HTTP_LIFECYCLE__
+static void assert_closed(void) {
+    for (unsigned i=0; i<3; i++) assert(!sockets[i]);
+}
+int main(void) {
+    httpd_config_t cfg={ .max_uri_handlers=2, .max_open_sockets=2, .max_resp_headers=2 };
+    httpd_handle_t handle=NULL;
+    assert(httpd_start(NULL,&cfg)==ESP_ERR_INVALID_ARG);
+    assert(httpd_start(&handle,NULL)==ESP_ERR_INVALID_ARG);
+    assert(httpd_stop(NULL)==ESP_ERR_INVALID_ARG);
+    for (unsigned fail=1; fail<=4; fail++) {
+        alloc_calls=0; alloc_fail_at=fail;
+        assert(httpd_start(&handle,&cfg)==ESP_ERR_HTTPD_ALLOC_MEM && !handle);
+        assert_closed();
+    }
+    alloc_fail_at=0; error_logs=0;
+    init_failed=true;
+    assert(httpd_start(&handle,&cfg)==ESP_FAIL && !handle); assert_closed();
+    init_failed=false;
+    task_failed=true;
+    assert(httpd_start(&handle,&cfg)==ESP_ERR_HTTPD_TASK && !handle);
+    assert_closed(); assert(error_logs==1);
+    task_failed=false;
+    assert(httpd_start(&handle,&cfg)==ESP_OK);
+    live_server=handle;
+    assert(httpd_stop(handle)==ESP_FAIL && sleep_calls==0);
+    assert(live_server->hd_td.status==THREAD_RUNNING && error_logs==2);
+    for (unsigned i=0; i<3; i++) assert(sockets[i]);
+    send_result=0;
+    assert(httpd_stop(handle)==ESP_FAIL && sleep_calls==0 && error_logs==3);
+    cfg.global_user_ctx=malloc(1); cfg.global_transport_ctx=malloc(1);
+    assert(cfg.global_user_ctx && cfg.global_transport_ctx);
+    live_server->config.global_user_ctx=cfg.global_user_ctx;
+    live_server->config.global_user_ctx_free_fn=free_context;
+    live_server->config.global_transport_ctx=cfg.global_transport_ctx;
+    send_result=1;
+    assert(httpd_stop(handle)==ESP_OK && sleep_calls==1 && context_frees==1);
+    assert_closed();
+    cfg.global_user_ctx=cfg.global_transport_ctx=NULL;
+    cfg.global_user_ctx=malloc(1); cfg.global_transport_ctx=malloc(1);
+    cfg.global_transport_ctx_free_fn=free_context;
+    assert(httpd_start(&handle,&cfg)==ESP_OK); live_server=handle;
+    assert(httpd_stop(handle)==ESP_OK && context_frees==2); assert_closed();
+    cfg.global_user_ctx=cfg.global_transport_ctx=NULL;
+    cfg.global_transport_ctx_free_fn=NULL;
+    for (unsigned i=0; i<20; i++) {
+        assert(httpd_start(&handle,&cfg)==ESP_OK); live_server=handle;
+        assert(httpd_stop(handle)==ESP_OK); assert_closed();
+    }
+    assert(httpd_start(&handle,&cfg)==ESP_OK); live_server=handle;
+    for (unsigned i=0; i<3; i++) mock_close(i);
+    live_server->hd_td.status=THREAD_STOPPED;
+    unsigned before=send_calls; send_result=-1;
+    assert(httpd_stop(handle)==ESP_OK && send_calls==before); assert_closed();
+    puts("HTTP lifecycle: task failure socket cleanup, shutdown send failure/short send, retry, stopped thread and 20 restarts passed");
+    return 0;
+}
+'''
+
+
+def check_http_lifecycle(gcc):
+    source = ROOT / "components/esp_http_server/httpd_main.c"
+    code = source.read_text(encoding="utf-8")
+    patterns = [r"struct httpd_ctrl_data \{.*?\n};",
+                r"static struct httpd_data \*httpd_create\(.*?\n}\n",
+                r"static void httpd_delete\(.*?\n}\n",
+                r"esp_err_t httpd_start\(.*?\n}\n",
+                r"esp_err_t httpd_stop\(.*?\n}\n"]
+    parts = []
+    for pattern in patterns:
+        match = re.search(pattern, code, re.S)
+        if not match:
+            raise AssertionError("HTTP 生命周期源码不匹配")
+        line = code.count("\n", 0, match.start()) + 1
+        parts.append(f'\n#line {line} "{source.as_posix()}"\n' + match[0])
+    harness = LIFECYCLE.replace("__HTTP_LIFECYCLE__", "\n".join(parts) +
+                                '\n#line 1 "http_lifecycle_harness"\n')
+    path = OUT / "http_lifecycle_test.c"
+    exe = OUT / "http_lifecycle_test.exe"
+    path.write_text(harness, encoding="utf-8")
+    subprocess.run([gcc, "-std=c11", "-Wall", "-Wextra", "-Werror",
+                    str(path), "-o", str(exe)], check=True, cwd=ROOT)
+    subprocess.run([str(exe)], check=True, cwd=ROOT)
+
+
 def main():
     gcc = shutil.which("gcc")
     if gcc is None:
@@ -1486,6 +1930,8 @@ def main():
         options = ["-DCONFIG_APP_PAUSE_NETWORK_TIMERS=1", "-DCONFIG_APP_PAUSE_NOISE_TIMER=1"] if name == "portal_pause" else []
         subprocess.run(command + options + [str(path), "-o", str(exe)], check=True, cwd=ROOT)
         subprocess.run([str(exe)], check=True, cwd=ROOT)
+    check_http_restart(gcc)
+    check_http_lifecycle(gcc)
 
 
 if __name__ == "__main__":

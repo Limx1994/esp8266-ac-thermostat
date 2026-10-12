@@ -1,0 +1,251 @@
+[
+  {
+    "path": "D:\\空调温度\\dxf-pdf\\TO-92.pdf",
+    "sha256": "5de59854821d46ee23ce7a7db54e145d17aaa73023c929d1ad801a0dffba63fe",
+    "baseline_sha256": "5DE59854821D46EE23CE7A7DB54E145D17AAA73023C929D1AD801A0DFFBA63FE",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "pages": 1,
+    "text_chars": 626,
+    "empty_text_pages": [],
+    "extraction_path": "D:\\空调温度\\审查报告\\20261011\\attachment_TO-92.txt",
+    "excerpt": "ENG. APPR. 0 30 mm THIRD ANGLE PROJECTION SCALE SHEET 4 : 1 1 of 1 正式發行圖面 REV: A4 PART NO:TO-92 DWG NO:DIM-TO-92-000-A4 TITLE 友順科技股份有限公司 UNISONIC TECHNOLOGIES CO.,LTD Refer to JEDEC NO. TO-92 A A1 b C D E e L Yen Hsiao TO-92 Package Dimensions b1x3 L1 Min Max Min Max A 3.30 3.80 0.130 0.150 A1 1.10 1.40 0.043 0.055 b 0.34 0.55 0.013 0.022 b1 0.50 0.70 0.020 0.028 C 0.34 0.54 0.013 0.021 D 4.30 4.90 0.169 0.193 E 4.30 4.90 0.169 0.193 e L 14.07 14.87 0.554 0.585 L1 12.47 TYP 0.491 TYP Dimensions in Millimeters Dimensions in Inches Symbol 1.27 TYP 0.050 TYP 發 行 ＦＯＲ ＩＳＳＵＥ F Nov 20 2019 文 件 管 理 中 ",
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true
+  },
+  {
+    "path": "D:\\空调温度\\dxf-pdf\\SL1307ZN+T（C5186044）.pdf",
+    "sha256": "47f6e240265ba1a0a65e30991094e3819ca548010e06daf7075a0802c341cc69",
+    "baseline_sha256": "47F6E240265BA1A0A65E30991094E3819CA548010E06DAF7075A0802C341CC69",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "pages": 14,
+    "text_chars": 25679,
+    "empty_text_pages": [],
+    "extraction_path": "D:\\空调温度\\审查报告\\20261011\\attachment_SL1307ZN+T（C5186044）.txt",
+    "excerpt": "GENERAL DESCRIPTION The SL1307 serial real -time clock (RTC) is a low - power, full binary-coded decimal (BCD) clock/calendar plus 56 bytes of NV SRAM. Address and data are transferred serially through an I 2 C, bidirectional bus. The clock/calendar provides seconds, minutes, hours, day, date, month, and year information. The end of the month date is automatically adjusted for months with fewer than 31 days, including corrections for leap year. The clock operates in either the 24 -hour or 12- hour format with AM/PM indicator. The SL1307 has a built-in power-sense circuit that detects power fai",
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true
+  },
+  {
+    "path": "D:\\空调温度\\dxf-pdf\\MG6228T5-33.PDF",
+    "sha256": "c1e78e55e0bf9aa97ef005fde82bc3402e7e4cb0138e985cc20811430e3854d6",
+    "baseline_sha256": "C1E78E55E0BF9AA97EF005FDE82BC3402E7E4CB0138E985CC20811430E3854D6",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "pages": 9,
+    "text_chars": 4264,
+    "empty_text_pages": [],
+    "extraction_path": "D:\\空调温度\\审查报告\\20261011\\attachment_MG6228T5-33.txt",
+    "excerpt": "Rev.1.2 1 MG6228 www.megain.com 6V、500mA、0.5uA IQ、高 PSRR 低压差线性稳压器 ■ 产品概述 MG6228 稳压器具有低压差、高 PSRR 和超低待机电流。 MG6228 在空载时具有 0.5uA 的极低静态电流，非常适合微 控制单元系统，尤其是便携式和其他电池供电系统等始终在 线的应用。MG6228 保留了低压差稳压器的所有常见特性， 包括低压差 PMOS 传输器件、短路保护和热关断。 MG6228 具有 6V 的最大工作电压和 ± 2% 的输出电压容 差，可选用输出电压最低至 1.8V。MG6228 采用 SOT89-3、 SOT23-3、SOT23-5 和 DFN1X1-4L 表面贴装封装。 ■ 命名规则 ■ 产品特点 • VIN 范围最高 6V • 可用输出电压范围： 1.8V 至 5V • 输出电压容差：± 2% • 最大输出电流： 500 mA • 超低静态电流 （IQ = 0.5uA） • 压差电压：660mV 于 IOUT = 500mA • 内部有热过载保护装置 • 内部有短路电流限制功能 • 可适用低 ESR 陶瓷电容 • EN 使能高电平有效，低电平关断时输出电容自放电 ■ 用途 • 便携式电池供电设备 • 超低功耗微控制器 • 笔记本电脑 ■ 封装 （符合 RoHS 标准） • SOT89-3 • SOT2",
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true
+  },
+  {
+    "path": "D:\\空调温度\\dxf-pdf\\HS0038B.pdf",
+    "sha256": "3137598fdd79e8ed6d136dc0790125084ff6b210801f418793950b8381a2454a",
+    "baseline_sha256": "3137598FDD79E8ED6D136DC0790125084FF6B210801F418793950B8381A2454A",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "pages": 7,
+    "text_chars": 9448,
+    "empty_text_pages": [],
+    "extraction_path": "D:\\空调温度\\审查报告\\20261011\\attachment_HS0038B.txt",
+    "excerpt": "HS0038B Vishay Telefunken 1 (7)Rev. 7, 05-Dec-00 www.vishay.comDocument Number 82002 Photo Modules for PCM Remote Control Systems Description The HS0038B – series are miniaturized receivers for infrared remote control systems. PIN diode and preamplifier are assembled on lead frame, the epoxy package is designed as IR filter. The demodulated output signal can directly be decoded by a microprocessor. HS0038B is the standard IR remote control receiver series, supporting all major transmission codes. 14 500 Features /C0068Photo detector and preamplifier in one package /C0068Internal filter for PCM",
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true
+  },
+  {
+    "path": "D:\\空调温度\\dxf-pdf\\esp8266-technical_reference_en.pdf",
+    "sha256": "25f08aa786724a9c82ad503fda6b4339b154d59efedc5c9dfff9544aca756211",
+    "baseline_sha256": "25F08AA786724A9C82AD503FDA6B4339B154D59EFEDC5C9DFFF9544ACA756211",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "pages": 111,
+    "text_chars": 199512,
+    "empty_text_pages": [],
+    "extraction_path": "D:\\空调温度\\审查报告\\20261011\\attachment_esp8266-technical_reference_en.txt",
+    "excerpt": "ESP8266 Technical Reference Version 1.7",
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true
+  },
+  {
+    "path": "D:\\空调温度\\dxf-pdf\\ESP-12F规格书-20201207.pdf",
+    "sha256": "323e5f3d8d1c9b2dfd8d56542062353d95748911bc8d64c11d63a73182f7a94f",
+    "baseline_sha256": "323E5F3D8D1C9B2DFD8D56542062353D95748911BC8D64C11D63A73182F7A94F",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "pages": 17,
+    "text_chars": 8351,
+    "empty_text_pages": [],
+    "extraction_path": "D:\\空调温度\\审查报告\\20261011\\attachment_ESP-12F规格书-20201207.txt",
+    "excerpt": "ESP-12F 规格书 V1.1 Copyright © 2020 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 1 页 共 17 页 ESP-12F 规格书 版本 V1.1 版权 ©2020",
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true
+  },
+  {
+    "path": "D:\\空调温度\\dxf-pdf\\ds18b20.pdf",
+    "sha256": "066c8a3c7e9222c49e84488840d5cfe9dd109cf0da6ab4a55480cebac8f97f76",
+    "baseline_sha256": "066C8A3C7E9222C49E84488840D5CFE9DD109CF0DA6AB4A55480CEBAC8F97F76",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "pages": 20,
+    "text_chars": 49838,
+    "empty_text_pages": [],
+    "extraction_path": "D:\\空调温度\\审查报告\\20261011\\attachment_ds18b20.txt",
+    "excerpt": "General Description The DS18B20 digital thermometer provides 9-bit to 12-bit Celsius temperature measurements and has an alarm function with nonvolatile user-programmable upper and lower trigger points. The DS18B20 communicates over a 1-Wire bus that by definition requires only one data line (and ground) for communication with a central microprocessor. In addition, the DS18B20 can derive power directly from the data line (“parasite power”), eliminating the need for an external power supply. Each DS18B20 has a unique 64-bit serial code, which allows multiple DS18B20s to function on the same 1-W",
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true
+  },
+  {
+    "path": "D:\\空调温度\\dxf-pdf\\AP2112.pdf",
+    "sha256": "ef8d376f2ec356e29172eb9e053819a0ebdcc576dba7fc9ab0505c568427920f",
+    "baseline_sha256": "EF8D376F2EC356E29172EB9E053819A0EBDCC576DBA7FC9AB0505C568427920F",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "pages": 18,
+    "text_chars": 29738,
+    "empty_text_pages": [],
+    "extraction_path": "D:\\空调温度\\审查报告\\20261011\\attachment_AP2112.txt",
+    "excerpt": "AP2112 Document number: DS39724 Rev. 2 - 2 1 of 18 www.diodes.com June 2017 © Diodes Incorporated AP2112 600mA CMOS LDO REGULATOR WITH ENABLE Description The AP2112 is CMOS process low dropout linear regulator with enable function, the regulator delivers a guaranteed 600mA (min.) continuous load current. The AP2112 is available with a fixed output voltage of 1.2V, 1.8V, 2.5V, 2.6V, or 3.3V. The LDO has an output accuracy of ± 1.5% and a very fast loop response providing excellent performance for dealing with line and load transients. The AP2112 includes an auto discharge function which connect",
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true
+  },
+  {
+    "path": "D:\\空调温度\\dxf-pdf\\9014.pdf",
+    "sha256": "18ee3367510cc73f7e17d5d39b27f55bee2000d2603b056263ad90385dc36f34",
+    "baseline_sha256": "18EE3367510CC73F7E17D5D39B27F55BEE2000D2603B056263AD90385DC36F34",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "pages": 3,
+    "text_chars": 3944,
+    "empty_text_pages": [],
+    "extraction_path": "D:\\空调温度\\审查报告\\20261011\\attachment_9014.txt",
+    "excerpt": "UNISONIC TECHNOLOGIES CO., LTD 9014 NPN SILICON TRANSISTOR www.unisonic.com.tw 1 of 3 Copyright © 2014 Unisonic Technologies Co., Ltd QW-R201-031.C PRE-AMPLIFIER, LOW LEVEL & LOW NOISE  FEATURES * High total power dissipation. (450mW) * Excellent hFE linearity. * Complementary to UTC 9015 TO-92 1  ORDERING INFORMATION Ordering Number Package Pin Assignment Packing Lead Free Halogen Free 1 2 3 9014L-x-T92-B 9014G-x-T92-B TO-92 E B C Tape Box 9014L-x-T92-K 9014G-x-T92-K TO-92 E B C Bulk Note: Pin assignment: E: Emitter B : B a s e C : C o l l e c t o r  MARKING INFORMATION PACKAGE MARKING TO-",
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true
+  },
+  {
+    "path": "D:\\空调温度\\Ad\\Bom.xlsx",
+    "sha256": "25a6c35f871068ba470ce6388c5b76e53c3407944883b98da70a16f9a896359e",
+    "baseline_sha256": "25A6C35F871068BA470CE6388C5B76E53C3407944883B98DA70A16F9A896359E",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "sheets": {
+      "Bom": 27
+    },
+    "extraction_path": "D:\\空调温度\\审查报告\\20261011\\attachment_Bom_cells.json",
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true
+  },
+  {
+    "path": "D:\\空调温度\\Ad\\Bom.pdf",
+    "sha256": "571940eba537e08fe4d714f201bee25ce74fb7b7958d7958a33b4f987464b84b",
+    "baseline_sha256": "571940EBA537E08FE4D714F201BEE25CE74FB7B7958D7958A33B4F987464B84B",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "pages": 1,
+    "text_chars": 602,
+    "empty_text_pages": [],
+    "extraction_path": "D:\\空调温度\\审查报告\\20261011\\attachment_Bom.txt",
+    "excerpt": "Designator Comment Footprint Quantity C1, C3, C10 10uF 0603_C 3 C2, C7, C11, C12 100nF 0603_C 4 C4, C6, C9 4.7uF 0603_C 3 C5 220nF 0603_C 1 C8 1nF 0603_C 1 D1 LED1 LED-1 1 P1 typeC USB_C_M 1 P2 Header 2 CR2450 1 P3 Header 4 HDR1X4 1 P4 Header 2 HDR1X2 1 R1, R2, R4, R5 NC 0603_R 4 R3, R6 5.1KΩ ±1% 0603_R 2 R7 4.7K 0603_R 1 R8 330K 0603_R 1 R9 82K 0603_R 1 R10 1K 0603_R 1 R11 9.1R 0603_R 1 R12, R13, R14, R15, R17, R18 11K 0603_R 6 R16 62R 0603_R 1 S1, S2 SW-PB 6x6-key 2 T1 9014 TO-92 1 U1 TP4057 SOT-23-6 1 U2 MG6228T5-33 SOT-23-5 1 U3 ESP-12F ESP-12F-16Pin 1 U4 HS0038B HS0038B 1 U5 ds18b20 TO-92",
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true
+  },
+  {
+    "path": "D:\\空调温度\\Ad\\20261009.zip",
+    "sha256": "c8c89b486c672500bdd0f6352a1cae8471b6f157a6cfbc9ddea2811a833d94bc",
+    "baseline_sha256": "C8C89B486C672500BDD0F6352A1CAE8471B6F157A6CFBC9DDEA2811A833D94BC",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "members": [
+      {
+        "name": "PCB1.PcbDoc",
+        "bytes": 2886656,
+        "crc": 3595427645
+      }
+    ],
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true
+  },
+  {
+    "path": "D:\\空调温度\\Sof\\20261004.csv",
+    "sha256": "4a570eb197ac68e1021d55c03692c5e57f21d9aaa391d154caaa5c83131212e7",
+    "baseline_sha256": "4A570EB197AC68E1021D55C03692C5E57F21D9AAA391D154CAAA5C83131212E7",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "rows": 5220,
+    "header": [
+      "sample",
+      "10000",
+      "length",
+      "5218                                                                          "
+    ],
+    "column_counts": [
+      2,
+      4
+    ],
+    "first_data": [
+      "Time(ns)",
+      "Vol(V)"
+    ],
+    "last_data": [
+      "521700000.000000",
+      "3.247867"
+    ],
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true,
+    "data_header": [
+      "Time(ns)",
+      "Vol(V)"
+    ],
+    "data_rows": 5218
+  },
+  {
+    "path": "D:\\空调温度\\Sof\\20261004发送波形.csv",
+    "sha256": "e68ac95c09dc34fb3d40eec7856ccbd61ab5fc0066a10191a132515f0f1afd62",
+    "baseline_sha256": "E68AC95C09DC34FB3D40EEC7856CCBD61AB5FC0066A10191A132515F0F1AFD62",
+    "attempts": 1,
+    "limit": "文本/单元格/结构读取，不证明图形、电气连接或当前固件实机行为",
+    "rows": 5220,
+    "header": [
+      "sample",
+      "10000",
+      "length",
+      "5218                                                                          "
+    ],
+    "column_counts": [
+      2,
+      4
+    ],
+    "first_data": [
+      "Time(ns)",
+      "Vol(V)"
+    ],
+    "last_data": [
+      "521700000.000000",
+      "-0.006243"
+    ],
+    "warnings": [],
+    "status": "current_bytes_read",
+    "hash_matches_baseline": true,
+    "data_header": [
+      "Time(ns)",
+      "Vol(V)"
+    ],
+    "data_rows": 5218
+  }
+]

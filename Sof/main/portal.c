@@ -80,7 +80,12 @@ static esp_err_t pause_timers(void)
 {
     esp_err_t err = noise_timer_set_active(false);
     esp_err_t network_err = set_network_timers(false);
+#ifdef CONFIG_APP_PAUSE_NOISE_TIMER
     return err != ESP_OK ? err : network_err;
+#else
+    (void)err; /* 未启用噪声暂停时恒成功，仍执行网络清理。 */
+    return network_err;
+#endif
 }
 
 /* 仅页面访问和控制操作刷新空闲计时；状态轮询及手机后台探测不延长热点寿命。 */
@@ -212,7 +217,7 @@ static esp_err_t rule_post(httpd_req_t *req)
         .rising = cJSON_IsTrue(rise), .enabled = cJSON_IsTrue(enabled)
     };
     cJSON_Delete(json);
-    if (!rule_valid(&cfg)) return error_reply(req, "400 Bad Request", ESP_ERR_INVALID_ARG);
+    /* 上面的整数范围和布尔检查已保证 cfg 有效；保存入口仍校验规则。 */
     esp_err_t err = app_save_rule(slot, &cfg);
     if (err != ESP_OK) return error_reply(req, "500 Internal Server Error", err);
     return reply(req, "200 OK", "{\"ok\":true}");
@@ -300,6 +305,8 @@ static esp_err_t send_post(httpd_req_t *req)
 static void dns_task(void *arg)
 {
     uint8_t query[256], response[300];
+    /* question_end <= 接收长度 <= sizeof(query)，保证追加答案不会越界。 */
+    _Static_assert(sizeof(response) >= sizeof(query) + 16, "DNS response buffer too small");
     struct timeval timeout = { .tv_sec = 0, .tv_usec = 200000 };
     if (setsockopt(dns_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
         ESP_LOGE(TAG, "DNS receive timeout setup failed");
@@ -315,7 +322,6 @@ static void dns_task(void *arg)
         while (pos < n && query[pos] && query[pos] <= 63) pos += query[pos] + 1;
         if (pos + 5 > n || query[pos] != 0) continue;
         int question_end = pos + 5;
-        if (question_end + 16 > sizeof(response)) continue;
         memcpy(response, query, question_end);
         response[2] = 0x81; response[3] = 0x80;
         response[4] = 0; response[5] = 1;
@@ -367,7 +373,9 @@ esp_err_t portal_init(void)
     ESP_LOGI(TAG, "init stage=phy_close_rf");
     phy_close_rf();
     err = pause_timers();
+#if defined(CONFIG_APP_PAUSE_NOISE_TIMER) || defined(CONFIG_APP_PAUSE_NETWORK_TIMERS)
     if (err != ESP_OK) return err;
+#endif
     ESP_LOGI(TAG, "RF disabled; AP off");
     return ESP_OK;
 }
@@ -379,21 +387,54 @@ esp_err_t portal_start(void)
         return server && dns_running && !dns_exited ? ESP_OK : ESP_ERR_INVALID_STATE;
     ap_used = false;
     esp_err_t err = set_network_timers(true);
+#ifdef CONFIG_APP_PAUSE_NETWORK_TIMERS
     if (err != ESP_OK) return err;
+#endif
     err = noise_timer_set_active(true);
+#ifdef CONFIG_APP_PAUSE_NOISE_TIMER
     if (err != ESP_OK) {
         esp_err_t cleanup = set_network_timers(false);
+#ifdef CONFIG_APP_PAUSE_NETWORK_TIMERS
         return cleanup != ESP_OK ? cleanup : err;
+#else
+        (void)cleanup;
+        return err;
+#endif
     }
+#endif
     phy_open_rf();
     err = esp_wifi_start();
     if (err != ESP_OK) {
         phy_close_rf();
         esp_err_t cleanup = pause_timers();
+#if defined(CONFIG_APP_PAUSE_NOISE_TIMER) || defined(CONFIG_APP_PAUSE_NETWORK_TIMERS)
         if (cleanup != ESP_OK) return cleanup;
+#else
+        (void)cleanup;
+#endif
         return err;
     }
     ap_on = true;
+    /* API uses 0.25 dBm units: 60 requests a 15 dBm maximum. */
+    const int8_t tx_power = 60;
+    int8_t actual_power;
+    err = esp_wifi_set_max_tx_power(tx_power);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Wi-Fi TX power set failed: %s", esp_err_to_name(err));
+        goto fail_wifi;
+    }
+    err = esp_wifi_get_max_tx_power(&actual_power);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Wi-Fi TX power read failed: %s", esp_err_to_name(err));
+        goto fail_wifi;
+    }
+    if (actual_power != tx_power) {
+        ESP_LOGE(TAG, "Wi-Fi TX power mismatch: expected=%d actual=%d",
+                 tx_power, actual_power);
+        err = ESP_ERR_INVALID_STATE;
+        goto fail_wifi;
+    }
+    ESP_LOGI(TAG, "Wi-Fi TX power maximum verified: 15 dBm (raw=%d)", actual_power);
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.max_open_sockets = 5;
     config.lru_purge_enable = true;
@@ -463,7 +504,9 @@ fail_wifi:
         phy_close_rf();
         ap_on = false;
         cleanup = pause_timers();
+#if defined(CONFIG_APP_PAUSE_NOISE_TIMER) || defined(CONFIG_APP_PAUSE_NETWORK_TIMERS)
         if (cleanup != ESP_OK) return cleanup;
+#endif
     }
     return err;
 }

@@ -1,0 +1,75 @@
+{
+  "ninja_initial": {
+    "command": [
+      "D:\\APPS\\Espressif\\tools\\ninja\\1.9.0\\ninja.exe",
+      "-f",
+      "tests/build.ninja",
+      "-j",
+      "12"
+    ],
+    "exit": 0,
+    "stdout": "[1/3] gcc -std=c11 -Wall -Wextra -Werror -I main -MMD -MF build_ascii/rules.o.d -c main/rules.c -o build_ascii/rules.o\n[2/3] gcc -std=c11 -Wall -Wextra -Werror -I main -MMD -MF build_ascii/rules_test.o.d -c tests/rules_test.c -o build_ascii/rules_test.o\n[3/3] gcc build_ascii/rules.o build_ascii/rules_test.o -o build_ascii/rules_test.exe\n",
+    "stderr": ""
+  },
+  "ninja_unchanged": {
+    "command": [
+      "D:\\APPS\\Espressif\\tools\\ninja\\1.9.0\\ninja.exe",
+      "-f",
+      "tests/build.ninja",
+      "-j",
+      "12"
+    ],
+    "exit": 0,
+    "stdout": "ninja: no work to do.\n",
+    "stderr": ""
+  },
+  "ninja_header": {
+    "command": [
+      "D:\\APPS\\Espressif\\tools\\ninja\\1.9.0\\ninja.exe",
+      "-f",
+      "tests/build.ninja",
+      "-j",
+      "12"
+    ],
+    "exit": 1,
+    "stdout": "[1/2] gcc -std=c11 -Wall -Wextra -Werror -I main -MMD -MF build_ascii/rules_test.o.d -c tests/rules_test.c -o build_ascii/rules_test.o\nFAILED: build_ascii/rules_test.o \ngcc -std=c11 -Wall -Wextra -Werror -I main -MMD -MF build_ascii/rules_test.o.d -c tests/rules_test.c -o build_ascii/rules_test.o\nIn file included from tests/rules_test.c:1:\ntests/rules_cases.h:149:2: error: #error header_dependency_verified\n  149 | #error header_dependency_verified\n      |  ^~~~~\nninja: build stopped: subcommand failed.\n",
+    "stderr": ""
+  },
+  "ninja_recovered": {
+    "command": [
+      "D:\\APPS\\Espressif\\tools\\ninja\\1.9.0\\ninja.exe",
+      "-f",
+      "tests/build.ninja",
+      "-j",
+      "12"
+    ],
+    "exit": 0,
+    "stdout": "[1/2] gcc -std=c11 -Wall -Wextra -Werror -I main -MMD -MF build_ascii/rules_test.o.d -c tests/rules_test.c -o build_ascii/rules_test.o\n[2/2] gcc build_ascii/rules.o build_ascii/rules_test.o -o build_ascii/rules_test.exe\n",
+    "stderr": ""
+  },
+  "rules_test": {
+    "command": [
+      "D:\\空调温度\\审查报告\\20261011\\repair_validation\\tmp0kpxa4ny\\build_ascii\\rules_test.exe"
+    ],
+    "exit": 0,
+    "stdout": "trend: noise/spikes, signed median, fast confirmation, gradual extension, timing/reset/wrap passed\nrules_test: threshold equality, repeated sends, startup/recovery and disabled rules passed\n",
+    "stderr": ""
+  },
+  "driver_configure": {
+    "command": [
+      "D:\\APPS\\Espressif\\tools\\cmake\\3.13.4\\bin\\cmake.exe",
+      "-S",
+      "Y:/",
+      "-B",
+      "Y:/build",
+      "-G",
+      "Ninja",
+      "-DCMAKE_MAKE_PROGRAM=D:\\APPS\\Espressif\\tools\\ninja\\1.9.0\\ninja.exe"
+    ],
+    "exit": 0,
+    "stdout": "-- Official ESP8266 driver: 89a3f254b63819035f65d9c5dcdae8864f1a6a8a; PHY 1167.0\n-- Configuring done\n-- Generating done\n-- Build files have been written to: Y:/build\n",
+    "stderr": ""
+  },
+  "driver_paths": "core|before|Y://sdk/components/esp8266/lib/libcore.a\nnet80211|before|Y://sdk/components/esp8266/lib/libnet80211.a\npp|before|Y://sdk/components/esp8266/lib/libpp.a\nphy|before|Y://sdk/components/esp8266/lib/libphy.a\nrtc|before|Y://sdk/components/esp8266/lib/librtc.a\nespnow|before|Y://sdk/components/esp8266/lib/libespnow.a\nsmartconfig|before|Y://sdk/components/esp8266/lib/libsmartconfig.a\nrevision|89a3f254b63819035f65d9c5dcdae8864f1a6a8a\ncore|after|Y://components/esp8266/lib/libcore.a\nnet80211|after|Y://components/esp8266/lib/libnet80211.a\npp|after|Y://components/esp8266/lib/libpp.a\nphy|after|Y://components/esp8266/lib/libphy.a\nrtc|after|Y://components/esp8266/lib/librtc.a\nespnow|after|Y://components/esp8266/lib/libespnow.a\nsmartconfig|after|Y://components/esp8266/lib/libsmartconfig.a\n",
+  "boundary": "Real installed SDK archives used as selected-source fixture; no remote candidate download, complete evaluation or flashing."
+}

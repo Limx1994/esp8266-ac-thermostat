@@ -1,0 +1,259 @@
+PAGE 1
+ESP-12F 规格书 V1.1
+Copyright © 2020 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 1 页 共 17 页
+ESP-12F 规格书
+版本 V1.1
+版权 ©2020
+PAGE 2
+ESP-12F 规格书 V1.1
+Copyright © 2020 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 2 页 共 17 页
+免责申明和版权公告
+本文中的信息，包括供参考的 URL 地址，如有变更，恕不另行通知。
+文档“按现状”提供，不负任何担保责任，包括对适销性、适用于特定用途或非侵
+权性的任何担保，和任何提案、规格或样品在他处提到的任何担保。本文档不负任何责
+任，包括使用本文档内信息产生的侵犯任何专利权行为的责任。本文档在此未以禁止反
+言或其他方式授予任何知识产权使用许可，不管是明示许可还是暗示许可。
+文中所得测试数据均为安信可实验室测试所得，实际结果可能略有差异。
+Wi-Fi 联盟成员标志归 Wi-Fi 联盟所有。
+文中提到的所有商标名称、商标和注册商标均属其各自所有者的财产，特此声明。
+最终解释权归深圳市安信可科技有限公司所有。
+注 意
+由于产品版本升级或其他原因，本手册内容有可能变更。深圳市安信可科技有限公
+司保留在没有任何通知或者提示的情况下对本手册的内容进行修改的权利。本手册仅作
+为使用指导，深圳市安信可科技有限公司尽全力在本手册中提供准确的信息，但是深圳
+市安信可科技有限公司并不确保手册内容完全没有错误，本手册中的所有陈述、信息和
+建议也不构成任何明示或暗示的担保。
+PAGE 3
+ESP-12F 规格书 V1.1
+Copyright © 2020 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 3 页 共 17 页
+文件制定/修订/废止履历表
+版本 日期 制定/修订内容 制定 核准
+V0.9 2016.05.14 首次制定 杨小飞
+V1.0 2019.10.29 资料更新 谢一骥
+V1.1 2020.12.7 更新资料 徐宏
+PAGE 4
+ESP-12F 规格书 V1.1
+Copyright © 2020 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 4 页 共 17 页
+目录
+一、 产品概述........................................................................................................................................................... 5
+二、 电气参数........................................................................................................................................................... 8
+三、 外观尺寸......................................................................................................................................................... 10
+四、 管脚定义......................................................................................................................................................... 11
+五、 原理图............................................................................................................................................................. 13
+六、 设计指导......................................................................................................................................................... 13
+七、 回流焊曲线图................................................................................................................................................. 16
+八、 包装信息......................................................................................................................................................... 17
+九、 联系我们......................................................................................................................................................... 17
+PAGE 5
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 5 页 共 17 页
+一、 产品概述
+ESP-12F 是由安信可科技开发的 Wi-Fi 模块，该模块核心处理器 ESP8266 在较小尺
+寸封装中集成了业界领先的 Tensilica L106 超低功耗 32 位微型 MCU，带有 16 位精
+简模式，主频支持 80 MHz 和 160 MHz，支持 RTOS，集成 Wi-Fi MAC/ BB/RF/PA/LNA。
+ESP-12F Wi-Fi 模块支持标准的 IEEE802.11 b/g/n 协议，完整的 TCP/IP 协议栈。
+用户可以使用该模块为现有的设备添加联网功能，也可以构建独立的网络控制器。
+ESP8266 是高性能无线 SoC，以最低成本提供最大实用性，为 Wi-Fi 功能嵌入其他
+系统提供无限可能。
+ESP8266 拥有完整的且自成体系的 Wi-Fi 网络功能，既能够独立应用，也可以作为从
+机搭载于其他主机 MCU 运行。当 ESP8266 独立应用时，能够直接从外接 flash 中启动。
+内置的高速缓冲存储器有利于提高系统性能，并且优化存储系统。
+另外⼀种情况是， ESP8266 只需通过 SPI/SDIO 接口或 UART 接口即可作为 Wi-Fi
+适配器，应用到基于任何微控制器设计中。
+ESP8266 强大的片上处理和存储能力，使其可通过 GPIO 口集成传感器及其他应用的
+特定设备，大大地降低了前期开发的成本。
+PAGE 6
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 6 页 共 17 页
+特性
+ 完整的 802.11b/g/n Wi-Fi SoC 模块
+ 内置 Tensilica L106 超低功耗 32 位微型 MCU，主频支持 80 MHz 和 160 MHz，支
+持 RTOS
+ 内置 1 路 10 bit 高精度 ADC
+ 支持 UART/GPIO/ADC/PWM/SPI/I2C 接口
+ 采用 SMD-22 封装
+ 集成 Wi-Fi MAC/ BB/RF/PA/LNA
+ 支持多种休眠模式，深度睡眠电流低至 20uA
+ 串口速率最高可达 4Mbps
+ 内嵌 Lwip 协议栈
+ 支持 STA/AP/STA+AP 工作模式
+ 支持安卓、IOS 的 Smart Config（APP）/AirKiss（微信） 一键配网
+ 支持串口本地升级和远程固件升级（FOTA）
+ 通用 AT 指令可快速上手
+ 支持二次开发，集成了 Windows、Linux 开发环境
+PAGE 7
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 7 页 共 17 页
+主要参数
+表 1 主要参数说明
+模块型号 ESP-12F
+封装 SMD-22
+尺寸 24*16*3(±0.2)MM （其中 PCB 厚度 0.8MM）
+天线形式 板载 PCB 天线
+频谱范围 2400 ~ 2483.5MHz
+工作温度 -40 ℃ ~ 85 ℃
+存储环境 -40 ℃ ~ 125 ℃ , < 90%RH
+供电范围 供电电压 3.0V ~ 3.6V，供电电流 >500mA
+支持接口 UART/GPIO/ADC/PWM/SPI/I2C
+IO 口数量 9
+串口速率 支持 110 ~ 4608000 bps ，默认 115200 bps
+安全性 WEP/WPA-PSK/WPA2-PSK
+SPI Flash 默认 32Mbit
+认证 FCC、CE、IC、REACH、RoHS、SRRC、NCC、TELEC、ANATEL、KCC
+PAGE 8
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 8 页 共 17 页
+二、 电气参数
+电气特性
+射频性能
+描述 典型值 单位
+工作频率 2400 - 2483.5 MHz
+输出功率
+11n 模式下，PA 输出功率为 13±2 dBm
+11g 模式下，PA 输出功率为 14±2 dBm
+11b 模式下，PA 输出功率 16±2 dBm
+接收灵敏度
+CCK, 1 Mbps ＜＝-90 dBm
+CCK, 11 Mbps ＜＝-85 dBm
+6 Mbps (1/2 BPSK) ＜＝-88 dBm
+54 Mbps (3/4 64-QAM) ＜＝-70 dBm
+HT20 (MCS7) ＜＝-67 dBm
+参数 条件 最小值 典型值 最大值 单位
+供电电压 VDD 3.0 3.3 3.6 V
+I/O
+VIL/VIH - -0.3/0.75VIO - 0.25VIO/3.6 V
+VOL/VOH - N/0.8VIO - 0.1VIO/N V
+IMAX - - - 12 mA
+PAGE 9
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 9 页 共 17 页
+功耗
+下列功耗数据是基于 3.3V 的电源、25°C 的周围温度，并使用内部稳压器测得。
+ 所有测量均在没有 SAW 滤波器的情况下，于天线接口处完成。
+ 所有发射数据是基于 90% 的占空比，在持续发射的模式下测得的。
+模式 最小值 典型值 最大值 单位
+传送 802.11b, CCK 11Mbps,
+POUT=+17dBm
+- 170 - mA
+传送 802.11g, OFDM 54Mbps, POUT
+=+15dBm
+- 140 - mA
+传送 802.11n, MCS7, POUT =+13dBm - 120 - mA
+接收 802.11b,包长 1024 字节, -80dBm - 50 - mA
+接收 802.11g,包长 1024 字节, -70dBm - 56 - mA
+接收 802.11n,包长 1024 字节, -65dBm - 56 - mA
+Modem-Sleep① - 20 - mA
+Light-Sleep② - 2 - mA
+Deep-Sleep③ - 20 - uA
+Power Off - 0.5 - uA
+说明：
+ Modem-sleep 用于需要 CPU 一直处于工作状态的应用，如 PWM 或 I2S 应用等。在
+保持 Wi-Fi 连接时，如果没有数据传输，可根据 802.11 标准（如 U-APSD），关闭
+Wi-Fi Modem 电路来省电。例如，在 DTIM3 时，每睡眠 300 ms，醒来 3 ms 接收 AP
+的 Beacon 包等，则整体平均电流约 20 mA。
+ Light-sleep 用于 CPU 可暂停的应用，如 Wi-Fi 开关。在保持 Wi-Fi 连接时，如
+果没有数据传输，可根据 802.11 标准（如 U-APSD），关闭 Wi-Fi Modem 电路并暂
+停 CPU 来省电。例如，在 DTIM3 时，每睡眠 300 ms，醒来 3 ms 接收 AP 的 Beacon
+包等，则整体平均电流约 2 mA。
+ Deep-sleep 用于不需一直保持 Wi-Fi 连接，很长时间才发送一次数据包的应用，如
+每 100s 测量一次温度的传感器。例如，每 300s 醒来后需 0.3s ~ 1s 连上 AP 发
+送数据，则整体平均电流可远小于 1 mA。电流值 20 μA 是在 2.5V 下测得的。
+PAGE 10
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 10 页 共 17 页
+三、 外观尺寸
+
+PAGE 11
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 11 页 共 17 页
+四、 管脚定义
+ESP-12F 模组共接出 16 个接口，如管脚示意图，管脚功能定义表是接口定义。
+ESP-12F 管脚示意图
+表 管脚功能定义
+脚序 名称 功能说明
+1 RST 复位
+2 ADC A/D 转换结果。输入电压范围 0～1V，取值范围：0～1024
+3 EN 芯片使能端，高电平有效
+4 IO16 GPIO16/ 接到 RST 管脚时可做 deep sleep 的唤醒
+5 IO14 GPIO14/HSPI_CLK
+6 IO12 GPIO12/HSPI_MISO
+7 IO13 GPIO13/HSPI_MOSI/UART0_CTS
+8 VCC 3.3V 供电（VDD）；外部供电电源输出电流建议在 500mA 以
+上
+9 GND 接地
+10 IO15 GPIO15/MTDO/HSPICS/UART0_RTS
+11 IO2 GPIO2/UART1_TXD
+
+PAGE 12
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 12 页 共 17 页
+12 IO0 GPIO0；下载模式:外部拉低，运行模式:悬空或者外部拉高
+13 IO4 GPIO4
+14 IO5 GPIO5/IR_R
+15 RXD UART0_RXD/GPIO3
+16 TXD UART0_TXD/GPIO1
+表 模组启动模式说明
+模式 CH_PD(EN) RST GPIO15 GPIO0 GPIO2 TXD0
+下载模式 高 高 低 低 高 高
+运行模式 高 高 低 高 高 高
+注意：部分引脚已经内部上拉，请参考原理图
+PAGE 13
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 13 页 共 17 页
+五、 原理图
+六、 设计指导
+1、应用电路
+注意：
+（1）、模组外围电路，GPIO0 必须上拉到 VCC，GPIO15 必须下拉到 GND。
+（2）、EN 脚和 RST 脚必须上拉到 VCC。
+（3）、模组的 pin9-pin14 不可用。
+PAGE 14
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 14 页 共 17 页
+2、推荐模组封装设计尺寸
+注意：此为 ESP-12F 模组封装图，推荐依照此图来设计 PCB 板，使模组能 PCB 板上正常
+工作；且设计焊盘时需注意，不能把 PCB 上的焊盘设计的比模组对应焊盘内缩偏移，而
+PCB 焊盘相对模组焊盘外扩则不影响模组使用。
+3、天线布局要求
+（1）、在主板上的安装位置，建议以下 2 种方式：
+方案一：把模组放在主板边沿，且天线区域伸出主板边沿。
+方案二：把模组放在主板边沿，主板边沿在天线位置挖空一个区域。
+（2）、为了满足板载天线的性能，天线周边禁止放置金属件，远离高频器件。
+
+PAGE 15
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 15 页 共 17 页
+4、供电
+（1）、推荐 3.3V 电压，峰值 500mA 以上电流
+（2）、建议使用 LDO 供电；如使用 DC-DC 建议纹波控制在 30mV 以内。
+（3）、DC-DC 供电电路建议预留动态响应电容的位置，可以在负载变化较大时，优化输出
+纹波。
+（4）、3.3V 电源接口建议增加 ESD 器件。
+5、GPIO 口的使用
+（1）、模组外围引出了一些 GPIO 口，如需使用建议在 IO 口上串联 10-100 欧姆的电阻。
+这样可以抑制过冲，是两边电平更平稳。对 EMI 和 ESD 都有帮助。
+（2）、特殊 IO 口的上下拉，需参考规格书的使用说明，此处会影响到模组的启动配置。
+（3）、模组的 IO 口是 3.3V 如果主控与模组的 IO 电平不匹配，需要增加电平转换电路。
+（4）、如果 IO 口直连到外围接口，或者排针等端子，建议在 IO 走线靠近端子处预留 ESD
+器件。
+图 电平转换电路
+
+PAGE 16
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 16 页 共 17 页
+七、 回流焊曲线图
+
+PAGE 17
+ESP-12F 规格书 V1.1
+Copyright © 2019 Shenzhen Ai-Thinker Technology Co., Ltd All Rights Reserved 第 17 页 共 17 页
+八、 包装信息
+如下图示，ESP-12F 的包装为编带。
+九、 联系我们
+官方官网：https://www.ai-thinker.com
+开发 DOCS：https://docs.ai-thinker.com
+官方论坛：http://bbs.ai-thinker.com
+样品购买：https://anxinke.taobao.com
+商务合作：sales@aithinker.com
+技术支持：support@aithinker.com
+公司地址：深圳市宝安区西乡固戍华丰智慧创新港 C 栋 410
+联系电话：0755-29162996

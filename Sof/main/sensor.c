@@ -215,7 +215,8 @@ esp_err_t sensor_finish(int16_t *temp10)
     if (!temp10) return ESP_ERR_INVALID_ARG;
     esp_err_t err = ESP_FAIL;
     /* 只重试 CRC 错误和设备未找到；其他错误直接上报，避免掩盖故障。 */
-    for (int attempt = 1; attempt <= 3; attempt++) {
+    /* 第三次读取必定退出，由下方 attempt == 3 保证上限。 */
+    for (int attempt = 1; ; attempt++) {
         err = read_temp(temp10);
         if (err == ESP_OK || attempt == 3 ||
             (err != ESP_ERR_INVALID_CRC && err != ESP_ERR_NOT_FOUND)) break;

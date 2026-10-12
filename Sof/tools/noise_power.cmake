@@ -3,7 +3,7 @@ set(noise_sdk "$ENV{IDF_PATH}")
 file(TO_CMAKE_PATH "${noise_sdk}" noise_sdk)
 set(noise_dir "${CMAKE_BINARY_DIR}/noise_power")
 execute_process(COMMAND ${PYTHON} "${CMAKE_CURRENT_LIST_DIR}/expose_timers.py"
-    --sdk "${noise_sdk}" --out "${noise_dir}" --ar "${CMAKE_AR}" --objcopy "${CMAKE_OBJCOPY}"
+    --sdk "${noise_lib_sdk}" --out "${noise_dir}" --ar "${CMAKE_AR}" --objcopy "${CMAKE_OBJCOPY}"
     RESULT_VARIABLE expose_result)
 if(NOT expose_result EQUAL 0)
     message(FATAL_ERROR "Cannot expose SDK timer storage; refusing noise pause build")
@@ -11,9 +11,7 @@ endif()
 set_property(TARGET core PROPERTY IMPORTED_LOCATION "${noise_dir}/libcore.a")
 set_property(TARGET pp PROPERTY IMPORTED_LOCATION "${noise_dir}/libpp.a")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_LIST_DIR}/expose_timers.py"
-    "${noise_sdk}/components/esp8266/lib/libcore.a"
-    "${noise_sdk}/components/esp8266/lib/libpp.a")
+    "${CMAKE_CURRENT_LIST_DIR}/expose_timers.py")
 
 set(sleep_original "${noise_sdk}/components/esp8266/source/esp_sleep.c")
 file(READ "${sleep_original}" sleep_code)

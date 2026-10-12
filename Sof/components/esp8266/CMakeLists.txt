@@ -28,6 +28,12 @@ include("${esp8266_generated}")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${esp8266_sdk_dir}/CMakeLists.txt")
 set(COMPONENT_DIR "${esp8266_local_component}")
 
+if(NOT CMAKE_BUILD_EARLY_EXPANSION AND NOT BOOTLOADER_BUILD AND NOT CONFIG_NO_BLOBS)
+    include("${esp8266_local_dir}/driver.cmake")
+endif()
+
 if(CONFIG_APP_PAUSE_NOISE_TIMER AND NOT BOOTLOADER_BUILD)
+    # Timer aliases must come from the same retained core/pp driver archives.
+    get_filename_component(noise_lib_sdk "${esp8266_local_dir}/../.." ABSOLUTE)
     include("${esp8266_local_dir}/../../tools/noise_power.cmake")
 endif()

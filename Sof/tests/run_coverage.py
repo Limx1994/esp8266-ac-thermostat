@@ -127,7 +127,8 @@ def collect_c():
                 if not source.is_relative_to(ROOT):
                     continue
                 rel = source.relative_to(ROOT).as_posix()
-                if not (rel.startswith("main/") or rel.startswith("components/") or rel == "tools/lwip_timers.inc"):
+                if not (rel.startswith("main/") or rel.startswith("components/") or
+                        (rel.startswith("tools/") and rel.endswith(".inc"))):
                     continue
                 row = files.setdefault(rel, {"lines": {}, "functions": {}, "branches": [], "graphs": {}})
                 structure = {
@@ -167,6 +168,9 @@ def collect_c():
                               "uninstrumented": True})
     files.setdefault("tools/lwip_timers.inc", {"lines": {}, "functions": {}, "branches": [],
                                                "uninstrumented": True})
+    for path in (ROOT / "tools").glob("*.inc"):
+        files.setdefault(path.relative_to(ROOT).as_posix(),
+                         {"lines": {}, "functions": {}, "branches": [], "uninstrumented": True})
     return {"files": files, "variants": variants}
 
 
@@ -342,13 +346,13 @@ def report(c_data, py_data):
              "- ir.c：发送脚初始化为低电平失败时立即返回错误，避免忽略 GPIO 故障；10 个初始化步骤独立注入。日志见 ir_init_repro.log 和 ir_init_fixed.log。",
              "- main.c：关闭热点请求仅在 portal_stop 成功后清除，首次停止失败后仍会重试。日志见 control_stop_repro.log 和 control_stop_fixed.log。",
              "- 复现和修复日志分别为 unrecv_repro.log/unrecv_fixed.log、uri_alloc_repro.log/uri_alloc_fixed.log。",
-             "- 固件构建日志见 final_build.log；真实镜像布局、HEX校验及生成配置由本次运行重新验证，哈希见 products.json。",
+             "- 本轮固件构建日志见 ../coverage_fix/build.log；真实镜像布局、HEX校验及生成配置由本次运行重新验证，哈希见 products.json。",
              "- 关键路径矩阵见 path_matrix.md。所有未命中分支均保留，未自动豁免；不可达判定需逐项源码证明。",
              "- tools/*.cmake 和组件 CMakeLists 由真实固件构建验证，无行/分支插桩；clean.ps1 不在本次构建/烧录测试范围。",
              "- 主机 GPIO/寄存器、任务与网络均为 mocks；代码覆盖不证明芯片时序、真实并发或电气特性。"]
     rows.append("- HTTP 发送返回零字节时立即报错，避免无进展循环；复现及修复日志见 zero_send_repro.log/zero_send_fixed.log。")
     rows.append("- URI 缺少路径字段时 default 可达，已有失败返回和无发送断言；已删除此前错误的不可达说明。")
-    rows.append("- 主机宏中的 assert 也会映射到自有源码行（临界区、SDK 错误检查及核心线程锁）；原始分支数包含这些检查，未自动排除。")
+    rows.append("- 主机临界区及核心线程锁 assert 保留在测试辅助函数中；SDK 错误检查仍计入自有源码原始分支，未自动排除。")
     (OUT / "gaps.json").write_text(json.dumps(gaps, ensure_ascii=False, indent=2), encoding="utf-8")
     (OUT / "report.md").write_text("\n".join(rows) + "\n", encoding="utf-8")
     return bool(gaps or failed)
@@ -370,6 +374,8 @@ def main():
         check("启动诊断", startup)
         check("功耗 28 组合与 SDK 定时器", lambda: script("test_power.py"))
         check("热点与 HTTP", lambda: script("test_portal.py"))
+        check("完整 HTTP 主循环", lambda: script("test_http_main.py"))
+        check("DHCP/ARP/WiFi", lambda: script("test_dhcps.py"))
     cov.stop()
     cov.save()
     cov.json_report(outfile=str(OUT / "python.json"))

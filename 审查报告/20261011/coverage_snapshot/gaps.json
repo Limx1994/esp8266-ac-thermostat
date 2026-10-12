@@ -1,0 +1,32 @@
+[
+  {
+    "file": "main/ir.c",
+    "reason": "现有主机测试未编译该源文件；需增加实际源码 mock harness",
+    "lines": "全部"
+  },
+  {
+    "file": "main/main.c",
+    "reason": "现有主机测试未编译该源文件；需增加实际源码 mock harness",
+    "lines": "全部"
+  },
+  {
+    "file": "main/noise_timer.c",
+    "reason": "现有主机测试未编译该源文件；需增加实际源码 mock harness",
+    "lines": "全部"
+  },
+  {
+    "file": "main/sensor.c",
+    "reason": "现有主机测试未编译该源文件；需增加实际源码 mock harness",
+    "lines": "全部"
+  },
+  {
+    "file": "main/sleep_trace.c",
+    "reason": "现有主机测试未编译该源文件；需增加实际源码 mock harness",
+    "lines": "全部"
+  },
+  {
+    "file": "tools/lwip_timers.inc",
+    "reason": "现有主机测试未编译该源文件；需增加实际源码 mock harness",
+    "lines": "全部"
+  }
+]

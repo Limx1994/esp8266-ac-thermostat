@@ -5,6 +5,7 @@
     python build.py
     python flash.py --dry-run
     python flash.py
+    python flash.py --full --port COM3
 无 --port 时，系统恰有 COM1 和另一个串口才自动选择后者；
 其他情况请用 --port 指定串口。--baud 默认 460800。
 
@@ -109,6 +110,11 @@ bootloader、partition table、应用程序以及其他烧录段写入 ESP-12F F
       - 各烧录区域占用的 4 KiB Flash sector 是否发生冲突。
 
     dry-run 不检查 esptool.exe，不访问串口，也不会写 Flash。
+
+--full
+    可选。将 build/auto/full_flash.bin 从 0x0 全量写入 4MB Flash。
+    检查镜像大小及其与当前分段固件的一致性；会清除 NVS 保存的数据。
+    可与 --dry-run 一起使用，仅预检而不烧写。
 
 安全检查
 ========
@@ -451,6 +457,23 @@ def read_layout():
     return mode, size_text, freq, segments
 
 
+def read_full_image(size_text, segments):
+    """检查当前构建的 4MB 全量镜像，返回单个烧录段。"""
+    if size_text != "4MB":
+        raise ValueError("全量烧写要求 Flash 容量为 4MB")
+    path = BUILD / "full_flash.bin"
+    image = path.read_bytes()
+    if len(image) != 4 * 1024 * 1024:
+        raise ValueError("full_flash.bin 必须恰为 4MB；请重新运行 python build.py")
+    for offset, name, segment_path, size in segments:
+        if image[offset:offset + size] != segment_path.read_bytes():
+            raise ValueError(
+                f"full_flash.bin 与当前分段固件不一致：{name}；"
+                "请重新运行 python build.py"
+            )
+    return [(0, path.name, path, len(image))]
+
+
 def build_command(
     port,
     baud,
@@ -518,6 +541,12 @@ def main():
         help="只检查 Flash 布局和 BIN 文件，不访问串口或写入 Flash",
     )
 
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="从 0x0 全量烧写 4MB full_flash.bin，会清除 NVS 数据",
+    )
+
     args = parser.parse_args()
 
     # -----------------------------------------------------------------------
@@ -527,6 +556,8 @@ def main():
     print("[1/3] 检查本次构建的烧录配置", flush=True)
     print(f"  配置文件：{BUILD / 'flasher_args.json'}")
     mode, size_text, freq, segments = read_layout()
+    if args.full:
+        segments = read_full_image(size_text, segments)
     port = resolve_port(args.port)
 
     print(
@@ -555,7 +586,10 @@ def main():
             f"-0x{sector_end - 1:06X}]"
         )
 
-    print("  仅写入上述分段；未覆盖的 NVS 区域保持原状")
+    if args.full:
+        print("  全量写入 4MB Flash；将清除 NVS 保存的规则、红外编码及共享载波")
+    else:
+        print("  仅写入上述分段；未覆盖的 NVS 区域保持原状")
     command = build_command(
         port,
         args.baud,

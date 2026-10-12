@@ -259,12 +259,33 @@ static void trace_rx(const char *phase, const char *stage)
              phase, stage, level, intr, pending, (unsigned)calls, segments);
 }
 
+/* SDK set_blob 立即落盘；学习失败时恢复旧有效码，旧无码则移除新键。 */
+static esp_err_t restore_code(nvs_handle handle, const char *key,
+                              const ir_code_t *old)
+{
+    bool valid = code_valid(old);
+    size_t size = offsetof(ir_code_t, duration) + old->count * sizeof(uint16_t);
+    esp_err_t err = valid ? nvs_set_blob(handle, key, old, size) :
+                           nvs_erase_key(handle, key);
+    if (!valid && err == ESP_ERR_NVS_NOT_FOUND) err = ESP_OK;
+    if (err != ESP_OK) return err;
+    err = nvs_commit(handle);
+    if (err != ESP_OK) return err;
+    size_t read_size = sizeof(capture_us);
+    err = nvs_get_blob(handle, key, capture_us, &read_size);
+    if (!valid) return err == ESP_ERR_NVS_NOT_FOUND ? ESP_OK :
+                       (err == ESP_OK ? ESP_ERR_INVALID_RESPONSE : err);
+    if (err == ESP_OK && (read_size != size || memcmp(capture_us, old, size) != 0))
+        err = ESP_ERR_INVALID_RESPONSE;
+    return err;
+}
+
 /* 等待信号最多 15 秒；采集最多 750 ms，高电平空闲 100 ms 判定帧结束。 */
 static void learn_task(void *arg)
 {
     ir_code_t candidate = { .version = IR_VERSION, .carrier_khz = ir_get_carrier() };
-    TickType_t poll_ticks = pdMS_TO_TICKS(2);
-    if (!poll_ticks) poll_ticks = 1;
+    /* 在编译期选择至少一个 tick，保持 100/1000 Hz 等配置的等待行为。 */
+    const TickType_t poll_ticks = pdMS_TO_TICKS(2) ? pdMS_TO_TICKS(2) : 1;
     esp_err_t err = ESP_OK;
     const char *stage = "rx-handler-add";
     capture_count = 0;
@@ -370,6 +391,14 @@ remove_isr:
         if (err != ESP_OK)
             ESP_LOGE(TAG, "learn slot %d NVS verification failed: %s",
                      learn_slot + 1, esp_err_to_name(err));
+    }
+    if (err != ESP_OK) {
+        esp_err_t restore_err = restore_code(handle, key, &codes[learn_slot]);
+        if (restore_err == ESP_OK)
+            ESP_LOGI(TAG, "learn slot %d previous NVS code restored and verified", learn_slot + 1);
+        else
+            ESP_LOGE(TAG, "learn slot %d NVS restore failed: %s; persistent code uncertain, re-learn required",
+                     learn_slot + 1, esp_err_to_name(restore_err));
     }
     nvs_close(handle);
     if (err == ESP_OK) {
@@ -683,7 +712,8 @@ finish:
         /* 只有定时器停止且 I2S、时钟恢复完成才算空闲；否则保留休眠锁。 */
         output_idle = timer_err == ESP_OK && !i2s_pending && !clock_pending;
     }
-    if (output_idle && tx_sleep_locked) {
+    /* 本次发送在任何 finish 路径之前均已取得或保留休眠锁。 */
+    if (output_idle) {
         esp_sleep_unlock();
         tx_sleep_locked = false;
     }

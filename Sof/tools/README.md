@@ -21,9 +21,19 @@
 
 分段偏移及 Flash 参数以本次构建的 `build\auto\flasher_args.json` 为准；若其中 Flash 频率不是 `26m`，请更新本地 `sdkconfig` 并重新运行 `python build.py`，烧录脚本会拒绝旧的 40 MHz 产物。烧录完成后断开 P4 短接并复位。`full_flash.bin` 从 `0x0` 整片写入会清除 NVS 中保存的规则、红外编码及共享载波；需保留数据时使用分段命令。固件产物及最新验证见 [本地发布](../README.md#本地发布)。指定 `--port COM3 --dry-run` 不打开串口，也不核验 esptool 文件；预检通过只表示布局检查通过，设备烧录须另行连接设备执行。
 
+## 全量烧录与发布校验
+
+1.0A 保留默认分段烧录，并提供 `python flash.py --full --port COM3`：从 `0x0` 写入 `build\auto\full_flash.bin`，要求镜像恰为 4 MB 且内容与当前分段固件一致。该操作会清除规则、红外编码、共享载波及网页校准参数；仅预检使用 `python flash.py --full --port COM3 --dry-run`。
+
+Release 附件包含分段 ZIP、完整 BIN/HEX 及 `SHA256SUMS.txt`；下载后用 `Get-FileHash -Algorithm SHA256` 与清单逐项比对。ZIP 内含布局、esptool、许可及 TXT 操作说明。用户于 2026-10-12 确认全部功能实机通过；本轮 dry-run 和校验不执行设备烧写。
+
 ## SDK 定时器构建工具
 
 `lwip_power.cmake` 按配置生成构建目录中的 `lwip_timeouts.c`，`lwip_timers.inc` 提供网络周期暂停/恢复实现。`noise_power.cmake` 与 `expose_timers.py` 生成项目内静态库及休眠源码副本，为实际 SDK 定时器对象添加符号别名。`components\esp8266` 接入这些副本；不会修改已安装 SDK，匹配失败时停止构建。开关、回退条件和验收见 [休眠与供电](../README.md#休眠与供电) 与 [功耗验收](../README.md#功耗验收)。
+
+## Wi-Fi 驱动评估
+
+`wifi_driver_eval.py` 为独立评估入口。候选 archive、revision/hash pin 和 timer alias 必须来自同一候选组件；来源或哈希不匹配会报错。生产构建继续使用固定官方库，详见 [构建与烧录](../README.md#构建与烧录)。
 
 ## 本地额外工具
 

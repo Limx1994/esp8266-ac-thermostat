@@ -4,7 +4,7 @@ set(COMPONENT_ADD_INCLUDEDIRS "${httpd_sdk}/include")
 set(COMPONENT_PRIV_INCLUDEDIRS "${httpd_sdk}/src"
                               "${httpd_sdk}/src/port/esp8266"
                               "${httpd_sdk}/src/util")
-set(COMPONENT_SRCS "${httpd_sdk}/src/httpd_main.c"
+set(COMPONENT_SRCS "httpd_main.c"
                    "httpd_parse.c"
                    "${httpd_sdk}/src/httpd_sess.c"
                    "httpd_txrx.c"

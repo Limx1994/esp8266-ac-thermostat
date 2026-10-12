@@ -1,0 +1,78 @@
+[
+  {
+    "id": "COMPLETENESS-001",
+    "severity": "P2",
+    "title": "默认Wi-Fi驱动评估实际仍链接生产固定库",
+    "domain": "功能完整度",
+    "location": "D:\\空调温度\\Sof\\tools\\wifi_driver_eval.py:112",
+    "symbols": "main；imported archive targets",
+    "trigger": "现有SDK基线、工具及候选缓存或网络可用，执行python tools\\wifi_driver_eval.py，不加--latest。",
+    "impact": "报告记录候选620605a，但真实应用archive和噪声别名来源为复制进OUT的生产858c7c2固定库，所得镜像不能证明默认候选的实际表现。",
+    "evidence": [
+      "REV=620605a；main:112复制当前components（包括生产库与driver.cmake）到OUT。",
+      "main:150候选只写shadow/sdk/components/esp8266/lib。",
+      "组件CMakeLists.txt:32 include local driver.cmake，:37 noise_lib_sdk定位OUT。",
+      "driver.cmake:29重写7个IMPORTED_LOCATION为local组件/lib；后续无回写候选。",
+      "main:211路径子串检查无法区分shadow SDK与local组件。",
+      "test_wifi_eval的project.main为mock，未覆盖真实CMake来源选择。"
+    ],
+    "original_verification": "独立真实CMake3.13.4 probe：net80211从candidate_sdk/libnet80211.a改为生产组件/lib/libnet80211.a，revision858c7c2。首次缺Ninja指定已有CMAKE_MAKE_PROGRAM后成功。没有完整运行默认评估/下载/烧录。",
+    "verification_artifacts_available": true,
+    "cross_review": "Bug专员独立同根因；本人确认后续无回写、路径子串不证明候选来源。限定默认入口，排除--latest。无未决技术争议。",
+    "recommendation": "评估入口使真实archive与noise alias使用所选候选同一来源，并核对实际链接路径/哈希与REV；保持生产默认固定库行为。",
+    "verification": "当前真实CMake探针重跑成功，7个IMPORTED_LOCATION由候选SDK路径改为生产组件路径；候选为占位路径，未执行完整下载/评估/烧录。",
+    "current_evidence": [
+      "D:\\空调温度\\审查报告\\20261011\\driver_probe\\configure.json",
+      "D:\\空调温度\\审查报告\\20261011\\reproductions.json"
+    ]
+  },
+  {
+    "id": "BUG-NINJA-HEADER",
+    "severity": "P2",
+    "title": "规则测试Ninja入口忽略头文件修改而运行旧测试",
+    "domain": "Bug",
+    "location": "D:\\空调温度\\Sof\\tests\\build.ninja:2",
+    "symbols": "cc rule；rules_test.o",
+    "trigger": "首次按README构建后，仅修改tests/rules_cases.h或main/rules.h，再执行README现有Ninja增量检查入口。",
+    "impact": "Ninja认为无工作，旧exe仍通过，当前头文件接口或新增断言未重新编译与执行。",
+    "evidence": [
+      "build.ninja仅.c依赖，无depfile/deps或显式header。",
+      "rules_test.c:1 include rules_cases.h；该header:4 include rules.h。",
+      "README.md:160-162无预先清理；清理章节为独立可选操作。"
+    ],
+    "original_verification": "本专员独立复制真源码/Ninja首次3步构建exit0；仅给rules_cases.h追加#error后Ninja no work to do/0，旧exe passed/0；相同GCC fresh compile报#error/1。",
+    "verification_artifacts_available": true,
+    "cross_review": "Bug专员初审、本专员独立真实复现确认。run_coverage.py:88-94直接GCC重编译，因此不泛化为coverage无效。无未决技术争议。",
+    "recommendation": "沿现有Ninja cc rule生成并消费header depfile，或明确header依赖；验证只改header也重建，避免全量clean替代正确依赖。",
+    "verification": "当前fixture首次构建0，header添加#error后Ninja无工作0、旧测试0，fresh compile1。",
+    "current_evidence": [
+      "D:\\空调温度\\审查报告\\20261011\\ninja_probe\\after_header.json",
+      "D:\\空调温度\\审查报告\\20261011\\ninja_probe\\stale_test.json",
+      "D:\\空调温度\\审查报告\\20261011\\ninja_probe\\fresh_compile.json"
+    ]
+  },
+  {
+    "id": "CURRENT-WIFI-MOCK",
+    "severity": "P2",
+    "title": "新增AP配置调用未同步主机SDK mock，功耗测试无法编译",
+    "domain": "功能完整度",
+    "location": "D:\\空调温度\\Sof\\tests\\test_power.py:28",
+    "symbols": "SDK mock；HEADERS；main；CONTROL harness",
+    "trigger": "以当前main.c运行文档python tests\\test_power.py，或run_coverage.py调度该脚本。",
+    "impact": "CONTROL首个80MHz baseline组合编译失败，功耗/控制回归组停止，当前覆盖验收退出1；不影响真实SDK固件编译结论。",
+    "evidence": [
+      "main.c:621-625依赖wifi_config_t、ESP_IF_WIFI_AP及esp_wifi_get/set_config。",
+      "test_power.py:21将esp_wifi.h列入mock headers；2952-2956生成每个头为#include sdk_mock.h。",
+      "SDK字符串与COMMON未定义所需类型、枚举或函数声明/实现。",
+      "覆盖调度复用真实main，-Wall/-Wextra/-Werror编译因此报缺接口。"
+    ],
+    "verification": "审查报告/20261011/coverage_run.log:37-55真实GCC报上述缺接口；Sof/build/coverage/results.json记录功耗28组合组failed，root整体coverage exit1。本人只读日志与mock源文件，没有重复共享测试。",
+    "verification_artifacts_available": true,
+    "cross_review": "bug_recovery独立用当前SDK/CONTROL/COMMON原样生成harness并gcc -fsyntax-only复现exit1；同意P2，无反证。首CONTROL阻断功耗主机整组；真实SDK有这些接口，不推断生产故障。独立证据bug_recovery/control_mock_repro.json。",
+    "recommendation": "沿现有SDK mock补全实际使用的最小WiFi配置接口和确定性返回/配置状态，再覆盖信道已为9、修改成功、get/set失败反馈；重新运行现有测试，不改生产行为规避测试。",
+    "current_evidence": [
+      "D:\\空调温度\\审查报告\\20261011\\coverage_run.log",
+      "D:\\空调温度\\审查报告\\20261011\\bug_recovery\\control_mock_repro.json"
+    ]
+  }
+]

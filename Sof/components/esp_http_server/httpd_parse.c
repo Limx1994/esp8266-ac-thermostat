@@ -495,9 +495,14 @@ static void parse_init(httpd_req_t *r, http_parser *parser, parser_data_t *data)
 static bool method_start(unsigned char ch)
 {
     /* 使用 SDK 解析器的方法列表识别合法首字符，避免另建协议列表与解析器不一致。 */
-#define XX(num, name, string) if (ch == #string[0]) return true;
+#define XX(num, name, string) #string,
+    static const char *const methods[] = {
     HTTP_METHOD_MAP(XX)
+    };
 #undef XX
+    for (size_t i = 0; i < sizeof(methods) / sizeof(methods[0]); i++) {
+        if (ch == (unsigned char)methods[i][0]) return true;
+    }
     return false;
 }
 

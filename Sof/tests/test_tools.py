@@ -71,6 +71,34 @@ class ToolsTest(unittest.TestCase):
         self.assertEqual(decoded, data)
         self.assertTrue(text.endswith(":00000001FF\n"))
 
+    def test_full_flash(self):
+        self.config["flash_settings"]["flash_size"] = "4MB"
+        self.image()
+        mode, size, freq, segments = self.layout()
+        with patch.object(flash, "BUILD", self.folder):
+            full = flash.read_full_image(size, segments)
+            command = flash.build_command("COM3", 460800, mode, size, freq, full)
+            self.assertEqual(command[-2:], ["0x0", str(self.folder / "full_flash.bin")])
+            with patch.object(sys, "argv", ["flash.py", "--full", "--port", "COM3", "--dry-run"]), \
+                    patch.object(flash.subprocess, "run") as run, \
+                    redirect_stdout(io.StringIO()) as output:
+                flash.main()
+            run.assert_not_called()
+            self.assertIn("将清除 NVS", output.getvalue())
+            with self.assertRaisesRegex(ValueError, "容量为 4MB"):
+                flash.read_full_image("2MB", segments)
+            path = self.folder / "full_flash.bin"
+            image = path.read_bytes()
+            path.write_bytes(b"short")
+            with self.assertRaisesRegex(ValueError, "必须恰为 4MB"):
+                flash.read_full_image(size, segments)
+            path.write_bytes(b"\x00" + image[1:])
+            with self.assertRaisesRegex(ValueError, "不一致"):
+                flash.read_full_image(size, segments)
+            path.unlink()
+            with self.assertRaises(FileNotFoundError):
+                flash.read_full_image(size, segments)
+
     def test_bad_settings(self):
         for key, value in [("flash_freq", "40m"), ("flash_mode", None),
                            ("flash_size", "0KB"), ("flash_size", "64GB")]:

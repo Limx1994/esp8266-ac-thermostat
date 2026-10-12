@@ -1,0 +1,8 @@
+rule cc
+  command = gcc -std=c11 -Wall -Wextra -Werror -I main -c $in -o $out
+rule link
+  command = gcc $in -o $out
+build build_ascii/rules.o: cc main/rules.c
+build build_ascii/rules_test.o: cc tests/rules_test.c
+build build_ascii/rules_test.exe: link build_ascii/rules.o build_ascii/rules_test.o
+default build_ascii/rules_test.exe

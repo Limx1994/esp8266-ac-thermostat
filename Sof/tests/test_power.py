@@ -40,6 +40,10 @@ extern unsigned test_send_start;
 extern unsigned test_send_reports;
 extern bool drop_send_logs;
 typedef int esp_err_t;
+typedef enum { ESP_IF_WIFI_AP } wifi_interface_t;
+typedef union { struct { uint8_t channel; } ap; } wifi_config_t;
+esp_err_t esp_wifi_get_config(wifi_interface_t, wifi_config_t *);
+esp_err_t esp_wifi_set_config(wifi_interface_t, wifi_config_t *);
 typedef int BaseType_t;
 typedef uint32_t TickType_t;
 typedef void *TaskHandle_t;
@@ -172,6 +176,7 @@ esp_err_t nvs_set_blob(nvs_handle, const char *, const void *, size_t);
 esp_err_t nvs_get_u16(nvs_handle, const char *, uint16_t *);
 esp_err_t nvs_set_u16(nvs_handle, const char *, uint16_t);
 esp_err_t nvs_commit(nvs_handle);
+esp_err_t nvs_erase_key(nvs_handle, const char *);
 esp_err_t i2s_driver_install(int, const i2s_config_t *, int, void *);
 esp_err_t i2s_set_pin(int, const i2s_pin_config_t *);
 esp_err_t i2s_set_sample_rates(int, uint32_t);
@@ -243,6 +248,11 @@ void test_log(const char *tag, const char *fmt, ...) {
     if (strstr(record, "learn slot") && strstr(record, "stage="))
         snprintf(last_learn_stage, sizeof(last_learn_stage), "%s", strstr(record, "stage=") + 6);
     if (strstr(record, "rejected: ESP_ERR_INVALID_STATE")) busy_reject_logs++;
+    if (strstr(record, "previous NVS code restored and verified")) restore_ok_logs++;
+    if (strstr(record, "NVS restore failed:")) {
+        assert(strstr(record, "persistent code uncertain, re-learn required"));
+        restore_error_logs++;
+    }
 #endif
     (void)tag;
     if (strstr(fmt, "send slot %d starting")) test_send_start++;
@@ -378,7 +388,9 @@ CONTROL = r'''
 #include "freertos/FreeRTOS.h"
 static int critical_depth;
 static bool drop_led_once, led_race_done;
+static unsigned led_race_mode;
 static void control_enter(void);
+static void control_exit(void);
 static bool quiet_installed, uart_drained, fail_idle_config, fail_led_config;
 static esp_err_t rule_save_error, rule_commit_error, rule_open_error, rule_read_error;
 static bool invalid_rule_size, invalid_rule_value;
@@ -387,7 +399,7 @@ static uint64_t idle_pin_mask;
 #undef portENTER_CRITICAL
 #undef portEXIT_CRITICAL
 #define portENTER_CRITICAL() control_enter()
-#define portEXIT_CRITICAL() assert(--critical_depth >= 0)
+#define portEXIT_CRITICAL() control_exit()
 #include <stdlib.h>
 _Noreturn void test_control_abort(void);
 #undef ESP_ERROR_CHECK
@@ -398,13 +410,22 @@ _Noreturn void test_control_abort(void);
 static uint8_t cal_saved[2][4], cal_pending[4];
 static size_t cal_sizes[2], cal_pending_size;
 static int cal_pending_kind = -1;
-static esp_err_t cal_read_error;
+static esp_err_t cal_read_error, cal_open_error;
+static int cal_read_kind = -1;
 static void control_enter(void) {
     critical_depth++;
     if (drop_led_once) {
         drop_led_once = false; led_race_done = true; led_enabled = false;
     }
+    if (led_race_mode) {
+        if (led_race_mode == 1) led_learning = false;
+        else if (led_race_mode == 2) led_learning = true;
+        else if (led_race_mode == 3) led_enabled = true;
+        else { led_enabled = false; led_learning = true; }
+        led_race_mode = 0;
+    }
 }
+static void control_exit(void) { assert(--critical_depth >= 0); }
 static unsigned wait_enter_logs, wait_done_logs, wait_key_logs;
 static unsigned conversion_enter_logs, conversion_done_logs, dispatch_logs;
 static unsigned release_enter_logs, release_done_logs;
@@ -426,6 +447,9 @@ static uint32_t now_ms, end_ms, notified, ap_start, hold_until[17];
 static uint32_t sample_times[512], send_times[512];
 static int sample_count, send_count, pm_calls, blocked_keys;
 static int ap_starts, ap_stops;
+static uint8_t ap_channel = 1;
+static esp_err_t wifi_get_error, wifi_set_error;
+static unsigned wifi_get_calls, wifi_set_calls;
 static int button_wakes[2];
 static uint32_t stopped_at;
 static bool ap, ap_used, ir_busy, fail_pm, fail_wakeup, sensor_error;
@@ -443,8 +467,6 @@ static unsigned led_waits;
 static unsigned led_fail_at, led_calls;
 static bool led_disable_first;
 static unsigned led_flow, led_step, led_notifies;
-static bool release_stall_test;
-static unsigned release_delays;
 static unsigned trace_report_calls;
 static TickType_t max_notify_wait;
 void sleep_trace_report(void) {
@@ -464,6 +486,7 @@ rtc_cpu_freq_t rtc_clk_cpu_freq_get(void) {
 static uint16_t adc_raw = 855;
 static esp_err_t adc_error = ESP_OK;
 static int battery_reads;
+static uint32_t battery_times[512];
 static int fast_reads, single_reads;
 static bool power_external = true, start_failed, conversion_pending;
 static const int16_t *temp_script;
@@ -511,8 +534,6 @@ BaseType_t xTaskCreate(TaskFunction_t fn, const char *name, unsigned stack,
 void vTaskDelete(TaskHandle_t handle) { (void)handle; assert(fail_led_config); }
 void vTaskDelay(TickType_t ticks) {
     assert(ap || !led_enabled);
-    if (release_stall_test && ticks == pdMS_TO_TICKS(20) && ++release_delays == 3)
-        longjmp(finished, 1);
     if (conversion_pending) {
         assert(ticks == pdMS_TO_TICKS(750) + 1);
         assert(auto_sleep == (power_external && !ap && !ir_busy && !sleep_failed));
@@ -530,6 +551,13 @@ BaseType_t xTaskNotifyGive(TaskHandle_t task) {
 uint32_t ulTaskNotifyTake(BaseType_t clear, TickType_t ticks) {
     assert(clear == pdTRUE);
     if (led_test) {
+        if (led_flow == 3) {
+            assert(led_learning && led_level == 0);
+            if (led_step++ == 0) {
+                assert(ticks == pdMS_TO_TICKS(500)); return 1;
+            }
+            assert(ticks == portMAX_DELAY); longjmp(finished, 1);
+        }
         if (led_flow == 1) {
             switch (led_step++) {
             case 0:
@@ -603,13 +631,14 @@ esp_err_t esp_pm_configure(const void *cfg) {
 }
 esp_err_t nvs_flash_init(void) { return boot_fault == 1 ? ESP_FAIL : ESP_OK; }
 esp_err_t nvs_open(const char *name, int mode, nvs_handle *handle) {
-    (void)name; (void)mode; *handle = 1;
+    (void)name; *handle = 1;
+    if (mode == NVS_READONLY && cal_open_error) return cal_open_error;
     return boot_fault == 3 ? ESP_FAIL : rule_open_error;
 }
 esp_err_t nvs_get_blob(nvs_handle handle, const char *key, void *data, size_t *size) {
     if (strcmp(key, "temp_adj") == 0 || strcmp(key, "bat_adj") == 0) {
         int kind = strcmp(key, "temp_adj") == 0 ? 0 : 1;
-        if (cal_read_error) return cal_read_error;
+        if (cal_read_error && (cal_read_kind < 0 || kind == cal_read_kind)) return cal_read_error;
         if (!cal_sizes[kind]) return ESP_ERR_NVS_NOT_FOUND;
         assert(*size >= cal_sizes[kind]);
         *size = cal_sizes[kind]; memcpy(data, cal_saved[kind], *size); return ESP_OK;
@@ -630,7 +659,8 @@ esp_err_t adc_init(adc_config_t *cfg) {
 }
 esp_err_t adc_read(uint16_t *raw) {
     assert(!auto_sleep && critical_depth == 0);
-    battery_reads++;
+    assert(battery_reads < 512);
+    battery_times[battery_reads++] = now_ms;
     single_reads++;
     *raw = adc_raw;
     return adc_error;
@@ -670,6 +700,19 @@ esp_err_t ir_send(int slot) {
     return ESP_OK;
 }
 esp_err_t portal_init(void) { return boot_fault == 10 ? ESP_FAIL : ESP_OK; }
+esp_err_t esp_wifi_get_config(wifi_interface_t interface, wifi_config_t *cfg) {
+    assert(interface == ESP_IF_WIFI_AP && ap && !auto_sleep);
+    wifi_get_calls++;
+    if (wifi_get_error) return wifi_get_error;
+    cfg->ap.channel = ap_channel; return ESP_OK;
+}
+esp_err_t esp_wifi_set_config(wifi_interface_t interface, wifi_config_t *cfg) {
+    assert(interface == ESP_IF_WIFI_AP && ap && !auto_sleep);
+    wifi_set_calls++;
+    assert(cfg->ap.channel == 9);
+    if (wifi_set_error) return wifi_set_error;
+    ap_channel = cfg->ap.channel; return ESP_OK;
+}
 esp_err_t portal_start(void) {
     if (fail_portal_start_once) { fail_portal_start_once = false; return ESP_FAIL; }
     assert(!auto_sleep); ap = true; ap_used = false;
@@ -712,15 +755,33 @@ static void run_control(uint32_t duration, const event_t *script, size_t count,
     conversion_pending = false;
     conversion_sleeps = conversion_awake = 0;
     ap_starts = ap_stops = 0; stopped_at = 0;
+    wifi_get_calls = wifi_set_calls = 0;
     memset(button_wakes, 0, sizeof(button_wakes));
     now_ms = notified = 0; start_tick = base; end_ms = duration;
     GPIO.in = (boot_held_s1 ? 0 : 1U << 12) | (1U << 13);
     events = script; event_count = count; event_pos = 0;
     if (!setjmp(finished)) app_main();
-    assert(battery_reads == sample_count);
+    for (int i = 1; i < sample_count; i++)
+        assert(sample_times[i] - sample_times[i - 1] >= 15000);
+    for (int i = 1; i < battery_reads; i++)
+        assert(battery_times[i] - battery_times[i - 1] >= 2000);
     assert(critical_depth == 0 && fast_reads == 0 && single_reads == battery_reads);
 }
+#include "rules_cases.h"
+
 int main(void) {
+    run_rule_cases();
+    const event_t wifi_key[] = {{1000,1,0}};
+    for (unsigned scenario = 0; scenario < 4; scenario++) {
+        ap_channel = scenario == 1 ? 9 : 1;
+        wifi_get_error = scenario == 2 ? ESP_FAIL : ESP_OK;
+        wifi_set_error = scenario == 3 ? ESP_FAIL : ESP_OK;
+        run_control(5000, wifi_key, 1, false, false, false, 0);
+        assert(ap && wifi_get_calls == 1);
+        assert(wifi_set_calls == (scenario == 0 || scenario == 3 ? 1U : 0U));
+        assert(ap_channel == (scenario < 2 ? 9 : 1));
+    }
+    wifi_get_error = wifi_set_error = ESP_OK;
     rule_open_error = ESP_ERR_NVS_NOT_FOUND;
     assert(load_rules() == ESP_OK && !current.rules[0].enabled && !current.rules[1].enabled);
     rule_open_error = ESP_FAIL;
@@ -842,10 +903,21 @@ int main(void) {
     assert(button_count[0] == 2 && button_count[1] == 3);
     assert(dispatch_logs == 5 && release_enter_logs == 5 && release_done_logs == 5);
     assert(wait_key_logs > 0);
-    assert(sample_count == 13 && send_count == 0 && trend.count == 0);
-    const uint32_t expected[] = {0,2000,4000,6000,8000,10000,12000,
-        70020,72020,74020,76020,78020,80020};
-    for (int i = 0; i < 13; i++) assert(sample_times[i] == expected[i]);
+    assert(sample_count == 3 && send_count == 1 && trend.count == 0);
+    const uint32_t expected[] = {0,60000,75000};
+    for (int i = 0; i < 3; i++) assert(sample_times[i] == expected[i]);
+    const event_t sample_ap[] = {{1000,1,0}};
+    for (int wrap = 0; wrap < 2; wrap++) {
+        run_control(32000, sample_ap, 1, false, false, false,
+                    wrap ? UINT32_MAX - 500 : 0);
+        assert(sample_count == 3 && battery_reads == 16 && send_count == 0);
+        for (int i = 0; i < 3; i++) assert(sample_times[i] == (uint32_t)i * 15000);
+        for (int i = 0; i < 16; i++) assert(battery_times[i] == (uint32_t)i * 2000);
+    }
+    run_control(20000, sample_ap, 1, false, false, true, 0);
+    assert(sample_count == 2 && battery_reads == 10);
+    assert(!current.temp_valid && current.sensor_error == ESP_ERR_INVALID_CRC);
+    assert(current.battery_valid && battery_sample_tick == pdMS_TO_TICKS(18000));
     const event_t sleep_keys[] = {{1000,2,0}, {35000,2,0}};
     run_control(130000, sleep_keys, 2, false, false, false, 0);
     assert(sample_count == 3 && send_count == 1 && auto_sleep && !ap && !led_enabled);
@@ -853,12 +925,21 @@ int main(void) {
     assert(send_times[0] == 60760);
     assert(states[0].primed && states[0].fired && !states[0].armed);
     assert(button_wakes[1] == 2 && button_wakes[0] == 0);
-    const event_t stuck_button[] = {{1000,1,99999}};
-    release_stall_test = true; release_delays = 0;
-    run_control(6000, stuck_button, 1, false, false, false, 0);
+    const event_t stuck_button[] = {{1000,2,200000}};
+    run_control(130000, stuck_button, 1, false, false, false, 0);
     assert(release_enter_logs == 1 && release_done_logs == 0 && dispatch_logs == 1);
-    assert(sample_count == 1 && button_count[0] == 1 && gpio_get_level(12) == 0);
-    release_stall_test = false;
+    assert(sample_count == 3 && send_count == 1 && button_count[1] == 1);
+    assert(gpio_get_level(13) == 0 && !ap && !auto_sleep);
+    for (int i = 0; i < 3; i++) assert(sample_times[i] == (uint32_t)i * 60000);
+    assert(send_times[0] == 60760);
+    const event_t held_then_pressed[] = {{1000,2,70000}, {72000,2,0}};
+    run_control(130000, held_then_pressed, 2, false, false, false, 0);
+    assert(sample_count == 3 && button_count[1] == 2 && release_done_logs == 2);
+    assert(auto_sleep && !ap);
+    const event_t overlapping_keys[] = {{1000,2,70000}, {2000,1,0}};
+    run_control(74000, overlapping_keys, 2, false, false, false, 0);
+    assert(button_count[0] == 1 && button_count[1] == 1);
+    assert(release_enter_logs == 1 && release_done_logs == 1);
     const int16_t already_hot[] = {270};
     temp_script = already_hot; temp_count = 1;
     run_control(180000, sleep_keys, 2, false, false, false, 0);
@@ -919,21 +1000,21 @@ int main(void) {
     const event_t sleep_ap[] = {{1000,1,0}, {5000,2,0}};
     run_control(130000, sleep_ap, 2, false, false, false, 0);
     assert(ap_stops == 1 && stopped_at == 5000 && !ap && !led_enabled && auto_sleep);
-    assert(sample_count == 5 && sample_times[3] == 64000 && sample_times[4] == 124000);
+    assert(sample_count == 3 && sample_times[1] == 60000 && sample_times[2] == 120000);
     assert(button_wakes[0] == 1);
-    assert(send_count == 1 && send_times[0] == 124760);
+    assert(send_count == 1 && send_times[0] == 60760);
     const event_t sleep_busy[] = {{1000,1,0}, {2000,3,0}, {3000,2,0},
         {4000,2,0}, {7000,4,0}};
     run_control(70000, sleep_busy, 5, false, false, false, 0);
     assert(ap_stops == 1 && stopped_at >= 7000 && stopped_at <= 7100);
-    assert(!ap && !led_enabled && auto_sleep && sample_count == 5);
-    assert(sample_times[4] - sample_times[3] == 60000);
+    assert(!ap && !led_enabled && auto_sleep && sample_count == 2);
+    assert(sample_times[1] - sample_times[0] == 60000);
     const event_t toggle[] = {{1000,1,0}, {11000,1,300}, {11010,1,0}};
     run_control(72000, toggle, 3, false, false, false, 0);
     assert(ap_starts == 1 && ap_stops == 1 && stopped_at == 11000 && blocked_keys == 1);
     assert(!ap && !led_enabled && auto_sleep && led_level == 1);
-    assert(sample_count == 7 && sample_times[6] == 70000);
-    assert(send_count == 1 && send_times[0] == 70760);
+    assert(sample_count == 2 && sample_times[1] == 60000);
+    assert(send_count == 1 && send_times[0] == 60760);
     assert(states[0].primed && states[0].fired && !states[0].armed);
     const event_t reopen[] = {{1000,1,0}, {2000,1,0}, {3000,1,0}};
     run_control(7000, reopen, 3, false, false, false, 0);
@@ -949,17 +1030,17 @@ int main(void) {
     const event_t timeout[] = {{1000,1,0}, {100000,6,0}, {180000,6,0}};
     run_control(640000, timeout, 3, false, false, false, 0);
     assert(!ap && !led_enabled && auto_sleep);
-    assert(stopped_at == 181000 && sample_count == 98);
+    assert(stopped_at == 181000 && sample_count == 20);
     const event_t used[] = {{1000,1,0}, {1100,5,0}, {180000,6,0}};
     run_control(640000, used, 3, false, false, false, 0);
-    assert(sample_count == 301 && sample_times[300] == 600000);
+    assert(sample_count == 41 && sample_times[40] == 600000);
     assert(stopped_at == 601100 && !ap && auto_sleep);
     const event_t unused_busy[] = {{1000,1,0}, {180000,3,0}, {190000,4,0}};
     run_control(191000, unused_busy, 3, false, false, false, 0);
     assert(ap_stops == 1 && stopped_at >= 190000 && stopped_at <= 190100);
     const event_t learning[] = {{1000,1,0}, {1100,5,0}, {600000,3,0}, {610000,4,0}};
     run_control(620000, learning, 4, false, false, false, 0);
-    assert(!ap && auto_sleep && sample_times[sample_count - 1] == 608000);
+    assert(!ap && auto_sleep && sample_times[sample_count - 1] == 600000);
     run_control(1000, NULL, 0, false, false, false, 0);
     assert(current.battery_valid && current.battery_mv == 4345);
     adc_raw = 0;
@@ -1055,6 +1136,24 @@ int main(void) {
     if (!setjmp(finished)) { set_led_enabled(false); assert(false); }
     assert(abort_calls == before_led + 1 && led_calls == 1);
     led_fail_at = 0; critical_depth = 0;
+    led_learning = true; led_enabled = false; led_fail_at = 1; led_calls = 0;
+    unsigned before_learn_led = abort_calls;
+    if (!setjmp(finished)) { led_task(NULL); assert(false); }
+    assert(abort_calls == before_learn_led + 1 && led_calls == 1);
+    led_fail_at = 0; critical_depth = 0;
+    for (unsigned race = 1; race <= 3; race++) {
+        led_learning = race == 1; led_enabled = false; led_level = 1;
+        led_race_mode = race; led_calls = 0;
+        if (!setjmp(finished)) led_task(NULL);
+        assert(led_race_mode == 0 && critical_depth == 0 && led_calls == 0);
+    }
+    led_learning = false; led_enabled = false;
+    led_enabled = true; led_race_mode = 4; led_flow = 3;
+    led_step = 0; led_calls = 0;
+    if (!setjmp(finished)) led_task(NULL);
+    assert(led_race_mode == 0 && critical_depth == 0 && led_calls > 0);
+    led_flow = 0; led_learning = false; led_enabled = false;
+    puts("学习 LED 故障及进入临界区前状态变化检查通过");
     fail_led_config = true;
     led_task(NULL);
     fail_led_config = false;
@@ -1067,11 +1166,18 @@ int main(void) {
     boot_fault = 0;
     for (boot_fault = 11; boot_fault <= 12; boot_fault++) {
         unsigned before_abort = abort_calls;
-        if (!setjmp(finished)) { wait_button_release(); assert(false); }
+        TickType_t high_at = xTaskGetTickCount() - pdMS_TO_TICKS(20);
+        bool high = true;
+        if (!setjmp(finished)) { wait_button_release(&high_at, &high); assert(false); }
         assert(abort_calls == before_abort + 1);
     }
     boot_fault = 0;
     app_reset_rule(-1); app_reset_rule(2);
+    TickType_t high_at = 0;
+    bool high = true;
+    frozen_ticks = true; frozen_value = pdMS_TO_TICKS(10);
+    assert(!wait_button_release(&high_at, &high) && high);
+    frozen_ticks = false;
     assert(app_save_rule(1, &replacement) == ESP_OK);
     led_handle = NULL; led_enabled = false;
     set_led_enabled(true);
@@ -1126,15 +1232,45 @@ int main(void) {
     unsigned before_zero = zero_waits;
     report_delay = 61000;
     run_control(70000, NULL, 0, false, false, false, 0);
-    assert(zero_waits > before_zero && sample_count == 2);
+    assert(zero_waits == before_zero && sample_count == 1);
+    assert(sample_times[0] == 61000); /* 诊断延迟后从实际转换时刻计时，避免紧接着再转换。 */
     /* 网页校准基于未追加校准的样本；模拟提交、重启及错误，不访问真实 NVS。 */
     bool storage_failed = true;
     assert(app_calibrate(false, 250, NULL) == ESP_ERR_INVALID_ARG);
     assert(app_calibrate(false, 501, &storage_failed) == ESP_ERR_INVALID_ARG && !storage_failed);
     assert(app_calibrate(true, 2499, &storage_failed) == ESP_ERR_INVALID_ARG);
     adc_raw = 702;
-    run_control(4000, battery_ap, 1, false, false, false, 0);
+    run_control(16000, battery_ap, 1, false, false, false, 0);
     assert(base_battery_mv == 3595 && base_temp10 == 260);
+    uint32_t saved_now = now_ms;
+    TickType_t saved_temp_tick = temp_sample_tick;
+    TickType_t saved_battery_tick = battery_sample_tick;
+    temp_sample_tick = xTaskGetTickCount();
+    battery_sample_tick = temp_sample_tick;
+    now_ms += 5000;
+    assert(app_calibrate(true, 3595, &storage_failed) == ESP_OK);
+    now_ms += 10;
+    assert(app_calibrate(true, 3595, &storage_failed) == ESP_ERR_INVALID_STATE);
+    now_ms = saved_now + 20000;
+    assert(app_calibrate(false, 260, &storage_failed) == ESP_OK);
+    now_ms += 10;
+    assert(app_calibrate(false, 260, &storage_failed) == ESP_ERR_INVALID_STATE);
+    now_ms = saved_now;
+    temp_sample_tick = saved_temp_tick;
+    battery_sample_tick = saved_battery_tick;
+    /* 独立采集只更新自身状态；读取失败仍明确上报。 */
+    int before_samples = sample_count, before_adc = battery_reads;
+    set_auto_sleep(false);
+    int16_t saved_temp = current.temp10;
+    TickType_t before_temp_tick = temp_sample_tick;
+    adc_error = ESP_FAIL;
+    update_battery();
+    assert(battery_reads == before_adc + 1 && sample_count == before_samples);
+    assert(!current.battery_valid && current.battery_error == ESP_FAIL);
+    assert(current.temp_valid && current.temp10 == saved_temp && temp_sample_tick == before_temp_tick);
+    adc_error = ESP_OK;
+    update_battery();
+    assert(current.battery_valid);
     states[0].primed = true; trend.count = 3; last_send[0] = 123; send_recorded[0] = true;
     assert(app_calibrate(false, 280, &storage_failed) == ESP_OK && !storage_failed);
     assert(current.temp10 == 280 && temp_adjust10 == 20 && trend.count == 0 && !states[0].primed);
@@ -1148,10 +1284,10 @@ int main(void) {
     assert(app_calibrate(true, 4000, &storage_failed) == ESP_OK && current.battery_mv == 4000);
     assert(app_calibrate(true, 4000, &storage_failed) == ESP_OK && battery_adjust.base_mv == 3595);
     assert(adjusted_battery(3994) == 4444); /* boot/sleep 已换算值再应用统一比例。 */
-    now_ms += 6000;
+    now_ms += 21000;
     assert(app_calibrate(false, 270, &storage_failed) == ESP_ERR_INVALID_STATE);
     assert(app_calibrate(true, 3900, &storage_failed) == ESP_ERR_INVALID_STATE);
-    run_control(4000, battery_ap, 1, false, false, false, 0);
+    run_control(16000, battery_ap, 1, false, false, false, 0);
     assert(temp_adjust10 == 20 && current.temp10 == 280 && current.battery_mv == 4000);
     rule_open_error = ESP_FAIL;
     assert(app_calibrate(false, 270, &storage_failed) == ESP_FAIL && storage_failed);
@@ -1246,6 +1382,51 @@ int main(void) {
     assert(load_calibration() == ESP_ERR_INVALID_STATE);
     memset(cal_sizes, 0, sizeof(cal_sizes));
     assert(load_calibration() == ESP_OK && temp_adjust10 == 0 && battery_adjust.reference_mv == 1);
+    /* 校准新增边界、独立存储失败与启动致命路径。 */
+    app_set_learning(false); led_handle = NULL;
+    app_set_learning(true); app_set_learning(false);
+    assert(!led_learning && critical_depth == 0);
+    assert(app_calibrate(true, 4501, &storage_failed) == ESP_ERR_INVALID_ARG);
+    assert(app_calibrate(false, -101, &storage_failed) == ESP_ERR_INVALID_ARG);
+    const battery_adjust_t invalid_voltage[] = {
+        {2499, 3000}, {4501, 3000}, {4000, 0}, {2500, 5001}, {4500, 2999}
+    };
+    for (unsigned i = 0; i < sizeof(invalid_voltage) / sizeof(invalid_voltage[0]); i++) {
+        assert(!battery_adjust_valid(&invalid_voltage[i]));
+        cal_sizes[1] = sizeof(invalid_voltage[i]);
+        memcpy(cal_saved[1], &invalid_voltage[i], cal_sizes[1]);
+        assert(load_calibration() == ESP_ERR_INVALID_STATE);
+        assert(temp_adjust10 == 0 && battery_adjust.reference_mv == 1);
+    }
+    assert(battery_adjust_valid(&(battery_adjust_t){2500, 5000}));
+    assert(battery_adjust_valid(&(battery_adjust_t){4500, 3000}));
+    cal_sizes[1] = 1;
+    assert(load_calibration() == ESP_ERR_INVALID_STATE);
+    int16_t negative_offset = -51;
+    cal_sizes[0] = sizeof(negative_offset);
+    memcpy(cal_saved[0], &negative_offset, sizeof(negative_offset));
+    assert(load_calibration() == ESP_ERR_INVALID_STATE);
+    memset(cal_sizes, 0, sizeof(cal_sizes));
+    cal_read_kind = 1; cal_read_error = ESP_FAIL;
+    assert(load_calibration() == ESP_FAIL);
+    cal_read_kind = -1; cal_read_error = ESP_OK;
+    cal_open_error = ESP_ERR_NVS_NOT_FOUND;
+    temp_adjust10 = 20; battery_adjust = (battery_adjust_t){4000, 3595};
+    assert(load_calibration() == ESP_OK && temp_adjust10 == 0);
+    assert(battery_adjust.reference_mv == 1 && battery_adjust.base_mv == 1);
+    cal_open_error = ESP_FAIL;
+    assert(load_calibration() == ESP_FAIL);
+    cal_open_error = ESP_OK; cal_read_error = ESP_FAIL;
+    unsigned before_cal_abort = abort_calls;
+    run_control(1000, NULL, 0, false, false, false, 0);
+    assert(abort_calls == before_cal_abort + 1 && sample_count == 0);
+    cal_read_error = ESP_OK;
+    run_control(1000, NULL, 0, false, false, false, 0);
+    set_auto_sleep(false);
+    battery_off_samples = UINT32_MAX;
+    update_battery();
+    assert(battery_off_samples == UINT32_MAX);
+    puts("校准边界、存储失败、启动失败及采样计数饱和检查通过");
     puts("power control: web calibration persistence/failures/freshness, state voltage, trend, LED, battery and AP lifecycle passed");
     return 0;
 }
@@ -1259,8 +1440,10 @@ static bool fail_sensor_config;
 static int critical_depth;
 #undef portENTER_CRITICAL
 #undef portEXIT_CRITICAL
-#define portENTER_CRITICAL() assert(critical_depth++ == 0)
-#define portEXIT_CRITICAL() assert(--critical_depth == 0)
+static void sensor_enter(void) { assert(critical_depth++ == 0); }
+static void sensor_exit(void) { assert(--critical_depth == 0); }
+#define portENTER_CRITICAL() sensor_enter()
+#define portEXIT_CRITICAL() sensor_exit()
 #include "sensor.c"
 static int inputs[512], input_count, input_pos;
 static uint8_t commands[32], byte_value;
@@ -1334,7 +1517,10 @@ static void queue_config(int16_t raw, bool good_crc, uint8_t config) {
 static void queue_result(int16_t raw, bool good_crc) {
     queue_config(raw, good_crc, 0x7f);
 }
+#include "rules_cases.h"
+
 int main(void) {
+    run_rule_cases();
     bool external;
     int16_t temp = 999;
     level = 1;
@@ -1528,9 +1714,13 @@ static void test_ir_exit(void);
 #define portENTER_CRITICAL() (++critical_depth)
 #define portEXIT_CRITICAL() test_ir_exit()
 #include "ir.c"
-static ir_code_t saved_codes[2], pending_code;
-static size_t saved_sizes[2], pending_size;
-static int pending_slot;
+static ir_code_t saved_codes[2];
+static size_t saved_sizes[2];
+static unsigned restore_ok_logs, restore_error_logs;
+static bool fail_read_once;
+static esp_err_t erase_error;
+static bool erase_ignored;
+static esp_err_t erase_read_error;
 static bool nvs_enabled, simulate_capture, corrupt_read, short_read;
 static unsigned hold_capture_low;
 static bool rx_pullup;
@@ -1629,6 +1819,7 @@ void uart_tx_wait_idle(uint8_t num) {
 static TickType_t learn_tick;
 static unsigned capture_delays;
 static unsigned capture_shape;
+static unsigned capture_pulse = 1000;
 static bool capture_timeout;
 static bool run_learn, task_failed;
 static bool learning_led;
@@ -1647,7 +1838,7 @@ void vTaskDelay(TickType_t ticks) {
     if (capture_started) capture_delays++;
     if (simulate_capture && !capture_started) {
         capture_started = true; capture_count = 7; first_us = last_us = 0;
-        for (int i = 0; i < 7; i++) capture_us[i] = 1000;
+        for (int i = 0; i < 7; i++) capture_us[i] = capture_pulse;
         if (capture_shape == 1) capture_count = 6;
         if (capture_shape == 2) capture_us[0] = 0;
         if (capture_shape == 3) capture_us[0] = 650010;
@@ -1717,6 +1908,10 @@ esp_err_t nvs_get_u16(nvs_handle handle, const char *key, uint16_t *value) {
 }
 esp_err_t nvs_get_blob(nvs_handle handle, const char *key, void *data, size_t *size) {
     assert(handle == 1);
+    if (fail_read_once) { fail_read_once = false; return ESP_FAIL; }
+    if (erase_read_error) {
+        esp_err_t err = erase_read_error; erase_read_error = ESP_OK; return err;
+    }
     if (read_error) return read_error;
     int slot = strcmp(key, "ir0") == 0 ? 0 : 1;
     if (!saved_sizes[slot]) return ESP_ERR_NVS_NOT_FOUND;
@@ -1727,23 +1922,33 @@ esp_err_t nvs_get_blob(nvs_handle handle, const char *key, void *data, size_t *s
     return ESP_OK;
 }
 esp_err_t nvs_set_blob(nvs_handle handle, const char *key, const void *data, size_t size) {
-    assert(handle == 1 && size <= sizeof(pending_code));
+    assert(handle == 1 && size <= sizeof(saved_codes[0]));
     assert(GPIO.pin[5].int_type == GPIO_INTR_DISABLE);
     if (set_error) return set_error;
-    pending_slot = strcmp(key, "ir0") == 0 ? 0 : 1;
-    memset(&pending_code, 0, sizeof(pending_code));
-    memcpy(&pending_code, data, size); pending_size = size;
+    int slot = strcmp(key, "ir0") == 0 ? 0 : 1;
+    memset(&saved_codes[slot], 0, sizeof(saved_codes[slot]));
+    memcpy(&saved_codes[slot], data, size); saved_sizes[slot] = size;
+    nvs_enabled = true; /* SDK set_blob writes immediately; commit is not a transaction. */
+    return ESP_OK;
+}
+esp_err_t nvs_erase_key(nvs_handle handle, const char *key) {
+    assert(handle == 1 && GPIO.pin[5].int_type == GPIO_INTR_DISABLE);
+    if (erase_error) return erase_error;
+    int slot = strcmp(key, "ir0") == 0 ? 0 : 1;
+    if (!saved_sizes[slot]) return ESP_ERR_NVS_NOT_FOUND;
+    if (!erase_ignored) saved_sizes[slot] = 0;
     return ESP_OK;
 }
 esp_err_t nvs_set_u16(nvs_handle handle, const char *key, uint16_t value) {
     assert(handle == 1 && strcmp(key, "carrier") == 0);
-    (void)value; return set_error;
+    (void)value;
+    if (set_error) return set_error;
+    nvs_enabled = true;
+    return ESP_OK;
 }
 esp_err_t nvs_commit(nvs_handle handle) {
     assert(handle == 1);
     if (commit_error) return commit_error;
-    saved_codes[pending_slot] = pending_code;
-    saved_sizes[pending_slot] = pending_size; nvs_enabled = true;
     return ESP_OK;
 }
 void app_reset_rule(int slot) { (void)slot; }
@@ -2137,21 +2342,62 @@ int main(void) {
     check_software(ESP_OK); check_waveform(periods[1]);
     assert(code_hash(&codes[0]) == saved_hash); /* Same NVS blob, no re-learning. */
     ap_on = true;
+    capture_pulse = 2000; /* New capture must differ from the old persisted code. */
+    fail_read_once = true;
+    unsigned restored_before = restore_ok_logs;
+    assert(ir_start_learn(0) == ESP_OK && ir_state() == IR_ERROR);
+    assert(ir_last_error() == ESP_FAIL && code_hash(&codes[0]) == saved_hash);
+    assert(code_hash(&saved_codes[0]) == saved_hash && restore_ok_logs == restored_before + 1);
+    memset(codes, 0, sizeof(codes));
+    assert(ir_init() == ESP_OK && code_hash(&codes[0]) == saved_hash && ir_has_code(1));
+    /* First learning failure must not create a code that appears after reboot. */
+    saved_sizes[1] = 0; memset(&codes[1], 0, sizeof(codes[1]));
+    fail_read_once = true;
+    assert(ir_start_learn(1) == ESP_OK && ir_state() == IR_ERROR);
+    assert(!ir_has_code(1) && saved_sizes[1] == 0);
+    memset(codes, 0, sizeof(codes));
+    assert(ir_init() == ESP_OK && ir_has_code(0) && !ir_has_code(1));
+    set_error = ESP_FAIL;
+    assert(ir_start_learn(1) == ESP_OK && ir_state() == IR_ERROR);
+    assert(saved_sizes[1] == 0 && !ir_has_code(1));
+    set_error = ESP_OK;
+    for (unsigned fault = 0; fault < 2; fault++) {
+        fail_read_once = true;
+        erase_ignored = fault == 0;
+        erase_read_error = fault == 1 ? ESP_FAIL : ESP_OK;
+        unsigned before = restore_error_logs;
+        assert(ir_start_learn(1) == ESP_OK && ir_state() == IR_ERROR);
+        assert(restore_error_logs == before + 1 && !ir_has_code(1));
+        saved_sizes[1] = 0; erase_ignored = false;
+    }
+    /* Restoration failure is visible, rather than claiming persistence succeeded. */
+    fail_read_once = true; erase_error = ESP_FAIL;
+    unsigned restore_errors_before = restore_error_logs;
+    assert(ir_start_learn(1) == ESP_OK && ir_state() == IR_ERROR);
+    assert(!ir_has_code(1) && saved_sizes[1] != 0);
+    assert(restore_error_logs == restore_errors_before + 1);
+    erase_error = ESP_OK; capture_pulse = 1000;
+    assert(ir_start_learn(1) == ESP_OK && ir_state() == IR_SAVED && ir_has_code(1));
+    capture_pulse = 2000;
     set_error = ESP_FAIL;
     assert(ir_start_learn(0) == ESP_OK && ir_state() == IR_ERROR);
     assert(ir_last_error() == ESP_FAIL && code_hash(&codes[0]) == saved_hash);
     assert(strcmp(last_learn_stage, "nvs-set") == 0);
+    assert(code_hash(&saved_codes[0]) == saved_hash);
     set_error = ESP_OK; commit_error = ESP_FAIL;
     assert(ir_start_learn(0) == ESP_OK && ir_state() == IR_ERROR);
     assert(ir_last_error() == ESP_FAIL && code_hash(&codes[0]) == saved_hash);
     assert(strcmp(last_learn_stage, "nvs-commit") == 0);
+    assert(code_hash(&saved_codes[0]) == saved_hash);
     commit_error = ESP_OK; corrupt_read = true;
     assert(ir_start_learn(0) == ESP_OK && ir_state() == IR_ERROR);
     assert(ir_last_error() == ESP_ERR_INVALID_RESPONSE && code_hash(&codes[0]) == saved_hash);
     assert(strcmp(last_learn_stage, "nvs-readback") == 0);
+    assert(code_hash(&saved_codes[0]) == saved_hash);
     corrupt_read = false; read_error = ESP_FAIL;
     assert(ir_start_learn(0) == ESP_OK && ir_state() == IR_ERROR);
     assert(ir_last_error() == ESP_FAIL && code_hash(&codes[0]) == saved_hash);
+    assert(code_hash(&saved_codes[0]) == saved_hash);
     read_error = ESP_OK;
     open_error = ESP_FAIL;
     assert(ir_start_learn(0) == ESP_OK && ir_state() == IR_ERROR);
@@ -2161,6 +2407,10 @@ int main(void) {
     assert(ir_start_learn(0) == ESP_OK && ir_last_error() == ESP_ERR_INVALID_RESPONSE);
     assert(code_hash(&codes[0]) == saved_hash);
     short_read = false;
+    assert(code_hash(&saved_codes[0]) == saved_hash);
+    memset(codes, 0, sizeof(codes));
+    assert(ir_init() == ESP_OK && code_hash(&codes[0]) == saved_hash && ir_has_code(1));
+    capture_pulse = 1000;
     for (unsigned shape = 1; shape <= 8; shape++) {
         capture_shape = shape;
         capture_timeout = shape == 7;
@@ -2565,13 +2815,14 @@ typedef int err_t;
 #define ERR_MEM -1
 #define LWIP_DEBUG_TIMERNAMES 0
 #define LWIP_UNUSED_ARG(x) (void)(x)
-#define LWIP_ASSERT_CORE_LOCKED() assert(core_owned)
+#define LWIP_ASSERT_CORE_LOCKED() test_core_locked()
 #define TIME_LESS_THAN(a,b) ((int32_t)((a)-(b)) < 0)
 #define MEMP_SYS_TIMEOUT 0
 struct sys_timeo { struct sys_timeo *next; sys_timeout_handler h; void *arg; };
 static struct sys_timeo *next_timeout;
 static u32_t current_timeout_due_time;
 static int app_timers_paused, tcpip_tcp_timer_active, core_owned = 1;
+static void test_core_locked(void) { assert(core_owned); }
 static int tcp_active_pcbs, tcp_tw_pcbs, alloc_budget = -1;
 static u32_t sys_now(void) { return 10000; }
 static void memp_free(int pool, void *ptr) { (void)pool; free(ptr); }
@@ -2798,7 +3049,8 @@ def main():
                        "-Wno-unused-parameter", f"-DTEST_CPU_MHZ={mhz}",
                        f"-DTEST_TICK_MS={tick_ms}",
                        f"-DCONFIG_APP_TEMP_OFFSET10={offset}",
-                       "-I", str(OUT), "-I", str(ROOT / "main"), str(path)]
+                       "-I", str(OUT), "-I", str(ROOT / "main"),
+                       "-I", str(ROOT / "tests"), str(path)]
             if name in ("control", "sensor"):
                 command.append(str(ROOT / "main" / "rules.c"))
             if profile == "measurement":

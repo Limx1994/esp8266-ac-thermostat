@@ -1,0 +1,350 @@
+{
+  "role": "功能完成度专员",
+  "status": "reconstructed_from_review_context",
+  "reconstruction_notice": "根据本专员保留的源码阅读、隔离验证及交叉质询上下文重建。原 Sof/build/review_20261011 目录已不存在，原因未知。本文件不声称恢复原1476文件基线、哈希或原JSON；原独立复现产物已不可读取，新的复现和当前基线由主控另行保存。",
+  "scope": "A-H批次的需求→实现→接口→验证闭环核对。源码/脚本/文档只读；二进制内部与实机表现存在明确限制。",
+  "original_file_count_context": 1476,
+  "original_file_inventory_available": false,
+  "original_hashes_verified_now": false,
+  "coverage_modules": [
+    {
+      "batch": "A",
+      "modules": "根README、Sof/README及硬件/编译/工具说明、sdkconfig/defaults、Kconfig、CMake与Git配置",
+      "method": "核对明确需求、当前配置和文档验收边界",
+      "limit": "当前对应可读文本已完整读并hash匹配新baseline；原旧baseline不可比"
+    },
+    {
+      "batch": "B",
+      "modules": "main/main.c、app.h、rules.c/.h、sensor.c/.h、ir.c/.h",
+      "method": "规则、趋势、测温、学习/发送、状态及NVS调用闭环阅读",
+      "limit": "主机模拟不证明实机精度、波形或真实并发"
+    },
+    {
+      "batch": "C",
+      "modules": "main/portal.c/.h、page.h、components/esp_http_server",
+      "method": "页面六条API、学习与校准状态、超时与错误反馈、组件入口核对",
+      "limit": "HTTP低层接口按功能契约及测试接入检查，不能以测试覆盖声称手机行为已验收"
+    },
+    {
+      "batch": "D",
+      "modules": "noise_timer、sleep_trace、startup_trace、components/esp8266及tools定时器/DHCP覆写",
+      "method": "配置开关→生成源码/库→链接→运行暂停恢复及诊断边界核对",
+      "limit": "静态库内部未反编译，诊断不证明实际睡眠、电流或唤醒原因"
+    },
+    {
+      "batch": "E",
+      "modules": "build.py、flash.py、clean.ps1、expose_timers.py、wifi_driver_eval.py、附带工具说明",
+      "method": "现有入口、布局/完整镜像、dry-run、驱动来源与错误反馈核对",
+      "limit": "不烧录/清理/下载；附带EXE内部行为未独立验证"
+    },
+    {
+      "batch": "F",
+      "modules": "tests目录、build.ninja、run_coverage.py、页面/功耗/HTTP/工具测试",
+      "method": "需求断言、真实源码包含、mock边界与运行入口对应检查；两项真实隔离CMake/Ninja验证",
+      "limit": "现有mock构建不能证明真实候选archive已链接；当前统一测试由主控验证"
+    },
+    {
+      "batch": "G",
+      "modules": "Ad BOM PDF/XLSX、ZIP及Altium文件；dxf-pdf；两个JPG；Sof历史CSV",
+      "method": "当前PDF全部页文本、BOM只读单元格、CSV结构、ZIP目录重新提取并记录当前hash；Altium工程文本完整阅读",
+      "limit": "Altium内部连接、DXF几何、JPG视觉未解析；PDF未全页视觉；原旧输入hash不可比"
+    },
+    {
+      "batch": "H",
+      "modules": "build、build_ascii、Python缓存及构建生成物",
+      "method": "当前794 build生成物和2 Python缓存逐文件hash/来源登记，源码另行完整阅读",
+      "limit": "未逐行分析生成物，14项build/auto重跑hash变化明确登记；原1476列表不可恢复"
+    }
+  ],
+  "requirement_map": [
+    {
+      "requirement": "两组温控规则和独立成功发送计时",
+      "source": "Sof/README.md 手机配置/运行行为",
+      "implementation": "main/rules.c rule_step；main/main.c app_save_rule、update_temp",
+      "chain": "/api/rule → app_save_rule → update_temp → rule_step → ir_send → last_send",
+      "tests": "rules_test、test_power CONTROL",
+      "conclusion": "实现闭环"
+    },
+    {
+      "requirement": "趋势120～600秒和失效重置",
+      "source": "Sof/README.md 运行行为",
+      "implementation": "main/rules.c rule_trend_step；main/main.c update_temp",
+      "chain": "有效采温→趋势速度/目标间隔→两组独立计时",
+      "tests": "rules_cases.h、test_power CONTROL",
+      "conclusion": "实现闭环"
+    },
+    {
+      "requirement": "DS18B20 12位/CRC/编译偏移",
+      "source": "Sof/README.md 温度测量与校准",
+      "implementation": "main/sensor.c ensure_resolution、sensor_start、sensor_finish",
+      "chain": "sensor_start→750ms加tick→sensor_finish→页面与规则同一读数",
+      "tests": "test_power SENSOR",
+      "conclusion": "实现闭环；不证明绝对温度精度"
+    },
+    {
+      "requirement": "学习15秒/持久化失败恢复旧码",
+      "source": "Sof/README.md 手机配置/红外与诊断",
+      "implementation": "main/ir.c learn_task、restore_code、ir_start_learn",
+      "chain": "learn→/api/learn→异步采集→NVS提交回读→状态轮询",
+      "tests": "test_power IR、check_page.js",
+      "conclusion": "实现闭环；不扩大所有协议兼容需求"
+    },
+    {
+      "requirement": "共享36/38/40kHz",
+      "source": "Sof/README.md 手机配置",
+      "implementation": "main/ir.c ir_set_carrier、ir_send；portal.c carrier_post",
+      "chain": "saveCarrier→/api/carrier→NVS→两组发送",
+      "tests": "test_power IR、check_page.js",
+      "conclusion": "实现闭环"
+    },
+    {
+      "requirement": "隐藏温度/电压校准与重启保持",
+      "source": "Sof/README.md 网页隐藏校准",
+      "implementation": "page.h、portal.c calibration_post、main.c app_calibrate/load_calibration",
+      "chain": "五次点击→参考输入→/api/calibration→NVS→读数/规则",
+      "tests": "test_power校准断言、check_page.js",
+      "conclusion": "实现闭环；重复校准替换追加参数"
+    },
+    {
+      "requirement": "boot/AP/sleep电压和低电提示",
+      "source": "Sof/README.md 电池电压",
+      "implementation": "main.c update_temp、adjusted_battery；page.h lowBattery",
+      "chain": "adc_read→分状态基准→网页比例→status→3.5V提示",
+      "tests": "test_power CONTROL、check_page.js",
+      "conclusion": "实现闭环；不证明全电压范围精度"
+    },
+    {
+      "requirement": "S1/S2、长按和红外忙碌延后关闭",
+      "source": "Sof/README.md 运行行为",
+      "implementation": "main.c button_isr、wait_button_release、app_main",
+      "chain": "ISR→pending→portal_start/stop→释放确认",
+      "tests": "test_power CONTROL",
+      "conclusion": "实现闭环；未独立实机验证"
+    },
+    {
+      "requirement": "热点未使用3分钟/使用后空闲10分钟",
+      "source": "Sof/README.md 运行行为",
+      "implementation": "portal.c record_action、portal_idle_ms、portal_timeout_ms；main.c超时处理",
+      "chain": "页面/控制操作→计时→portal_stop；status/probe不续期",
+      "tests": "test_portal、test_power",
+      "conclusion": "实现闭环"
+    },
+    {
+      "requirement": "I2S/软件发送及清理失败保锁",
+      "source": "Sof/README.md 红外与诊断",
+      "implementation": "main/ir.c ir_send、software_send",
+      "chain": "固定发送路径→包络→硬件清理→返回和计时",
+      "tests": "test_power IR",
+      "conclusion": "实现闭环；软件成功不等于空调接收"
+    },
+    {
+      "requirement": "噪声/网络定时器暂停恢复",
+      "source": "Sof/README.md 休眠与供电",
+      "implementation": "noise_timer.c、lwip_timers.inc、portal起停和生成CMake",
+      "chain": "配置→生成/链接→AP起停→暂停恢复验证",
+      "tests": "test_power SDK checks",
+      "conclusion": "实现闭环；不证明实际功耗"
+    },
+    {
+      "requirement": "诊断不冒充实际休眠",
+      "source": "Sof/README.md 休眠与供电/诊断",
+      "implementation": "sleep_trace.c、startup_trace.c",
+      "chain": "链接wrap→RAM统计→采温report",
+      "tests": "test_power TRACE、startup_test",
+      "conclusion": "实现和文档边界一致"
+    },
+    {
+      "requirement": "构建/分段/完整镜像与dry-run",
+      "source": "Sof/README.md 构建与烧录；tools/README.md",
+      "implementation": "build.py、flash.py",
+      "chain": "CMake/Ninja→flasher_args→BIN/HEX→布局校验→烧录入口",
+      "tests": "test_tools、test_flash_port、dry-run",
+      "conclusion": "实现闭环；审查不烧录"
+    },
+    {
+      "requirement": "固定候选Wi-Fi驱动评估",
+      "source": "tools/wifi_driver_eval.py docstring、REV",
+      "implementation": "wifi_driver_eval.main、components/esp8266/CMakeLists.txt与driver.cmake",
+      "chain": "候选写shadow SDK→local组件重指向生产库",
+      "tests": "独立真实CMake probe；test_wifi_eval构建为mock",
+      "conclusion": "默认入口存在确认问题；--latest排除"
+    }
+  ],
+  "confirmed_consensus": [
+    {
+      "id": "COMPLETENESS-001",
+      "severity": "P2",
+      "title": "默认Wi-Fi驱动评估实际仍链接生产固定库",
+      "domain": "功能完整度",
+      "location": "D:\\空调温度\\Sof\\tools\\wifi_driver_eval.py:112",
+      "symbols": "main；imported archive targets",
+      "trigger": "现有SDK基线、工具及候选缓存或网络可用，执行python tools\\wifi_driver_eval.py，不加--latest。",
+      "impact": "报告记录候选620605a，但真实应用archive和噪声别名来源为复制进OUT的生产858c7c2固定库，所得镜像不能证明默认候选的实际表现。",
+      "evidence": [
+        "REV=620605a；main:112复制当前components（包括生产库与driver.cmake）到OUT。",
+        "main:150候选只写shadow/sdk/components/esp8266/lib。",
+        "组件CMakeLists.txt:32 include local driver.cmake，:37 noise_lib_sdk定位OUT。",
+        "driver.cmake:29重写7个IMPORTED_LOCATION为local组件/lib；后续无回写候选。",
+        "main:211路径子串检查无法区分shadow SDK与local组件。",
+        "test_wifi_eval的project.main为mock，未覆盖真实CMake来源选择。"
+      ],
+      "original_verification": "独立真实CMake3.13.4 probe：net80211从candidate_sdk/libnet80211.a改为生产组件/lib/libnet80211.a，revision858c7c2。首次缺Ninja指定已有CMAKE_MAKE_PROGRAM后成功。没有完整运行默认评估/下载/烧录。",
+      "verification_artifacts_available": false,
+      "cross_review": "Bug专员独立同根因；本人确认后续无回写、路径子串不证明候选来源。限定默认入口，排除--latest。无未决技术争议。",
+      "recommendation": "评估入口使真实archive与noise alias使用所选候选同一来源，并核对实际链接路径/哈希与REV；保持生产默认固定库行为。"
+    },
+    {
+      "id": "BUG-NINJA-HEADER",
+      "severity": "P2",
+      "title": "规则测试Ninja入口忽略头文件修改而运行旧测试",
+      "domain": "Bug",
+      "location": "D:\\空调温度\\Sof\\tests\\build.ninja:2",
+      "symbols": "cc rule；rules_test.o",
+      "trigger": "首次按README构建后，仅修改tests/rules_cases.h或main/rules.h，再执行README现有Ninja增量检查入口。",
+      "impact": "Ninja认为无工作，旧exe仍通过，当前头文件接口或新增断言未重新编译与执行。",
+      "evidence": [
+        "build.ninja仅.c依赖，无depfile/deps或显式header。",
+        "rules_test.c:1 include rules_cases.h；该header:4 include rules.h。",
+        "README.md:160-162无预先清理；清理章节为独立可选操作。"
+      ],
+      "original_verification": "本专员独立复制真源码/Ninja首次3步构建exit0；仅给rules_cases.h追加#error后Ninja no work to do/0，旧exe passed/0；相同GCC fresh compile报#error/1。",
+      "verification_artifacts_available": false,
+      "cross_review": "Bug专员初审、本专员独立真实复现确认。run_coverage.py:88-94直接GCC重编译，因此不泛化为coverage无效。无未决技术争议。",
+      "recommendation": "沿现有Ninja cc rule生成并消费header depfile，或明确header依赖；验证只改header也重建，避免全量clean替代正确依赖。"
+    },
+    {
+      "id": "CURRENT-WIFI-MOCK",
+      "severity": "P2",
+      "title": "新增AP配置调用未同步主机SDK mock，功耗测试无法编译",
+      "domain": "功能完整度",
+      "location": "D:\\空调温度\\Sof\\tests\\test_power.py:28",
+      "symbols": "SDK mock；HEADERS；main；CONTROL harness",
+      "trigger": "以当前main.c运行文档python tests\\test_power.py，或run_coverage.py调度该脚本。",
+      "impact": "CONTROL首个80MHz baseline组合编译失败，功耗/控制回归组停止，当前覆盖验收退出1；不影响真实SDK固件编译结论。",
+      "evidence": [
+        "main.c:621-625依赖wifi_config_t、ESP_IF_WIFI_AP及esp_wifi_get/set_config。",
+        "test_power.py:21将esp_wifi.h列入mock headers；2952-2956生成每个头为#include sdk_mock.h。",
+        "SDK字符串与COMMON未定义所需类型、枚举或函数声明/实现。",
+        "覆盖调度复用真实main，-Wall/-Wextra/-Werror编译因此报缺接口。"
+      ],
+      "verification": "审查报告/20261011/coverage_run.log:37-55真实GCC报上述缺接口；Sof/build/coverage/results.json记录功耗28组合组failed，root整体coverage exit1。本人只读日志与mock源文件，没有重复共享测试。",
+      "verification_artifacts_available": true,
+      "cross_review": "bug_recovery独立用当前SDK/CONTROL/COMMON原样生成harness并gcc -fsyntax-only复现exit1；同意P2，无反证。首CONTROL阻断功耗主机整组；真实SDK有这些接口，不推断生产故障。独立证据bug_recovery/control_mock_repro.json。",
+      "recommendation": "沿现有SDK mock补全实际使用的最小WiFi配置接口和确定性返回/配置状态，再覆盖信道已为9、修改成功、get/set失败反馈；重新运行现有测试，不改生产行为规避测试。"
+    }
+  ],
+  "cross_review_additions": [
+    {
+      "role": "死代码",
+      "conclusion": "0确认问题共识",
+      "response": "未发现rule_state primed/armed/fired、HTTP公共API、生成sdk_component副本、固定debug库存在明确废弃依据。规则状态有接口契约与测试消费；HTTP仍SDK公共导出；生成副本非维护代码；debug库实际被固定组合哈希校验消费。620候选库被ABI分析消费，不能因未实际链接而直接删。",
+      "unresolved": false
+    },
+    {
+      "role": "性能",
+      "conclusion": "已收到主控转述建议；原performance_cross_review.json无法读取",
+      "response": "原材料消失后不声称已独立读过。噪声别名与所选archive须同步，Ninja以最小header依赖修复而非全量clean，与既有功能共识一致。",
+      "unresolved": false,
+      "boundary": "仅对明确转述建议作一致性核对，未扩大为性能实测结论"
+    },
+    {
+      "role": "Bug",
+      "conclusion": "两项确认问题限定明确",
+      "response": "默认eval排除--latest、不声称全工具运行或烧录；Ninja问题仅常规增量入口，coverage直接编译不受影响。",
+      "unresolved": false
+    }
+  ],
+  "rejected_candidates": [
+    {
+      "title": "休眠与供电锚点缺失",
+      "reason": "完整标题检索确认Sof/README.md:108存在；初始截断输出造成疑问，已撤回。"
+    },
+    {
+      "title": "实机待验等于功能缺失",
+      "reason": "文档明确当前镜像/历史用户反馈边界，不引申需求。"
+    },
+    {
+      "title": "寄生DS18B20无强上拉",
+      "reason": "实际需求明确外部三线供电，文档已限定寄生不支持。"
+    },
+    {
+      "title": "100%覆盖证明功能全面完成",
+      "reason": "mock构建覆盖不能证明实际candidate archive选择；不以覆盖统计替代实现核对。"
+    }
+  ],
+  "attachment_boundaries": [
+    "当前10PDF全部201页文本已重新提取，均无空文本页；未全页视觉审查，pypdf有startxref修复提示，不以解析成功证明图形可靠。",
+    "当前Bom.xlsx 27行单元格与Bom.pdf文本逐项核对，R8=330K/R9=82K/R7=4.7K和U2 MG6228/U3 ESP12F/U4 HS0038/U5 DS18B20一致；不证明原理图内部连接。",
+    "当前两个CSV各5220行，第1行为sample/10000/length/5218元数据，第2行Time(ns)/Vol(V)，5218数据行；历史波形不能证明当前固件。",
+    "当前ZIP只登记1成员PCB1.PcbDoc，2886656字节，CRC3595427645；未解包或解析内部。",
+    "其余28二进制/几何附件仍只登记限制；Altium内部连接、DXF几何、JPG视觉及EXE/archive内部未独立解析。",
+    "原旧附件hash/提取日志丢失，不能声称当前与原1476基线相同；当前新提取和hash另存metadata。"
+  ],
+  "open_technical_disputes": [],
+  "evidence_state": "原1476证据目录消失且无法恢复；当前74完整文本重审及912处理台账独立建立，均记录新baseline hash；三项probe/build/test验证由root及bug_recovery保存。",
+  "changes": "本次仅在用户批准的项目内持久审查报告目录重建结果JSON；不修改业务源码、脚本、文档和配置，不重跑共享测试。",
+  "current_source_review": {
+    "status": "current_source_read_only_review",
+    "path": "D:\\空调温度\\Sof\\main\\main.c",
+    "sha256": "BD68346A21BB43AECF8444AD58D0FF1B20A40505E38FE5BA2F62630C7599AAB4",
+    "lines_read": 703,
+    "method": "分段完整重新读取当前文件、app/rules/sensor/ir/portal头、直接调用方引用、README需求、Kconfig和实际sdkconfig；新WiFi调用核对本地SDK头契约。没有复用旧main哈希或把旧覆盖结果套用当前源码。",
+    "observed_new_block": "main.c:620-627，S1开启热点成功后读取AP配置，channel不为9时设置9；读取或设置错误明确日志。变更原因未知。",
+    "production_conclusion": "现有规则、趋势、NVS、温度/ADC、学习LED、按键释放、AP超时和独立成功发送计时仍存在实现闭环。新WiFi块未发现符合红线的生产缺陷。SDK set_config需enabled接口，portal_start成功满足；不推测掉连接或实际信道切换结果。",
+    "symbol_check": [
+      "app_get_status定义main.c:245→portal.c:177引用。",
+      "app_save_rule定义main.c:351→portal.c:221引用。",
+      "app_calibrate定义main.c:301→portal.c:261引用。",
+      "app_reset_rule定义main.c:374→ir.c:406引用。",
+      "app_set_learning定义main.c:141→ir.c:419/549/554引用。",
+      "wait_button_release定义main.c:393→app_main:651调用；release_pending仍限制20ms等待并阻止长按期间休眠。",
+      "rule_step、rule_trend_step/reset、ir_send/report_last_send、sensor_start/finish、portal_start/stop仍被当前main消费。"
+    ],
+    "configuration": "实际sdkconfig 80MHz、PM_ENABLE、noise/network pause、DHCP client timers disabled、idle boot/sensor input开启，quiet UART关闭、温度偏移0；与当前条件分支和文档默认一致。",
+    "cross_bug": "bug_recovery独立hash/SDK契约一致；第三候选已独立syntax-only复现并确认P2，无技术争议。",
+    "current_test_state": "root当前coverage_run.log真实CONTROL编译失败：wifi_config_t未知、ESP_IF_WIFI_AP缺失、esp_wifi_get/set_config未声明。results.json功耗组failed，其他10组passed；不能声称当前coverage通过。固件build通过由root记录支持。",
+    "baseline_limit": "原baseline/原专员证据已消失，原因未知；当前只读重审只证明所记录当前hash，不证明原1476文件未变化。",
+    "current_test_power_sha256": "ABC8C5FF70919D01DAC6BF8BD33BCBDEC47E0068E5EAB6C04956F07A0BA67B98"
+  },
+  "current_snapshot_review": {
+    "status": "current_snapshot_functional_review_complete",
+    "baseline_path": "D:\\空调温度\\审查报告\\20261011\\recovery_baseline.json",
+    "baseline_sha256": "0F4963D7DDEEA9A89BBB71314D68551CC349922BDD7E34C1ADF68B0714E23C50",
+    "inventory_count": 912,
+    "coverage_path": "D:\\空调温度\\审查报告\\20261011\\completeness_current_coverage.json",
+    "full_text_count": 74,
+    "full_text_hash_mismatches": [],
+    "source_gaps": [],
+    "generated_count": 794,
+    "cache_count": 2,
+    "attachment_prior_context_count": 0,
+    "binary_geometry_limited_count": 28,
+    "changed_generated_paths": [
+      "Sof\\build\\auto\\.ninja_deps",
+      "Sof\\build\\auto\\.bin_timestamp",
+      "Sof\\build\\auto\\.ninja_log",
+      "Sof\\build\\auto\\ac_thermostat.bin",
+      "Sof\\build\\auto\\ac_thermostat.elf",
+      "Sof\\build\\auto\\ac_thermostat.map",
+      "Sof\\build\\auto\\noise_power\\libpp.a",
+      "Sof\\build\\auto\\noise_power\\libcore.a",
+      "Sof\\build\\auto\\full_flash.hex",
+      "Sof\\build\\auto\\full_flash.bin",
+      "Sof\\build\\auto\\esp-idf\\lwip\\liblwip.a",
+      "Sof\\build\\auto\\build.ninja",
+      "Sof\\build\\auto\\esp-idf\\esp8266\\libesp8266.a",
+      "Sof\\build\\auto\\esp-idf\\esp8266\\ld\\esp8266.project.ld"
+    ],
+    "method": "生产代码、脚本、页面、HTTP、全部tests、MD、配置完整分块读到EOF；长test_power/test_portal/http_parse未以长度跳过；截断段已补读。逐项记录本次hash、基线hash、处理状态、batch及限制。生成物按来源登记而非业务代码逐行审查。",
+    "conclusion": "当前完整文本需求/接口闭环核对无新增确认问题；原默认eval、Ninja依赖和当前SDK mock三项P2维持。14需求对应仅指源码实现闭环，相关主机功耗组当前编译失败不能写验收通过。",
+    "old_baseline_limit": "原1476逐文件基线及原提取日志丢失，原因未知；不能证明整体原新相同。当前仅main有原记录hash不同的确证；test_power实际2991行，不能以先前range2998声称改变。",
+    "attachment_limit": "14个当前字节附件已重新只读提取且hash均匹配新baseline。10PDF共201页文本、BOM27行、2CSV各5220行含5218数据行、ZIP1成员PCB1.PcbDoc。pypdf有incorrect startxref pointer(3)/parsing for Object Streams修复提示，未全页视觉检查。旧hash与旧提取仍不可比。",
+    "business_changes": "none",
+    "shared_tests_run_by_this_agent": "none",
+    "current_attachment_read_count": 14,
+    "attachment_metadata_path": "D:\\空调温度\\审查报告\\20261011\\completeness_attachments_current.json"
+  },
+  "source_gaps": [],
+  "current_file_coverage": "D:\\空调温度\\审查报告\\20261011\\completeness_current_coverage.json"
+}
+

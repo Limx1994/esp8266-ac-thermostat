@@ -15,6 +15,8 @@
 
 推荐使用项目 `flash.py` 读取构建布局，项目脚本默认 460800 baud、分段烧录并保留未覆盖的 NVS；该默认值属于项目脚本，不代表上游 esptool 默认值。先执行 `python flash.py --port COM3 --dry-run` 检查布局，不打开串口；实际偏移和参数以 `build\auto\flasher_args.json` 为准，不将其他芯片示例直接用于 ESP8266。工具不负责判断空调是否接收红外，项目脚本位于 `Sof` 固件目录，从项目根目录须先执行 `Set-Location .\Sof`。当前固件的产物与验证记录见 [本地发布](../../README.md#本地发布)。
 
+1.0A 的全量镜像可通过项目 `flash.py --full` 烧录；该参数属于项目包装脚本，不是 esptool 参数。完整镜像会清除 NVS，保留数据应使用默认分段流程。发布附件 SHA256 核对及命令见 [烧录工具说明](../README.md#全量烧录与发布校验)。
+
 ## 贡献
 
 参与上游开发请阅读 [贡献指南](https://docs.espressif.com/projects/esptool/en/latest/contributing.html)。
@@ -25,4 +27,4 @@
 
 ## 许可
 
-本文件与附带源码沿用上游的 GNU General Public License Version 2 or later。参见本目录 [LICENSE](LICENSE) 及原始 [上游 LICENSE 链接](https://github.com/espressif/esptool/blob/master/LICENSE)。
+本文件与附带源码沿用上游的 GNU General Public License Version 2 or later。参见本目录 [LICENSE](LICENSE) 及对应版本的 [上游 v4.12.0 LICENSE](https://raw.githubusercontent.com/espressif/esptool/v4.12.0/LICENSE)。

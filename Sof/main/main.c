@@ -308,7 +308,7 @@ esp_err_t app_calibrate(bool battery, int reference, bool *storage_failed)
     TickType_t age = xTaskGetTickCount() - (battery ? battery_sample_tick : temp_sample_tick);
     bool valid = battery ? current.battery_valid && battery_sample_ap && base_battery_mv :
                            current.temp_valid;
-    if (!portal_is_on() || !valid || age > pdMS_TO_TICKS(5000)) {
+    if (!portal_is_on() || !valid || age > pdMS_TO_TICKS(battery ? 5000 : 20000)) {
         xSemaphoreGive(status_lock);
         return ESP_ERR_INVALID_STATE;
     }
@@ -389,26 +389,28 @@ static esp_err_t init_buttons(void)
     return gpio_config(&cfg);
 }
 
-/* 等待两键都释放并经过 20 ms 确认，再恢复低电平唤醒中断。 */
-static void wait_button_release(void)
+/* 非阻塞确认两键释放；长按期间主循环仍采温，释放稳定 20 ms 后恢复中断。 */
+static bool wait_button_release(TickType_t *high_at, bool *high)
 {
-    trace_buttons("release-enter", 0, 0);
-    while (true) {
-        while (gpio_get_level(GPIO_NUM_12) == 0 || gpio_get_level(GPIO_NUM_13) == 0)
-            vTaskDelay(pdMS_TO_TICKS(20));
-        vTaskDelay(pdMS_TO_TICKS(20));
-        if (gpio_get_level(GPIO_NUM_12) && gpio_get_level(GPIO_NUM_13)) break;
+    if (!gpio_get_level(GPIO_NUM_12) || !gpio_get_level(GPIO_NUM_13)) {
+        *high = false;
+        return false;
     }
+    TickType_t now = xTaskGetTickCount();
+    if (!*high) {
+        *high_at = now;
+        *high = true;
+        return false;
+    }
+    if (now - *high_at < pdMS_TO_TICKS(20)) return false;
     ESP_ERROR_CHECK(gpio_set_intr_type(GPIO_NUM_12, GPIO_INTR_LOW_LEVEL));
     ESP_ERROR_CHECK(gpio_set_intr_type(GPIO_NUM_13, GPIO_INTR_LOW_LEVEL));
     trace_buttons("release-done", 0, 0);
+    return true;
 }
 
-static void update_temp(void)
+static void update_battery(void)
 {
-    ir_report_last_send();
-    ESP_LOGI(TAG, "sampling: AP=%s", portal_is_on() ? "on" : "off");
-    sleep_trace_report();
     uint16_t raw;
     esp_err_t battery_err = adc_read(&raw);
     TickType_t adc_tick = xTaskGetTickCount();
@@ -426,8 +428,43 @@ static void update_temp(void)
     unsigned measured_mv = 0;
     if (battery_err == ESP_OK)
         measured_mv = ((uint32_t)raw * 412000U + 41943U) / 83886U;
+    unsigned battery_base = 0, battery_mv = 0;
+    battery_adjust_t voltage;
+    xSemaphoreTake(status_lock, portMAX_DELAY);
+    voltage = battery_adjust;
+    current.battery_error = battery_err;
+    current.battery_valid = battery_err == ESP_OK;
+    if (battery_err == ESP_OK) {
+        /* 单点增益校准，保留 ADC 变化；其他电压点的精度仍待实测。 */
+        base_battery_mv = ((uint32_t)raw * cal_mv * 2U + cal_adc / 2U) / cal_adc;
+        battery_sample_tick = adc_tick;
+        battery_sample_ap = ap_on;
+        current.battery_mv = adjusted_battery(base_battery_mv);
+        battery_base = base_battery_mv;
+        battery_mv = current.battery_mv;
+    }
+    xSemaphoreGive(status_lock);
+    if (battery_err != ESP_OK) {
+        ESP_LOGE(TAG, "battery read failed: %s (phase=%s off_sample=%u off_ms=%u)",
+                 esp_err_to_name(battery_err), sample_phase,
+                 (unsigned)(ap_on ? 0 : battery_off_samples), (unsigned)off_ms);
+    } else {
+        ESP_LOGI(TAG, "battery=%u.%03u V (adc=%u measured=%u.%03u V compensated=%d cal=%s base_mv=%u ratio=%u/%u phase=%s off_sample=%u off_ms=%u)",
+                 battery_mv / 1000, battery_mv % 1000, (unsigned)raw,
+                 measured_mv / 1000, measured_mv % 1000, compensate, cal_state,
+                 battery_base, (unsigned)voltage.reference_mv, (unsigned)voltage.base_mv,
+                 sample_phase, (unsigned)(ap_on ? 0 : battery_off_samples), (unsigned)off_ms);
+    }
+}
+
+static TickType_t update_temp(void)
+{
+    ir_report_last_send();
+    ESP_LOGI(TAG, "sampling: AP=%s", portal_is_on() ? "on" : "off");
+    sleep_trace_report();
     int16_t temp10;
     bool external_power;
+    TickType_t sample_tick = xTaskGetTickCount();
     esp_err_t err = sensor_start(&external_power);
     if (err == ESP_OK) {
         bool conversion_sleep = external_power && !portal_is_on() && !ir_is_busy();
@@ -448,21 +485,7 @@ static void update_temp(void)
     }
     bool fire[2] = { false, false };
     bool control_on = !portal_is_on();
-    unsigned battery_base = 0, battery_mv = 0;
-    battery_adjust_t voltage;
     xSemaphoreTake(status_lock, portMAX_DELAY);
-    voltage = battery_adjust;
-    current.battery_error = battery_err;
-    current.battery_valid = battery_err == ESP_OK;
-    if (battery_err == ESP_OK) {
-        /* 单点增益校准，保留 ADC 变化；其他电压点的精度仍待实测。 */
-        base_battery_mv = ((uint32_t)raw * cal_mv * 2U + cal_adc / 2U) / cal_adc;
-        battery_sample_tick = adc_tick;
-        battery_sample_ap = ap_on;
-        current.battery_mv = adjusted_battery(base_battery_mv);
-        battery_base = base_battery_mv;
-        battery_mv = current.battery_mv;
-    }
     current.sensor_error = err;
     current.temp_valid = err == ESP_OK;
     if (err == ESP_OK) {
@@ -498,20 +521,9 @@ static void update_temp(void)
     ESP_LOGI(TAG, "trend: control=%s points=%u robust_milli=%u fast_milli=%u target_ms=%u interval_ms=%u (speed: 0.001 C/min)",
              control_on ? "on" : "paused", trend.count, (unsigned)trend.robust_milli,
              (unsigned)trend.fast_milli, (unsigned)trend.target_ms, (unsigned)trend.interval_ms);
-    if (battery_err != ESP_OK) {
-        ESP_LOGE(TAG, "battery read failed: %s (phase=%s off_sample=%u off_ms=%u)",
-                 esp_err_to_name(battery_err), sample_phase,
-                 (unsigned)(ap_on ? 0 : battery_off_samples), (unsigned)off_ms);
-    } else {
-        ESP_LOGI(TAG, "battery=%u.%03u V (adc=%u measured=%u.%03u V compensated=%d cal=%s base_mv=%u ratio=%u/%u phase=%s off_sample=%u off_ms=%u)",
-                 battery_mv / 1000, battery_mv % 1000, (unsigned)raw,
-                 measured_mv / 1000, measured_mv % 1000, compensate, cal_state,
-                 battery_base, (unsigned)voltage.reference_mv, (unsigned)voltage.base_mv,
-                 sample_phase, (unsigned)(ap_on ? 0 : battery_off_samples), (unsigned)off_ms);
-    }
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "temperature read failed: %s", esp_err_to_name(err));
-        return;
+        return sample_tick;
     }
     int magnitude = temp10 < 0 ? -(int)temp10 : temp10;
     ESP_LOGI(TAG, "temperature=%s%d.%d℃", temp10 < 0 ? "-" : "",
@@ -533,6 +545,7 @@ static void update_temp(void)
         if (err != ESP_OK) ESP_LOGE(TAG, "rule %d send failed: %s", i + 1, esp_err_to_name(err));
         if (i == 0 && fire[1]) vTaskDelay(pdMS_TO_TICKS(500));
     }
+    return sample_tick;
 }
 
 void app_main(void)
@@ -578,13 +591,21 @@ void app_main(void)
 #else
     ESP_LOGI(TAG, "DHCP client cyclic timers enabled (SDK baseline)");
 #endif
-    ESP_LOGI(TAG, "ready; temperature interval: AP off 60 seconds, AP on 2 seconds; automatic IR: trend 120-600 seconds per rule, paused while AP on");
+    ESP_LOGI(TAG, "ready; temperature interval: AP off 60 seconds, AP on 15 seconds; battery interval: AP off 60 seconds, AP on 2 seconds; automatic IR: trend 120-600 seconds per rule, paused while AP on");
+#if defined(CONFIG_APP_IDLE_BOOT_PINS) || defined(CONFIG_APP_QUIET_UART)
     ESP_ERROR_CHECK(init_idle_pins());
+#else
+    /* 未启用测量配置时该函数不调用硬件，恒返回 ESP_OK。 */
+    (void)init_idle_pins();
+#endif
     TickType_t last_temp = xTaskGetTickCount();
+    TickType_t last_battery = last_temp;
     TickType_t last_s1 = last_temp - pdMS_TO_TICKS(200);
     TickType_t last_s2 = last_s1;
     bool sample_now = true;
     bool close_pending = false;
+    bool release_pending = false, release_high = false;
+    TickType_t release_at = 0;
     if (gpio_get_level(GPIO_NUM_12) == 0) s1_pending = true;
     while (true) {
         set_auto_sleep(false);
@@ -604,7 +625,18 @@ void app_main(void)
             } else {
                 close_pending = false;
                 esp_err_t err = portal_start();
-                if (err != ESP_OK) ESP_LOGE(TAG, "portal start: %s", esp_err_to_name(err));
+                if (err == ESP_OK) {
+                    /* Set the SoftAP channel to 9 each time the portal starts. */
+                    wifi_config_t ap_cfg;
+                    err = esp_wifi_get_config(ESP_IF_WIFI_AP, &ap_cfg);
+                    if (err == ESP_OK && ap_cfg.ap.channel != 9) {
+                        ap_cfg.ap.channel = 9;
+                        err = esp_wifi_set_config(ESP_IF_WIFI_AP, &ap_cfg);
+                    }
+                    if (err != ESP_OK) ESP_LOGE(TAG, "set AP channel 9: %s", esp_err_to_name(err));
+                } else {
+                    ESP_LOGE(TAG, "portal start: %s", esp_err_to_name(err));
+                }
             }
         }
         if (s2 && now - last_s2 >= pdMS_TO_TICKS(200)) {
@@ -621,8 +653,12 @@ void app_main(void)
         if (s1 || s2) {
             trace_buttons("button-action-done", 0, 0);
             set_led_enabled(portal_is_on());
-            wait_button_release();
+            if (!release_pending) trace_buttons("release-enter", 0, 0);
+            release_pending = true;
+            release_high = false;
         }
+        if (release_pending && wait_button_release(&release_at, &release_high))
+            release_pending = false;
         if (portal_is_on() && portal_idle_ms() >= portal_timeout_ms() &&
             !ir_is_busy()) {
             esp_err_t err = portal_stop();
@@ -637,12 +673,20 @@ void app_main(void)
             if (!ap_active) battery_off_tick = xTaskGetTickCount();
         }
         if (portal_is_on()) rule_trend_reset(&trend);
-        /* 热点开启时每 2 秒测温，关闭时每 60 秒测温并执行趋势温控。 */
-        TickType_t interval = pdMS_TO_TICKS(portal_is_on() ? 2000 : 60000);
-        if (sample_now || xTaskGetTickCount() - last_temp >= interval) {
-            last_temp = xTaskGetTickCount();
+        /* 热点开启时温度每 15 秒、电压每 2 秒；关闭时两项每 60 秒。 */
+        TickType_t interval = pdMS_TO_TICKS(ap_active ? 15000 : 60000);
+        TickType_t battery_interval = pdMS_TO_TICKS(2000);
+        TickType_t sample_tick = xTaskGetTickCount();
+        bool temp_due = sample_now || sample_tick - last_temp >= interval;
+        bool battery_due = ap_active ?
+            sample_now || sample_tick - last_battery >= battery_interval : temp_due;
+        if (battery_due) {
+            last_battery = sample_tick;
+            update_battery();
+        }
+        if (temp_due) {
             sample_now = false;
-            update_temp();
+            last_temp = update_temp();
         }
         /* 等待时间取采样期限、热点超时和单次休眠上限的最小值；按键通知可提前唤醒。 */
         TickType_t wait = pdMS_TO_TICKS(SLEEP_WAIT_MS);
@@ -650,14 +694,19 @@ void app_main(void)
         TickType_t remaining = elapsed < interval ? interval - elapsed : 0;
         if (remaining < wait) wait = remaining;
         if (portal_is_on()) {
+            TickType_t battery_elapsed = xTaskGetTickCount() - last_battery;
+            TickType_t battery_remaining = battery_elapsed < battery_interval ?
+                battery_interval - battery_elapsed : 0;
+            if (battery_remaining < wait) wait = battery_remaining;
             uint32_t idle = portal_idle_ms();
             uint32_t timeout = portal_timeout_ms();
             TickType_t remaining = pdMS_TO_TICKS(idle < timeout ? timeout - idle : 5000);
             if (remaining < wait) wait = remaining;
             if (close_pending && wait > pdMS_TO_TICKS(100)) wait = pdMS_TO_TICKS(100);
         }
-        bool allow_sleep = !portal_is_on() && !ir_is_busy();
-        bool trace_wait = !portal_is_on() && wait;
+        if (release_pending && wait > pdMS_TO_TICKS(20)) wait = pdMS_TO_TICKS(20);
+        bool allow_sleep = !portal_is_on() && !ir_is_busy() && !release_pending;
+        bool trace_wait = !portal_is_on() && wait && !release_pending;
         if (trace_wait) {
             trace_buttons("wait-enter", wait, 0);
 #ifndef CONFIG_APP_QUIET_UART

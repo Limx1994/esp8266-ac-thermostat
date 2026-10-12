@@ -1,0 +1,80 @@
+{
+  "base_sdk": "89a3f254b63819035f65d9c5dcdae8864f1a6a8a",
+  "official_driver_commit": "858c7c2eb9004691f2c736c64a23715f6ea900c4",
+  "actual_phy_version": "1167.0",
+  "scope": "Official driver archives only; v3.4 SDK C sources and headers retained",
+  "archives": {
+    "VERSION": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/VERSION",
+      "git_blob": "2873e0c84d99387b79a09890f9f305ebfb797690",
+      "bytes": 161,
+      "sha256": "469aa0250cb011552af1931fd4d55304a3f54578b1f98e2cac5c737716445466"
+    },
+    "libcore.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libcore.a",
+      "git_blob": "8beb25fae1a526487b1312062de4712ec4ad02ad",
+      "bytes": 39742,
+      "sha256": "526c23b9079361dcccb6ce3b7807602e899a719728ab347cab7409dbf6db18b7"
+    },
+    "libcore_dbg.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libcore_dbg.a",
+      "git_blob": "45b00afe0339b849dc96a0e44addc88d216827f1",
+      "bytes": 40650,
+      "sha256": "987643c203f92a008769daf9e260ecc42d40def3a287789bfe05dec431563b9f"
+    },
+    "libespnow.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libespnow.a",
+      "git_blob": "e1af2020a78dd5130e4fbc29d273d01f8286d6c9",
+      "bytes": 38660,
+      "sha256": "e77171af84e0090c40d69531c80315566286327770755212baf6fc0e45529c8e"
+    },
+    "libespnow_dbg.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libespnow_dbg.a",
+      "git_blob": "2c7346c7b2ebafcbda4395a36e780b5abc29f8ae",
+      "bytes": 38660,
+      "sha256": "f38e0db67eda0ea9fd7358fb5ff29e653997ff4241343fe8f9506b66d88fad64"
+    },
+    "libnet80211.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libnet80211.a",
+      "git_blob": "a6da69b90208784affb1c44ff31cc16d5cd6c0fb",
+      "bytes": 485352,
+      "sha256": "8bfae78356d82db98f6f0fceafb9b10a6788e4f94887f4b0ce47f06daf3d78e3"
+    },
+    "libnet80211_dbg.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libnet80211_dbg.a",
+      "git_blob": "d74f6f5c7e3c6b3c0b390eb994dab44b0c42b2ce",
+      "bytes": 544252,
+      "sha256": "d62a64f849fe099c67634c61e558873eceb2f257f432db79d1d5a58ea446900e"
+    },
+    "libphy.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libphy.a",
+      "git_blob": "6f3b75e9339546b4d1535c352c244a1d18e87ba0",
+      "bytes": 266024,
+      "sha256": "806da2ef0f8f5fa5f9a265dfe0bb8dd54a578cd1e75bf1f3aa0415586fc6e178"
+    },
+    "libpp.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libpp.a",
+      "git_blob": "de933338008d632ae1cd57625263054666ce821e",
+      "bytes": 248934,
+      "sha256": "430c0b2893dfa6aa29ae965ce390135a698a04f4a039e8a78ffd29022e167821"
+    },
+    "libpp_dbg.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libpp_dbg.a",
+      "git_blob": "89786fcc466bec7518209ace1d3871838d0a609b",
+      "bytes": 268090,
+      "sha256": "2f70073992ace791f9b0c030f1c5f4b892039a9eb93b8f5bb85b6270d0739a06"
+    },
+    "librtc.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/librtc.a",
+      "git_blob": "8a809ee92b3658556bae4eed725fe3043991fbd1",
+      "bytes": 5048,
+      "sha256": "347d020d5d520dd7c93f254447c0f61dd3cb160147986ef2ca01ffeed541a355"
+    },
+    "libsmartconfig.a": {
+      "url": "https://raw.githubusercontent.com/espressif/ESP8266_RTOS_SDK/858c7c2eb9004691f2c736c64a23715f6ea900c4/components/esp8266/lib/libsmartconfig.a",
+      "git_blob": "cdadb3a398e749ebe49d0c24e5863c709d4fcb6a",
+      "bytes": 156402,
+      "sha256": "89e417befc8cea4eda72f16e6529bd02536f2c5893018639d927ce1b9bde4941"
+    }
+  }
+}

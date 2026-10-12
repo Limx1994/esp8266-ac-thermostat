@@ -1,0 +1,4562 @@
+[
+  {
+    "Path": "页面图.jpg",
+    "Bytes": 404665,
+    "SHA256": "41964E4FBB466714DD09F34FD3402290C3FB3ACB691CFBCB9D7E6595F6458FEC"
+  },
+  {
+    "Path": "实物图.jpg",
+    "Bytes": 3497488,
+    "SHA256": "50203A766BEAEB2BA63DE1224A5449546F898CB2DE50780F3C560FCE2FE5819E"
+  },
+  {
+    "Path": "LICENSE",
+    "Bytes": 5732,
+    "SHA256": "30958D91F76561DED02D6F7606B982163C69271E007A57633E41B165B27DEC85"
+  },
+  {
+    "Path": "README.md",
+    "Bytes": 3908,
+    "SHA256": "3A9E459AC980C13B7FD789C74B0D1072C566D04191FCC202F4DC66909591978D"
+  },
+  {
+    "Path": ".gitattributes",
+    "Bytes": 90,
+    "SHA256": "23FCF47DBD0B8ACCB34129455D4B67D36BE1E43FA37E0E286345B932E4EAB6C0"
+  },
+  {
+    "Path": ".gitignore",
+    "Bytes": 337,
+    "SHA256": "26760AAC125766B8945515B57484F1930197F454BA2F950094880D26157DFC07"
+  },
+  {
+    "Path": "Sof\\version.txt",
+    "Bytes": 6,
+    "SHA256": "8A5296B5437C0458C0AE7D0F37DBEDB1A3842A9930A88878C6C6E15B6563C2C2"
+  },
+  {
+    "Path": "Sof\\ESP-12F硬件引脚与链路说明.md",
+    "Bytes": 4744,
+    "SHA256": "5468BBD19813CFDDCB267A8B92C84E305ABCBBF83138C4B0874E95AAF30AFC8E"
+  },
+  {
+    "Path": "dxf-pdf\\电池座.DXF",
+    "Bytes": 20616,
+    "SHA256": "5FB20F8640273A7C4868FC27290CAB4EC8B23C15B9BA29447FC6F38060751D42"
+  },
+  {
+    "Path": "dxf-pdf\\TO-92.pdf",
+    "Bytes": 292094,
+    "SHA256": "5DE59854821D46EE23CE7A7DB54E145D17AAA73023C929D1AD801A0DFFBA63FE"
+  },
+  {
+    "Path": "Sof\\README.md",
+    "Bytes": 47309,
+    "SHA256": "BD54D84CA3C9573622D66A945A5741071B92381089BD75CF436F0E39CBB9394B"
+  },
+  {
+    "Path": "dxf-pdf\\TO-92.DXF",
+    "Bytes": 20850,
+    "SHA256": "8A94BD4C0D701F9FD7F03BFB9733F254CE2858F8ACA460624C84DC845655AEC4"
+  },
+  {
+    "Path": "dxf-pdf\\SL1307ZN+T（C5186044）.pdf",
+    "Bytes": 4084680,
+    "SHA256": "47F6E240265BA1A0A65E30991094E3819CA548010E06DAF7075A0802C341CC69"
+  },
+  {
+    "Path": "dxf-pdf\\MG6228T5-33.PDF",
+    "Bytes": 1180487,
+    "SHA256": "C1E78E55E0BF9AA97EF005FDE82BC3402E7E4CB0138E985CC20811430E3854D6"
+  },
+  {
+    "Path": "dxf-pdf\\HS0038B.pdf",
+    "Bytes": 140511,
+    "SHA256": "3137598FDD79E8ED6D136DC0790125084FF6B210801F418793950B8381A2454A"
+  },
+  {
+    "Path": "dxf-pdf\\HS0038B.DXF",
+    "Bytes": 21051,
+    "SHA256": "CC6559F36973B82268A3F1386547D2A5A6B2CD0AECB32F05B71A6451FA7D8285"
+  },
+  {
+    "Path": "dxf-pdf\\esp8266-technical_reference_en.pdf",
+    "Bytes": 3445297,
+    "SHA256": "25F08AA786724A9C82AD503FDA6B4339B154D59EFEDC5C9DFFF9544ACA756211"
+  },
+  {
+    "Path": "dxf-pdf\\ESP-12F规格书-20201207.pdf",
+    "Bytes": 1019912,
+    "SHA256": "323E5F3D8D1C9B2DFD8D56542062353D95748911BC8D64C11D63A73182F7A94F"
+  },
+  {
+    "Path": "dxf-pdf\\ESP-12F.DXF",
+    "Bytes": 35059,
+    "SHA256": "1FE6CC939B9F977D7593886CDD31E6DDF93404E4DE6D71803481A2B3D53A7E78"
+  },
+  {
+    "Path": "dxf-pdf\\ds18b20.pdf",
+    "Bytes": 392186,
+    "SHA256": "066C8A3C7E9222C49E84488840D5CFE9DD109CF0DA6AB4A55480CEBAC8F97F76"
+  },
+  {
+    "Path": "dxf-pdf\\AP2112.pdf",
+    "Bytes": 755270,
+    "SHA256": "EF8D376F2EC356E29172EB9E053819A0EBDCC576DBA7FC9AB0505C568427920F"
+  },
+  {
+    "Path": "dxf-pdf\\9014.pdf",
+    "Bytes": 124574,
+    "SHA256": "18EE3367510CC73F7E17D5D39B27F55BEE2000D2603B056263AD90385DC36F34"
+  },
+  {
+    "Path": "dxf-pdf\\6x6-key.DXF",
+    "Bytes": 20488,
+    "SHA256": "A5514B816174B1819F0E499D879E25133805A344F83F958816730101233C0FC3"
+  },
+  {
+    "Path": "Ad\\__Previews\\Sheet1.SchDocPreview",
+    "Bytes": 100643,
+    "SHA256": "40E0EE776F13A5C29946E88FFFC21E9D6E6CA117A4D8075A8F7FFDE83D91D4AF"
+  },
+  {
+    "Path": "Sof\\sdkconfig.defaults",
+    "Bytes": 661,
+    "SHA256": "096BD9D6BE5A43D489994C47CC9CD6A7405EA8A0ADD43825A86D3B4F8D4274B7"
+  },
+  {
+    "Path": "Sof\\sdkconfig",
+    "Bytes": 19840,
+    "SHA256": "258A6AE9AC04581BA6DFD077E6E1351AD7A9A968091AA5A5099B86C3F62BED4E"
+  },
+  {
+    "Path": "Sof\\sdk_component.cmake",
+    "Bytes": 6901,
+    "SHA256": "B4BCAFF7A700B31A7E52CCB3FA4CBBEC868014B8A0233561C14DAC9DF756A9E4"
+  },
+  {
+    "Path": "Ad\\ZJYM130-CH1115.PcbLib",
+    "Bytes": 1076736,
+    "SHA256": "A961B39059112F18712F6E50AC5DB4F11DE176331DAE2FC16E574F33F8B473DC"
+  },
+  {
+    "Path": "Ad\\Sheet1.SchDoc",
+    "Bytes": 206848,
+    "SHA256": "39F6F858AE695712FC869E7CF70E2C7B77D819542CD07CE012537CE6148A4E35"
+  },
+  {
+    "Path": "Ad\\PCB_Project.PrjPcbStructure",
+    "Bytes": 62,
+    "SHA256": "A785CA24B1AC528633E38723EB10FCF1E4A90292A5EBCBDBC642E6754B87E3D9"
+  },
+  {
+    "Path": "Ad\\PCB_Project.PrjPcb",
+    "Bytes": 38635,
+    "SHA256": "0426E57F961DD0B0DD271AC0FED6133DCCD9F889F234CA20055F71F1424CDD61"
+  },
+  {
+    "Path": "Ad\\PCB1.PcbDoc",
+    "Bytes": 2886656,
+    "SHA256": "598181D6186F0FBC89DD70EE9B905DC39D3A3C2147DEC3EF62FE06C7376E25AF"
+  },
+  {
+    "Path": "Ad\\myschlib.SchLib",
+    "Bytes": 245760,
+    "SHA256": "72D807DB945AABE9F062092206B094B50F468824E5F0517B85F4B850A4B3A897"
+  },
+  {
+    "Path": "Ad\\mypcblib.PcbLib",
+    "Bytes": 4573696,
+    "SHA256": "B027731670BC2950897EE683A1168DA979C50D3551E12C29C2551F14D115DEC0"
+  },
+  {
+    "Path": "Ad\\KongTiaoT.SchLib",
+    "Bytes": 12800,
+    "SHA256": "B0189C7A70D5A0C9AC9095CD88CD831C383598EBC991B88B3F8B2CC1394AEBC2"
+  },
+  {
+    "Path": "Ad\\KongTiaoT.PcbLib",
+    "Bytes": 1640960,
+    "SHA256": "AED2361342FFBAAB66376809A9CC7024A623928FDA3FA3744D1F4FCE0A854502"
+  },
+  {
+    "Path": "Ad\\Bom.xlsx",
+    "Bytes": 10999,
+    "SHA256": "25A6C35F871068BA470CE6388C5B76E53C3407944883B98DA70A16F9A896359E"
+  },
+  {
+    "Path": "Ad\\Bom.pdf",
+    "Bytes": 21368,
+    "SHA256": "571940EBA537E08FE4D714F201BEE25CE74FB7B7958D7958A33B4F987464B84B"
+  },
+  {
+    "Path": "Ad\\20261009.zip",
+    "Bytes": 2886812,
+    "SHA256": "C8C89B486C672500BDD0F6352A1CAE8471B6F157A6CFBC9DDEA2811A833D94BC"
+  },
+  {
+    "Path": "Sof\\20261004.csv",
+    "Bytes": 140518,
+    "SHA256": "4A570EB197AC68E1021D55C03692C5E57F21D9AAA391D154CAAA5C83131212E7"
+  },
+  {
+    "Path": "Sof\\.gitignore",
+    "Bytes": 80,
+    "SHA256": "9B6F4FAEB3E20375BAC54326BBDABD803E413B91D30F96093B6B243F22A0331F"
+  },
+  {
+    "Path": "Sof\\20261004发送波形.csv",
+    "Bytes": 144673,
+    "SHA256": "E68AC95C09DC34FB3D40EEC7856CCBD61AB5FC0066A10191A132515F0F1AFD62"
+  },
+  {
+    "Path": "Sof\\clean.ps1",
+    "Bytes": 5597,
+    "SHA256": "A94D5C2B36B105C076B2885921EFEE01021722097DC7AAA4984106FC62718364"
+  },
+  {
+    "Path": "Sof\\build.py",
+    "Bytes": 8944,
+    "SHA256": "8E22E864E718788908193E62EE059B04B3C284F076AC3E78F9BBC480F6626EDE"
+  },
+  {
+    "Path": "Sof\\CMakeLists.txt",
+    "Bytes": 265,
+    "SHA256": "B787FFE86B375EB59E4888C47F0E81A04B80F254945D5C0227D8A4D35DB63301"
+  },
+  {
+    "Path": "Sof\\flash.py",
+    "Bytes": 17972,
+    "SHA256": "6EAC60055A2101AA38DC8FCC7903857635E8034D283F84E492BECFC6D6ED9E8C"
+  },
+  {
+    "Path": "Sof\\ESP8266编译环境路径.md",
+    "Bytes": 3287,
+    "SHA256": "6B0AD560BB2297D0D0EDB75C0AD50BB9437814FF9CA6B4EEE2DC52D621D816DE"
+  },
+  {
+    "Path": "Sof\\LICENSE",
+    "Bytes": 5732,
+    "SHA256": "30958D91F76561DED02D6F7606B982163C69271E007A57633E41B165B27DEC85"
+  },
+  {
+    "Path": "Sof\\tools\\__pycache__\\wifi_driver_eval.cpython-314.pyc",
+    "Bytes": 18599,
+    "SHA256": "FEE150111F8D2AAE80DAE3B95461F0FCD2D47DDCEFBED6B7C4569DD73783C566"
+  },
+  {
+    "Path": "Sof\\tools\\__pycache__\\expose_timers.cpython-314.pyc",
+    "Bytes": 4379,
+    "SHA256": "D2BB964B00AB68264F432DC47EF1ACE7152F2FD91A9DF9CEA3B1C74A34061A05"
+  },
+  {
+    "Path": "Sof\\tools\\wifi_driver_eval.py",
+    "Bytes": 12817,
+    "SHA256": "32258F777B7816D0B4FB73BF5EC88519933B970B6C552B4F5505907FF5E1492C"
+  },
+  {
+    "Path": "Sof\\tools\\README.md",
+    "Bytes": 4300,
+    "SHA256": "5498D2A0F7D965D68018ED068437939B4F72DE4A4BF845E0E0C0A98DFB114595"
+  },
+  {
+    "Path": "Sof\\tools\\noise_power.cmake",
+    "Bytes": 2273,
+    "SHA256": "AF1209391F373ADD017182FEBC8E551BD54A506DA6C0CF815E9AC035CF40D8CD"
+  },
+  {
+    "Path": "Sof\\tools\\lwip_timers.inc",
+    "Bytes": 1927,
+    "SHA256": "0D79AD3E5B332898AD143CB99368FC38D574358425DED383475539286D963A28"
+  },
+  {
+    "Path": "Sof\\tools\\lwip_power.cmake",
+    "Bytes": 3042,
+    "SHA256": "764B150222A3E768A4E8B01E35C8FA495408840D380BCD4D9B46E35C67880E2A"
+  },
+  {
+    "Path": "Sof\\components\\esp_http_server\\Kconfig",
+    "Bytes": 54,
+    "SHA256": "B37FFA94899A09659B17386FD2A2E3E77EF965397E00F6AF7B0981A1D8955E58"
+  },
+  {
+    "Path": "Sof\\components\\esp_http_server\\httpd_uri.c",
+    "Bytes": 8619,
+    "SHA256": "BA66151D61CED23C51729FE2705E813747DFCA1A18B90CAEA986DED6D281CFCD"
+  },
+  {
+    "Path": "Sof\\components\\esp_http_server\\httpd_txrx.c",
+    "Bytes": 17587,
+    "SHA256": "7E145299F477187047C46044827143E68B85EA9953B3D2E81CB16F37FB73BE54"
+  },
+  {
+    "Path": "Sof\\components\\esp_http_server\\httpd_parse.c",
+    "Bytes": 29917,
+    "SHA256": "C04D785ED488C12966F3A9A5EEF464279C302C814564562B47C663B93AA053CF"
+  },
+  {
+    "Path": "Sof\\components\\esp_http_server\\httpd_main.c",
+    "Bytes": 13658,
+    "SHA256": "A760410215EB92112C684B1A0DBCC35EA3E07F76EDF318E177DC6C5C3E8AE982"
+  },
+  {
+    "Path": "Sof\\components\\esp_http_server\\CMakeLists.txt",
+    "Bytes": 683,
+    "SHA256": "2085877A995F13C0B417D14708054986F8D8ED98B04C86E0D109021162E8A7C8"
+  },
+  {
+    "Path": "Sof\\main\\startup_trace.c",
+    "Bytes": 1453,
+    "SHA256": "E03DF5B7EA023A9C72E5AAB7635EC123BA67C3F7497AA8B4A0963FB06BD1DD5E"
+  },
+  {
+    "Path": "Sof\\main\\sleep_trace.h",
+    "Bytes": 447,
+    "SHA256": "16A0151FCC08CFE1DBA923B93D762F6893C17B57450473422ABB8FE429BD5A14"
+  },
+  {
+    "Path": "Sof\\main\\sleep_trace.c",
+    "Bytes": 15309,
+    "SHA256": "A62CF81BBB1B495EB72CFB5093992E31545CFADA286E6725B63306F73F8B2452"
+  },
+  {
+    "Path": "Sof\\main\\sensor.h",
+    "Bytes": 1060,
+    "SHA256": "57E0E155BF811334515F1DF862B21F37021253152DB9FABC9ECBD6FA30A8D26C"
+  },
+  {
+    "Path": "Sof\\main\\sensor.c",
+    "Bytes": 7363,
+    "SHA256": "1D1B4BE1DE17CE4D719DE5CDC4B49DD8705C17A5E9CBE75F0B6C556DE92ED14B"
+  },
+  {
+    "Path": "Sof\\main\\rules.h",
+    "Bytes": 1771,
+    "SHA256": "3DB7C0BD99065EC60C4995BCE6D3DDD2C0761E9F1FD6D7ED568D649B177AA222"
+  },
+  {
+    "Path": "Sof\\main\\rules.c",
+    "Bytes": 3694,
+    "SHA256": "D946A3187A329041845B2014C23DEE0B826584EB3A796D6ED7ABA23049792AB1"
+  },
+  {
+    "Path": "Sof\\main\\portal.h",
+    "Bytes": 859,
+    "SHA256": "A32ABB3BC57ABB54E5D80379537270C674148BF5741BA87C45E7B95E317697BB"
+  },
+  {
+    "Path": "Sof\\main\\portal.c",
+    "Bytes": 20773,
+    "SHA256": "8DCB13D92C267A4B310D42B67893AB2AB4541080C99C58FFEB7300E8E89B0467"
+  },
+  {
+    "Path": "Sof\\main\\page.h",
+    "Bytes": 11011,
+    "SHA256": "F9D1744974A3D9F5F2CABF8FAFA589CD5FA4608F0D523D14BBD9CDD793B7EC39"
+  },
+  {
+    "Path": "Sof\\main\\noise_timer.h",
+    "Bytes": 279,
+    "SHA256": "AEFE5C2FCD59D1B87D97261C29F55B136AF875D4C2CCC4FE3BD0D3CAF8D50C28"
+  },
+  {
+    "Path": "Sof\\main\\noise_timer.c",
+    "Bytes": 3166,
+    "SHA256": "882870922D60F66B17E95A301B11C874CAA61B3F33152BE04105F90EDEA184E1"
+  },
+  {
+    "Path": "Sof\\main\\main.c",
+    "Bytes": 30003,
+    "SHA256": "BD68346A21BB43AECF8444AD58D0FF1B20A40505E38FE5BA2F62630C7599AAB4"
+  },
+  {
+    "Path": "Sof\\main\\Kconfig.projbuild",
+    "Bytes": 2610,
+    "SHA256": "273CC5DAB39689184D349F4BA7271BA7E66E8D4EAEA9AEB7DB55C6EA2D767F3F"
+  },
+  {
+    "Path": "Sof\\main\\ir.h",
+    "Bytes": 1588,
+    "SHA256": "D61355531DCB2C02CB7E3C1678D91A1B5F2EB7FBA8B289044EAE5C0BC7270CCD"
+  },
+  {
+    "Path": "Sof\\main\\ir.c",
+    "Bytes": 28955,
+    "SHA256": "6850BA5CCAD982A0FAD951CBE054DB4B6819365ED4119928F41807C1AC41C05A"
+  },
+  {
+    "Path": "Sof\\main\\CMakeLists.txt",
+    "Bytes": 830,
+    "SHA256": "A63732CF8AD93A770462692239EA7791E5463430B2BED113417E712E0BE7181B"
+  },
+  {
+    "Path": "Sof\\main\\app.h",
+    "Bytes": 1363,
+    "SHA256": "5051C45D46C13D1BC1D05FC24FFB98139C2764EFEBC3CB35812F6817A3943802"
+  },
+  {
+    "Path": "Sof\\tools\\dhcps_trace.inc",
+    "Bytes": 7321,
+    "SHA256": "94F939A7B4916FD062DE0BF5232194901FC3FA84999B28135CCF5D295BB680DE"
+  },
+  {
+    "Path": "Sof\\tools\\dhcps_trace.cmake",
+    "Bytes": 5605,
+    "SHA256": "8D65B0CEA6DBC702316A0EDFC955067FE5B8A5D8D78FD6B0625FADF01151996A"
+  },
+  {
+    "Path": "Sof\\tools\\dhcps_arp.inc",
+    "Bytes": 302,
+    "SHA256": "D778F8597C933BB619A2E08612977ED0CBC3FB0A8935753B7A369A5AA23A0A35"
+  },
+  {
+    "Path": "Sof\\tools\\dhcps_wifi.inc",
+    "Bytes": 4358,
+    "SHA256": "B6A06A8D32F7500149D07A6FFD79607E21209256148625F14B51B54227D00824"
+  },
+  {
+    "Path": "Sof\\tools\\esptool-v4.12.0\\esptool.exe",
+    "Bytes": 10914136,
+    "SHA256": "1CD8386A7934862EB6CE1E14AF3CC2309B0A743DE1171FD09FAB2F2EF2F5D1A3"
+  },
+  {
+    "Path": "Sof\\tools\\esptool-v4.12.0\\LICENSE",
+    "Bytes": 18431,
+    "SHA256": "189B1AF95D661151E054CEA10C91B3D754E4DE4D3FECFB074C1FB29476F7167B"
+  },
+  {
+    "Path": "Sof\\tests\\run_coverage.py",
+    "Bytes": 25594,
+    "SHA256": "F2B586D98E5E60022CC7F35151F4165A44019E6DCB5D1EF8BD0B624BAF7E2B55"
+  },
+  {
+    "Path": "Sof\\tests\\rules_test.c",
+    "Bytes": 88,
+    "SHA256": "ECB739DC7937D50224CD529AC2428068762DD251A1CCBCA6CA0E8D6028C0D365"
+  },
+  {
+    "Path": "Sof\\tests\\rules_cases.h",
+    "Bytes": 6814,
+    "SHA256": "5C5FAC18F2157BAA03D32C3C1F378146E80F30F9A5F09F911DCED542FB4736AE"
+  },
+  {
+    "Path": "Sof\\tests\\dhcps_wifi_test.c",
+    "Bytes": 12079,
+    "SHA256": "D131DB9E602114E097C557A37A289A7BFF704302D577E5E9FDCDA1B973087376"
+  },
+  {
+    "Path": "Sof\\tests\\check_page.js",
+    "Bytes": 19487,
+    "SHA256": "96521BE3CE49F654E3D8CDD1B35252A3EE40881E867287F2378BB715F4E1C0A2"
+  },
+  {
+    "Path": "Sof\\tests\\build.ninja",
+    "Bytes": 332,
+    "SHA256": "CB4F02B3E36281673D2C7EDDD37264C205FAA3786760561C0445B69516B05F3B"
+  },
+  {
+    "Path": "Sof\\tests\\test_http_main.py",
+    "Bytes": 12045,
+    "SHA256": "421DF96C2B45AE05D7F36A5605F0616D1E72BC69EA942F7A5EA698C5B29F4709"
+  },
+  {
+    "Path": "Sof\\tests\\test_flash_port.py",
+    "Bytes": 3265,
+    "SHA256": "34EA3EADABF99D65D667A361ECF81FE46985D9FFE36A5214D7D599E7DA0C6C4F"
+  },
+  {
+    "Path": "Sof\\tests\\test_dhcps.py",
+    "Bytes": 25667,
+    "SHA256": "E5278C2459A9F411C1D8EB6D048E977B538711B1123D4BC627B116394C316B04"
+  },
+  {
+    "Path": "Sof\\tests\\startup_test.c",
+    "Bytes": 1175,
+    "SHA256": "3A2E586BEB7EEBE9350215DDE5FB5C36E8F3D6033765A1B0D72AB59961ED8C47"
+  },
+  {
+    "Path": "Sof\\tests\\test_power.py",
+    "Bytes": 147243,
+    "SHA256": "ABC8C5FF70919D01DAC6BF8BD33BCBDEC47E0068E5EAB6C04956F07A0BA67B98"
+  },
+  {
+    "Path": "Sof\\tests\\test_portal.py",
+    "Bytes": 89634,
+    "SHA256": "9124B6F3D825AFAC8BCDF9BAD99E0C0C964EDB781BE4648A510515B4AB98F1A8"
+  },
+  {
+    "Path": "Sof\\tests\\test_tools.py",
+    "Bytes": 18276,
+    "SHA256": "6B8D8EE04DEB8DAA45B6790BF7C76D083EDFE525A7FAABB656D39E27ED645A04"
+  },
+  {
+    "Path": "Sof\\tools\\expose_timers.py",
+    "Bytes": 2549,
+    "SHA256": "91A4152C90B0599C544BF345F9DC02DF8DCAB8095E92A6659257251F72FC0667"
+  },
+  {
+    "Path": "Sof\\build\\auto\\.ninja_deps",
+    "Bytes": 372324,
+    "SHA256": "269F2D743DF9461FF53B7DDC6F72A6D76D3911156339C15506EDBB9F07F01ABB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\.bin_timestamp",
+    "Bytes": 66,
+    "SHA256": "7885F7A1C9CAA1BA7809FD643D6CAC1FF694352A418D336349086BA89CA225EA"
+  },
+  {
+    "Path": "Sof\\tests\\test_wifi_eval.py",
+    "Bytes": 12243,
+    "SHA256": "4A84292CC96F20665BC9F8D89CC93886403969830DF32FC382C9815E0EBA85C9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\.ninja_log",
+    "Bytes": 74728,
+    "SHA256": "DE2171022B7DEFB62A98E7C8A24471143ADB55B905551F4F3FF5C14E9555810F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\ac_thermostat.bin",
+    "Bytes": 543744,
+    "SHA256": "341136C2E2C7FCFD6F9CF0E28DF241D636047D834A0FB85B8DEDD71C4B6D7FB7"
+  },
+  {
+    "Path": "Sof\\tools\\esptool-v4.12.0\\README.md",
+    "Bytes": 2487,
+    "SHA256": "C197E662E776AC96F0CA8D16CE5D83A107049D58D79C23E1161AB6B554A3A2A9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\ac_thermostat.elf",
+    "Bytes": 5099500,
+    "SHA256": "87A68439559DF8A4436709F80952986B014BCAAEAFE50001B308C04BE1CF48B3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\ac_thermostat.map",
+    "Bytes": 3693057,
+    "SHA256": "8C265DB8138B369B4711FDD3906312D4726D9477014BA288B2B56928D164614E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\wlanif_dhcps.c",
+    "Bytes": 21436,
+    "SHA256": "01915647000527083632226036701E478011FCE08FD039FEF15E61B5E50A39CE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\rules.ninja",
+    "Bytes": 43824,
+    "SHA256": "BE74F57878872F9AB53484BCC3853A9E54855190EF2C23B670856878B70AC87C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\project_elf_src.c",
+    "Bytes": 0,
+    "SHA256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "Path": "Sof\\build\\auto\\project_description.json",
+    "Bytes": 6720,
+    "SHA256": "4BDC7532AA997C04FE77B5B48B903AF19BBBDA49AFED3AF133BC30DED013F974"
+  },
+  {
+    "Path": "Sof\\build\\auto\\partition_table\\partition-table.bin",
+    "Bytes": 3072,
+    "SHA256": "5D1DBC1E3C50D7BC93B123215900B57FDFDA24131E76DA03999A54FE9B554EC3"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\VERSION",
+    "Bytes": 161,
+    "SHA256": "469AA0250CB011552AF1931FD4D55304A3F54578B1F98E2CAC5C737716445466"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\manifest.json",
+    "Bytes": 4537,
+    "SHA256": "587004AE27224E8A819CE8B47C41162E321A0012EC1584BEA065C3AC67D28544"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\libsmartconfig.a",
+    "Bytes": 156402,
+    "SHA256": "89E417BEFC8CEA4EDA72F16E6529BD02536F2C5893018639D927CE1B9BDE4941"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\librtc.a",
+    "Bytes": 5048,
+    "SHA256": "347D020D5D520DD7C93F254447C0F61DD3CB160147986EF2CA01FFEED541A355"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\libpp_dbg.a",
+    "Bytes": 268090,
+    "SHA256": "2F70073992ACE791F9B0C030F1C5F4B892039A9EB93B8F5BB85B6270D0739A06"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\libpp.a",
+    "Bytes": 248934,
+    "SHA256": "430C0B2893DFA6AA29AE965CE390135A698A04F4A039E8A78FFD29022E167821"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\libphy.a",
+    "Bytes": 266024,
+    "SHA256": "806DA2EF0F8F5FA5F9A265DFE0BB8DD54A578CD1E75BF1F3AA0415586FC6E178"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\libnet80211_dbg.a",
+    "Bytes": 544252,
+    "SHA256": "D62A64F849FE099C67634C61E558873ECEB2F257F432DB79D1D5A58EA446900E"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\libnet80211.a",
+    "Bytes": 485352,
+    "SHA256": "8BFAE78356D82DB98F6F0FCEAFB9B10A6788E4F94887F4B0CE47F06DAF3D78E3"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\libespnow_dbg.a",
+    "Bytes": 38660,
+    "SHA256": "F38E0DB67EDA0EA9FD7358FB5FF29E653997FF4241343FE8F9506B66D88FAD64"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\libespnow.a",
+    "Bytes": 38660,
+    "SHA256": "E77171AF84E0090C40D69531C80315566286327770755212BAF6FC0E45529C8E"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\libcore_dbg.a",
+    "Bytes": 40650,
+    "SHA256": "987643C203F92A008769DAF9E260ECC42D40DEF3A287789BFE05DEC431563B9F"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\lib\\libcore.a",
+    "Bytes": 39742,
+    "SHA256": "526C23B9079361DCCCB6CE3B7807602E899A719728AB347CAB7409DBF6DB18B7"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\Kconfig",
+    "Bytes": 46,
+    "SHA256": "7AA80EE651CC348A23F38DD3A3A0D1092B66F46E4561D8B0D8FAB88DDCB97967"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\driver.cmake",
+    "Bytes": 1888,
+    "SHA256": "F0A736F4802F6984E51658836B81F68EC5D7D4C99F82EFFBDB763147D169A7D4"
+  },
+  {
+    "Path": "Sof\\components\\esp8266\\CMakeLists.txt",
+    "Bytes": 2577,
+    "SHA256": "7134CFDC7E33D02A92B9FE96BB9A0A1DDC3AED47EF17C396DDF7B2FF0C00C8E1"
+  },
+  {
+    "Path": "Sof\\tools\\flash_download_tool\\flash_download_tool_3.9.11.exe",
+    "Bytes": 26519970,
+    "SHA256": "193F4F4113E5F315AD19175DD33456BA632801699F5B67E52CE164F11D7A54CA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\flasher_args.json",
+    "Bytes": 815,
+    "SHA256": "4E5FA5BF7FB2B043F552875F746925D0E3C1600A4FDFFD2FCA2010C8FC155F13"
+  },
+  {
+    "Path": "Sof\\build\\auto\\noise_power\\pp\\pp.o",
+    "Bytes": 44796,
+    "SHA256": "AEF68DAA0498AF2FF0D0E21F2A20B96C0632FFE760C238813ED3DE4CDDFC27D7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\etharp_dhcps.c",
+    "Bytes": 47857,
+    "SHA256": "27B1E6F029DB82EA9F6292A85AC7D303154B10571757ED3D01C26F870CE394B1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp_sleep.c",
+    "Bytes": 11766,
+    "SHA256": "2D049E02A976AC4B52A127931795BF20C16F7B3EAB24FE536374A0979685D0D1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\noise_power\\pp\\patched\\pp.o",
+    "Bytes": 44828,
+    "SHA256": "3A142559070B63275FEB2980995B2E26D663788010E8FD0233FFCE0534D04E40"
+  },
+  {
+    "Path": "Sof\\build\\auto\\noise_power\\libpp.a",
+    "Bytes": 248986,
+    "SHA256": "5D854635165A3E844EB7C9AF87335BB966AFEDFF788FBF6952C88A65841079BB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\noise_power\\libcore.a",
+    "Bytes": 39800,
+    "SHA256": "1D4725A3E92E2787781CF3D9DFE0F7A6B64CF7E69F5C90D73E4860BEEE9D99BB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\libwpa_supplicant.a",
+    "Bytes": 5726534,
+    "SHA256": "098BF7C80D9D68463B849528DDE296963BAD6E46B85CCEF2367DFE4C6EFFB858"
+  },
+  {
+    "Path": "Sof\\build\\auto\\noise_power\\core\\patched\\ets_timer.o",
+    "Bytes": 9476,
+    "SHA256": "0CC61DC5A9D2DA40696E1BF48691C1A4AEDEE016B432CEFF1EE2D93825AA46E8"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\cmake_install.cmake",
+    "Bytes": 1081,
+    "SHA256": "4BC1886FA9A2E13C2F61EF7E34326F82D93EEC14FEF81EC19C85EF403A844500"
+  },
+  {
+    "Path": "Sof\\build\\auto\\noise_power\\core\\ets_timer.o",
+    "Bytes": 9440,
+    "SHA256": "4E0DB6787711C5492AF40479977ECA58F3BE3A0BC2D0B9EF119E3592BD5D8E95"
+  },
+  {
+    "Path": "Sof\\build\\auto\\mconf-idf-prefix\\tmp\\mconf-idf-cfgcmd.txt.in",
+    "Bytes": 13,
+    "SHA256": "261CB8BC1498A4D57E77AE81637164B2CE75F9869CF18CBA1F02AB6D2BDC57F0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\mconf-idf-prefix\\tmp\\mconf-idf-cfgcmd.txt",
+    "Bytes": 8,
+    "SHA256": "4338C530A76441CDA4F59C911C9FDF950E000F361B796FCD9DB755AAAE241FF9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\lwip_timeouts.c",
+    "Bytes": 15641,
+    "SHA256": "7AE0DF337587D007EF45BF00AF480868A7AA5364C900CEBB46BD2340EBB0E5C0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\ldgen_libraries.in",
+    "Bytes": 1170,
+    "SHA256": "40C7F0604B5545B808FE020F7A739DFCF7553156C666BF74A99FC7F3BCB5E50F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\ldgen_libraries",
+    "Bytes": 1752,
+    "SHA256": "51C631BC8DCA02AC628480CFCCF267B2DAFD26BFDA85D62DD3D4568B43FD4C5F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\wps\\wps_validate.c.obj",
+    "Bytes": 216536,
+    "SHA256": "8BB1E19F058F278E652A027216C5E0308B9F9F61CE3C89BA2133010B9D08986F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\wps\\wps_registrar.c.obj",
+    "Bytes": 356336,
+    "SHA256": "86CC25F2334D9A118E98B513A5F77995AFE311D3680D82E3508A9133BACA1FCA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\wps\\wps_enrollee.c.obj",
+    "Bytes": 191912,
+    "SHA256": "7603A787044ECCCA23A2A12C31EE5BAA8CBB3081E764DB5D2C017078693FD8F5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\wps\\wps_dev_attr.c.obj",
+    "Bytes": 94896,
+    "SHA256": "995ACE3FEBCA25EEE2DB80A91D981CD392D356ADF77FBDA57288F45918EA2A8D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\wps\\wps_common.c.obj",
+    "Bytes": 74400,
+    "SHA256": "5247EC88B56130A7FF5DC44611517B2C1E1D84D0E0ED42A795CD782337A67AA0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\wps\\wps_attr_process.c.obj",
+    "Bytes": 50836,
+    "SHA256": "E58D82D3ABFC8BAFFE0B4AD9B050E5C7942431953D0A1A83E6F441C9D1477501"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\wps\\wps_attr_parse.c.obj",
+    "Bytes": 58368,
+    "SHA256": "F2C4B1C407AE5A8BC3E6CD611C8542276A886F7DB0BC616EC03965D0B1A43887"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\wps\\wps_attr_build.c.obj",
+    "Bytes": 119480,
+    "SHA256": "0980582353456EEA85AFC1D31675765A474144BF6D2755F60F7402285AC937A6"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\wps\\wps.c.obj",
+    "Bytes": 86792,
+    "SHA256": "136DBEA10F9AFC7EA355773B317DB2528C04B4DD3A328672B9B75E89F74E88BF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\full_flash.hex",
+    "Bytes": 11535372,
+    "SHA256": "C4D360D076B713D76FF51B56C34E6C601BB9BD2E80EF30CF29335D6E81AE99BD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\full_flash.bin",
+    "Bytes": 4194304,
+    "SHA256": "1ED38C98CF251DD9FD6E634B10A2A75EC3533387E60B8A751B33B407D0F136BC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\flash_project_args",
+    "Bytes": 154,
+    "SHA256": "E2916F84ECF8772CCFCC9EBCCFD274F51E91F411C72E76825FCCA58201874611"
+  },
+  {
+    "Path": "Sof\\build\\auto\\flash_partition_table_args",
+    "Bytes": 42,
+    "SHA256": "D1E19D2A93003F633B4073CA3FB983B7DBCFB41079D92957E16245A28117521B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\flash_bootloader_args",
+    "Bytes": 85,
+    "SHA256": "1165CFA3E2A868233A8B5377A69E2DE76783AD56F36540D93936F0B67ECABE40"
+  },
+  {
+    "Path": "Sof\\build\\auto\\flash_app_args",
+    "Bytes": 25,
+    "SHA256": "FD54BC53DA7904523212C9FCFB05884D523BF0EBD171BB0B8F18E02FFEE554E4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\utils\\wpa_debug.c.obj",
+    "Bytes": 19572,
+    "SHA256": "842AA95038BA43D7D2249BDB167FA638CC0353F29D406E7035E35C1927CDCB61"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\utils\\wpabuf.c.obj",
+    "Bytes": 38920,
+    "SHA256": "E8BFAEF353544033243E284029F26A973D439781F74951608B278240B64D450C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\utils\\uuid.c.obj",
+    "Bytes": 16600,
+    "SHA256": "99598FF2E92F87180451794538319DF714D0DF61F0BCC21A1647804106AE24A0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\utils\\json.c.obj",
+    "Bytes": 77920,
+    "SHA256": "A294A17E15B4FD44FD10F1BC29BF8F1E998110BC871D696D2BA40DF41716B27C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\utils\\ext_password.c.obj",
+    "Bytes": 9976,
+    "SHA256": "0CBB2CEAEF4761F17D21E6AD792DD2145B3A1E4F2BEBA1C5509E55D5DA20457C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\utils\\common.c.obj",
+    "Bytes": 76184,
+    "SHA256": "FB31F23F3D56C93B02FD0921F5722E0C47B19198EBAFF670DD9ADB113DA4B214"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\utils\\bitfield.c.obj",
+    "Bytes": 18344,
+    "SHA256": "BC3663EA1B90FEB48F7B469B8968406B37D4B3167963501ECA81C4EC27A1C6B1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\utils\\base64.c.obj",
+    "Bytes": 30396,
+    "SHA256": "19FF544BD82D5770EE5EBDB22A431398F2B20C5F3122A67B2B3FD4E0972DBEB0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\heap\\libheap.a",
+    "Bytes": 62452,
+    "SHA256": "4BED0EF209B90A7CA2DCA0F22FE77D2E53BB0406EC13CCD2123805C696FC7F54"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\heap\\cmake_install.cmake",
+    "Bytes": 1071,
+    "SHA256": "C4A90F542EBEA2A891A40393EFA02D7BB7FE37EF00FBDD2F61266BB509CDAE64"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spi_flash\\libspi_flash.a",
+    "Bytes": 162290,
+    "SHA256": "83FF41C798E9DB7954C9FD2BE212840622D4DB6988209542AF8DFCFC32652875"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spi_flash\\cmake_install.cmake",
+    "Bytes": 1076,
+    "SHA256": "7018F2CE4D46CE11D560A553D7F72EE0C305BA8100DD3F440962C528A4206EE7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\rsn_supp\\wpa_ie.c.obj",
+    "Bytes": 57600,
+    "SHA256": "D9D12032B3DE721B16E168680270410678050C556DA3B38F3AF1BEF34B5F0D64"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\rsn_supp\\wpa.c.obj",
+    "Bytes": 212372,
+    "SHA256": "AE52C3B03BDC13DF441E623927299A3B38C67C305857DCF126AD35A4566C061F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\rsn_supp\\pmksa_cache.c.obj",
+    "Bytes": 60724,
+    "SHA256": "A93E3CFDDEBBA34BD7C5E3AB56F063CA86A0114247623E616978F5F857B54B89"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\esp_supplicant\\esp_wps.c.obj",
+    "Bytes": 243124,
+    "SHA256": "A89807276D57218237F771DCB41AEFEEBE08E56CFF3A554D672019FF067F0498"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\esp_supplicant\\esp_wpa_main.c.obj",
+    "Bytes": 67964,
+    "SHA256": "782AF52461B0E63F766E4F0566CE3810156A8E4B4E3DC2D3C65B7D011B8D8CBF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\esp_supplicant\\esp_wpas_glue.c.obj",
+    "Bytes": 23528,
+    "SHA256": "339C156376CD73B2B05A1AB89A4F8419B441175F4DA8B68114641F3616CF13B1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\esp_supplicant\\esp_wpa3.c.obj",
+    "Bytes": 45484,
+    "SHA256": "0C0A021652F1134F37004967CFCD89D267D95E30F2AAEAA52715A6E72DAEA18A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\esp_supplicant\\esp_wpa2.c.obj",
+    "Bytes": 140980,
+    "SHA256": "17C851969052D0D0CA8ACEE77182190A11CE49ADF1DE259A435D58301029908C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\esp_supplicant\\esp_hostap.c.obj",
+    "Bytes": 35152,
+    "SHA256": "BEDF0097A8FC24A4ECD849E4D66C58F57AD76E0C5A5E12E9AC27D301D63B94E9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\heap\\CMakeFiles\\__idf_heap.dir\\src\\esp_heap_trace.c.obj",
+    "Bytes": 1060,
+    "SHA256": "CEF2C7E186B6FFB7F5CB0A446891952F52143643350B8F3F627A42D2FC35184B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\heap\\CMakeFiles\\__idf_heap.dir\\src\\esp_heap_caps.c.obj",
+    "Bytes": 48500,
+    "SHA256": "6C8FFAD8E84EC8D661D0BA1C802932FC9E89A328AFECE30FD6BC0EDD85F8F2AF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\eap_peer\\mschapv2.c.obj",
+    "Bytes": 18804,
+    "SHA256": "4E3C2D2938A126BBAFC2CFF86D9DF2200C9DFFDD3ADEC01CF432D5AE312779D9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\eap_peer\\eap_ttls.c.obj",
+    "Bytes": 119672,
+    "SHA256": "5FBE2A4BF0C9C1300A99CAEF9CCADFA2540A27E9FA331B24FFA9DB9ED1A4AA5C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\eap_peer\\eap_tls_common.c.obj",
+    "Bytes": 105888,
+    "SHA256": "196D9E184654F623423230BECFA4F75904B5F35879E96D8E0D71C371C1712130"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\eap_peer\\eap_tls.c.obj",
+    "Bytes": 37524,
+    "SHA256": "7FFD16BEEF4D924A5C13D3C5CF5FF52CCA42813680B255994CFB748FAC1C1A40"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\eap_peer\\eap_peap_common.c.obj",
+    "Bytes": 14544,
+    "SHA256": "6EF19A4EECC225ADCDA207FBD19B76AA6FD2CB416A5972238A28BB3EB18C8459"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\eap_peer\\eap_peap.c.obj",
+    "Bytes": 143420,
+    "SHA256": "93BD8A8DDC6F7B9FB6745265E6E479AD3632246E3933D788860E9FD5B96CF7D2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\eap_peer\\eap_mschapv2.c.obj",
+    "Bytes": 83096,
+    "SHA256": "D85AF64D61CCB9E8AF76698C589B3B21644629BC9AE56BCAC0FA75EE9FA28315"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\eap_peer\\eap_common.c.obj",
+    "Bytes": 32364,
+    "SHA256": "923E18449FB66D2CB4C491ED930CA3C1B76209BBAD5EBC5DBD9BBB429258D9C7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\eap_peer\\eap.c.obj",
+    "Bytes": 89040,
+    "SHA256": "F85B2DB4AED141DACE738E858438F05FDCC9E20D82BF89EF445CA7EA389CD018"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\eap_peer\\chap.c.obj",
+    "Bytes": 1060,
+    "SHA256": "E8F7797963D40832616168C05D0EB188E72327D985A8DD29C3A23722F9E4A37A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spi_flash\\CMakeFiles\\__idf_spi_flash.dir\\src\\spi_flash_raw.c.obj",
+    "Bytes": 35204,
+    "SHA256": "FC7CE6514734DD63F1C147F76BAF3550085DED115837B89995FA89CFD802573A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spi_flash\\CMakeFiles\\__idf_spi_flash.dir\\src\\spi_flash.c.obj",
+    "Bytes": 80936,
+    "SHA256": "369D157EFE93D3C1FE8A84EACB24F73A64E54C097A3A01E6CEB64DA4493FB5F4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spi_flash\\CMakeFiles\\__idf_spi_flash.dir\\src\\partition.c.obj",
+    "Bytes": 44720,
+    "SHA256": "34B46732425FFBA11B9A7EDDC30AFAD3930AECDA49C4ECF2F75E1829C187EB48"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\tcpip_adapter\\libtcpip_adapter.a",
+    "Bytes": 221652,
+    "SHA256": "84CFBB423AF2253DE9D158A9E7AEB4734ED9B3DF70C9117D11EEF4E11BE2711F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\tcpip_adapter\\cmake_install.cmake",
+    "Bytes": 1080,
+    "SHA256": "51FD8A0EC04E834537B007CE14ECE19251EB37D68B7C40FAD7FEFC26B789D36C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\coap\\cmake_install.cmake",
+    "Bytes": 1071,
+    "SHA256": "0B9D2E193AF201EAA29A421BA9613D4935D25534DED0A5898950C0AFE95C19ED"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wear_levelling\\libwear_levelling.a",
+    "Bytes": 323736,
+    "SHA256": "229E927D8FAF6B87C19DF281E3157A83E066F7C8807573C9AB8DF769699CC1E3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wear_levelling\\cmake_install.cmake",
+    "Bytes": 1081,
+    "SHA256": "71351A95517673BA453123A6E2570613EF189D48E732AA1B41A7EBFE31AD9E4C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mqtt\\libmqtt.a",
+    "Bytes": 403948,
+    "SHA256": "9E94436AA6C0CF68B6AC834780D530967266AA988FF1FA535ABD6B12FBB78382"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mqtt\\cmake_install.cmake",
+    "Bytes": 1071,
+    "SHA256": "1880B8B6853ACF676F49BCBA960266F96F36312BD321E5AD3E3AE07179D1F92C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\config\\sdkconfig.json",
+    "Bytes": 16265,
+    "SHA256": "A5F809D60D304A1B121919FDCBC41298C5E6CD98CCF9D5148B0FC3298FA93346"
+  },
+  {
+    "Path": "Sof\\build\\auto\\config\\sdkconfig.h",
+    "Bytes": 22924,
+    "SHA256": "03D9711E1686B6593DAD4C538A36743DD03C963EC6D3880DC56720D7A453F0B0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\config\\sdkconfig.cmake",
+    "Bytes": 36085,
+    "SHA256": "2CFAC99FA1C9EC1DCCA00A3124055A59674CC97FF2FDF0D85E01FC832B969E74"
+  },
+  {
+    "Path": "Sof\\build\\auto\\config\\kconfig_menus.json",
+    "Bytes": 402466,
+    "SHA256": "E29EF37782CE5AE9420DF5B0036678E793974DB8C3EA7C17152A9C211FEF99F5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\compile_commands.json",
+    "Bytes": 1748682,
+    "SHA256": "61374994A320006FD08FDFE1AD94812B248A960529DADCDAD02BF195202C1A76"
+  },
+  {
+    "Path": "Sof\\build\\auto\\cmake_install.cmake",
+    "Bytes": 1550,
+    "SHA256": "EA216CE695FB1299508F4077D3A1BADB09EEE557F54AC897F68A03FBF6BF8638"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\cmake_install.cmake",
+    "Bytes": 4187,
+    "SHA256": "7371D9204F036819ADD7FB59A7298F3CFBA25F33195FFB5236098178C985A569"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spiffs\\libspiffs.a",
+    "Bytes": 815602,
+    "SHA256": "A622FB6B34B0449B4AEB84B5BB8034B82F62A713DDCA822417C87E85BEB2DFFA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spiffs\\cmake_install.cmake",
+    "Bytes": 1073,
+    "SHA256": "87EF2664D492CF61CE5ED0FB90B76E282202FCC62BC3D16B4E1E541B26DA1844"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\heap\\CMakeFiles\\__idf_heap.dir\\port\\esp8266\\esp_heap_init.c.obj",
+    "Bytes": 12220,
+    "SHA256": "D5EF0E6D84A1F2D2517E68E0AAAD217827618EA5DA8D236060DF9356AA505BCC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\tls_mbedtls.c.obj",
+    "Bytes": 111440,
+    "SHA256": "654A5296E5F16E7427C731403B4FE88D403EAD13B45DA8355A4BC6B53BF63E0B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\sha384-tlsprf.c.obj",
+    "Bytes": 13264,
+    "SHA256": "AA443B0555AA7C3AEE231BD6BA279FDA6BD153103901E0A47191ABEE7D2E37CD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\sha256.c.obj",
+    "Bytes": 16508,
+    "SHA256": "42562AF291407C19B3182CF2EC67DC08466828DAFA836C847329F29312F1E12E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\sha256-tlsprf.c.obj",
+    "Bytes": 13264,
+    "SHA256": "582639CEC460D9835DED8EEEEB29D8D33EB2A8CAEBFEAABFE5A52B74C172DF5A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\sha256-prf.c.obj",
+    "Bytes": 17376,
+    "SHA256": "63653C48656B4019022AC58FCC31EAA5D6D0B9D85200FBB4B3CF42CB7DB631B3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\sha256-kdf.c.obj",
+    "Bytes": 14396,
+    "SHA256": "F3B2A1888464088A5CEA5EA9C0FD657D924B97721F7F7A13548849571FD30427"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\sha256-internal.c.obj",
+    "Bytes": 13132,
+    "SHA256": "9B6986E07F0ABEA91659C533B0486DBB1C491D0B3EA5FDCF5B059205310E201F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\sha1.c.obj",
+    "Bytes": 21028,
+    "SHA256": "1EB257EA61E76D659CFA72961CF49CB4418F70ADB89BC80AD510EDC57B181CD0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\sha1-tlsprf.c.obj",
+    "Bytes": 15388,
+    "SHA256": "61D3ED414EB5AB3400EE57E6EE7C49F33CCC441EEE1A5771176D978C66B33838"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\sha1-pbkdf2.c.obj",
+    "Bytes": 17180,
+    "SHA256": "0D592BE9A46D0384A605897086ECE84E08358FF7D9385D27AAB2F10FDB03E859"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\sha1-internal.c.obj",
+    "Bytes": 32824,
+    "SHA256": "03549E32762DB63E7513AFB816A7606D5C23F1CA8E63BE2D23212864CA4F633D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\rc4.c.obj",
+    "Bytes": 13568,
+    "SHA256": "C271700ED94A744286103A5BF01D803E9063FD4F7B5C768FFC7A5EAD796D6B61"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\ms_funcs.c.obj",
+    "Bytes": 56164,
+    "SHA256": "A20056AC6AE5520BA6112DD8F56EADFC2C2C621A5DC40F511BD8BF2F4231FECD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\md5.c.obj",
+    "Bytes": 16468,
+    "SHA256": "4232C95672BB2A09CA05DA95FF4E0574B1BFEB1635AB249B4A100DF064334685"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\md5-internal.c.obj",
+    "Bytes": 30528,
+    "SHA256": "7F36ED08EE64F1C824B4863A6EA50A6900B2B7D756B289E6FC1905AB432D0F50"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\md4-internal.c.obj",
+    "Bytes": 26976,
+    "SHA256": "DDA1DA2B3BCD1ED71233D880F9B882C07403370DB8C7E6A38F1DC22D3733BBB2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\dh_groups.c.obj",
+    "Bytes": 22668,
+    "SHA256": "EBB3F17170231EA1BE0AAFFE82F1947E6FB001B8AB82E415D4D7AD95A85B5778"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\dh_group5.c.obj",
+    "Bytes": 12648,
+    "SHA256": "70DDFBC9F743E57ADEEC2A6ABFA0647512CA7BA0B50D45231BBCB3C7C4CB9E9C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\des-internal.c.obj",
+    "Bytes": 36776,
+    "SHA256": "89CDA452C82D0BC786C1AA799EE3E3EADF886550B64A1778A5F3E9D5AE7A2BD7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\crypto_ops.c.obj",
+    "Bytes": 12424,
+    "SHA256": "5A92508F8FDEEC1780995B0ACBEBD9CB440D926428F510007D489B80A06CF684"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\crypto_mbedtls.c.obj",
+    "Bytes": 18000,
+    "SHA256": "FDA38CE249286B3FB1E77CEF5962A1AF34055855AD44F675ED6A0F009C45A140"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\crypto_mbedtls-rsa.c.obj",
+    "Bytes": 53988,
+    "SHA256": "45DCA11987CE3B8B635A8352AC6A272198E18166F225C5652585A7D2895F8533"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\crypto_mbedtls-ec.c.obj",
+    "Bytes": 134232,
+    "SHA256": "E2843F8220E1B66E7ACD1D66D0F00923F78B82C8C4E7FC435A1B4E9E52ACFD1F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\crypto_mbedtls-bignum.c.obj",
+    "Bytes": 46660,
+    "SHA256": "B275E342F5C0BEB121936084FC866E1E3D44087AB62CC430C02F415A72210BC3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\crypto_internal.c.obj",
+    "Bytes": 28792,
+    "SHA256": "1CA5BB8B1045F40389A8E2ED40B0EA1B661C536F3A780158D91B182FD029A2B3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\crypto_internal-rsa.c.obj",
+    "Bytes": 7384,
+    "SHA256": "066CC72B224BFFCEEAAEC9CF3F6B96177A8F41F0C7C12644416E5ED966796478"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\crypto_internal-modexp.c.obj",
+    "Bytes": 14644,
+    "SHA256": "5398E97C4B165A1B928A96344D7E7C7B37F0D7CDE42910CED122B1CC088817C9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\crypto_internal-cipher.c.obj",
+    "Bytes": 25764,
+    "SHA256": "62F53A61BAEAA39AD5F59843EE26C573225D9B33702A34B0E9AB3D3C621B3656"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\ccmp.c.obj",
+    "Bytes": 48756,
+    "SHA256": "283C82FFDEDB63D10BAB3D538A6FCDFF1EB9BC5F24769C053EC9C55BD973A95C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\bignum.c.obj",
+    "Bytes": 235256,
+    "SHA256": "B1030A2C91A7BAC22FAF9ACED2822E2C74D683E6630A9002126DB2BA11872A96"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\aes-wrap.c.obj",
+    "Bytes": 14884,
+    "SHA256": "39126B1A3E393EB1E14BD7CA505100EAA42EE27721A869C707593DD86ADE6BF0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\aes-unwrap.c.obj",
+    "Bytes": 14604,
+    "SHA256": "C1DFF69964DAD8B13A921C8778AECA0D4E95E1AEB9B23F342698E0191862A88E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\aes-siv.c.obj",
+    "Bytes": 32616,
+    "SHA256": "A936C21823D35F730042D8A2C570541A02F7D4A15AB947E56AD6C090E72A7A31"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\aes-omac1.c.obj",
+    "Bytes": 22940,
+    "SHA256": "16DFF10EBD8C5835A36D7C72F825E03B77DBCA776963559A243F8EC708BADB9F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\aes-internal.c.obj",
+    "Bytes": 20276,
+    "SHA256": "707FDB5C4B17D254799D83BE306F390DF3B1416C2BD3AD995FF8A0517F47F309"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\aes-internal-enc.c.obj",
+    "Bytes": 28900,
+    "SHA256": "FFF1417F427EFFA92455924A3A4AFF0CB785554AFCFF84A5CAD432BB29D6C734"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\aes-internal-dec.c.obj",
+    "Bytes": 33932,
+    "SHA256": "314A52DA94DDB3975D5E1FFF1EAFEA912506E218817844767D5EC1126594A806"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\aes-ctr.c.obj",
+    "Bytes": 14220,
+    "SHA256": "FEA6CA4F25F006F8A5BC66355C370D71FD29E60F09A1F6EFBE496F902BA5ADD0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\aes-ccm.c.obj",
+    "Bytes": 39644,
+    "SHA256": "CCE7C0079A4E8608D4A891F389ED6CFAD1CCC6A11E76EC0FFD3D21AE2328BE11"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\crypto\\aes-cbc.c.obj",
+    "Bytes": 15856,
+    "SHA256": "A4B02602C545E9081A7D093BF5D3D2FF2641C8000DE72A099285D1F8AB29E417"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\tcp_transport\\libtcp_transport.a",
+    "Bytes": 319016,
+    "SHA256": "9DCC03CEF393A874185BA254BCDA0EAA586E1ABE6007726E2FD9170DCB4A2064"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\tcp_transport\\cmake_install.cmake",
+    "Bytes": 1080,
+    "SHA256": "8581F3479879DF0C1845CEE3B064A5BA0170CD35178C209223AC423079DB42AF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\TargetDirectories.txt",
+    "Bytes": 24736,
+    "SHA256": "06E08A28B0A92E4D272ECE8CAA2D502FB158B691F36FA4F968EABE864D2A1023"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\tcpip_adapter\\CMakeFiles\\__idf_tcpip_adapter.dir\\tcpip_adapter_lwip.c.obj",
+    "Bytes": 154808,
+    "SHA256": "4FF02845843D03513D2AA66B5B2BB0B8579E2FADF7F9971829A0AA84799ACC4F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\tcpip_adapter\\CMakeFiles\\__idf_tcpip_adapter.dir\\event_handlers.c.obj",
+    "Bytes": 47352,
+    "SHA256": "3C8819930DAF08F9BEEB64DD257379EFBD6B37B83D0B65FCD336DBF904070B14"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\tcpip_adapter\\CMakeFiles\\__idf_tcpip_adapter.dir\\esp_netif.c.obj",
+    "Bytes": 18220,
+    "SHA256": "A7928635E690B16C8076D20D81B1D2E1D9B8F83FE4D97C2491414E24D70E8173"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\libfreertos.a",
+    "Bytes": 634526,
+    "SHA256": "F10900D1DCC4A061DABC38D1AD40965E461270A062417A26CBBC30CA4D5E7656"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\cmake_install.cmake",
+    "Bytes": 1075,
+    "SHA256": "CEAFFA6491032C4E19554B37ACC51AA0BBF60ABB1CD6996A14555185101AA16D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wear_levelling\\CMakeFiles\\__idf_wear_levelling.dir\\WL_Flash.cpp.obj",
+    "Bytes": 124568,
+    "SHA256": "7DC31A96FBC171C16C77A58F808D87FF06013C67791037DFEF09A3FCEB27F702"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wear_levelling\\CMakeFiles\\__idf_wear_levelling.dir\\WL_Ext_Safe.cpp.obj",
+    "Bytes": 44556,
+    "SHA256": "175CCFCC1C5E79E14DC4049E4113E1292FD21B5FBBB303F722BB8C1594FA8BC9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wear_levelling\\CMakeFiles\\__idf_wear_levelling.dir\\WL_Ext_Perf.cpp.obj",
+    "Bytes": 41816,
+    "SHA256": "990A24B40F0973FC9F923AD87746105F8582A9B5E4AE61733B8EF7DA5DD5901B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wear_levelling\\CMakeFiles\\__idf_wear_levelling.dir\\wear_levelling.cpp.obj",
+    "Bytes": 50384,
+    "SHA256": "738B52212C653648D8A2DFC152EF1D383C99D46DCD815A19769C5A8D8440B8EE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wear_levelling\\CMakeFiles\\__idf_wear_levelling.dir\\SPI_Flash.cpp.obj",
+    "Bytes": 27956,
+    "SHA256": "18EFEA31286A1A72705C1D2DF9655ADBB2A6F136E7FAB5809A63F34DE23A8CF8"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wear_levelling\\CMakeFiles\\__idf_wear_levelling.dir\\Partition.cpp.obj",
+    "Bytes": 27188,
+    "SHA256": "BC2EEAD42FD37DCF328CDEE6A6243DB14F9F57BB65B5809C7936211AEE5C053B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wear_levelling\\CMakeFiles\\__idf_wear_levelling.dir\\crc32.cpp.obj",
+    "Bytes": 4264,
+    "SHA256": "334E2718EAF9D37EEFF23820FC39E2543480EB78DF12AC128D69030CCDDFFFB2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\common\\wpa_common.c.obj",
+    "Bytes": 67972,
+    "SHA256": "EB15B8052B00DCECE839DB28B3EF554686E6EC22137C71F6B3A8FB7E7E053A99"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\common\\sae.c.obj",
+    "Bytes": 159648,
+    "SHA256": "1F379477B3EB953EDD4217A80EA9709121312682C14CB50C673B349AE5FF874C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\common\\dpp.c.obj",
+    "Bytes": 680676,
+    "SHA256": "140BFD34B3509E57D91D6FAD2B997BF88D2FED50CFA0CE0E106B76754F3C1159"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\libbootloader_support.a",
+    "Bytes": 209972,
+    "SHA256": "A3E0DD822379F64969A00450DF78540B9F7516DC14A1F0AD4DB8986D2137B578"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\cmake_install.cmake",
+    "Bytes": 1085,
+    "SHA256": "04C359AB7C8A9854080B5D56B175DEFCBDE958146C1EAB9159E456A42C3BF19C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spi_ram\\libspi_ram.a",
+    "Bytes": 130022,
+    "SHA256": "7D4205A9CE81F1567F8D5EED3AD1DBCB6F03FC1F0E82D5B86A98AC20A09611A8"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spi_ram\\cmake_install.cmake",
+    "Bytes": 1074,
+    "SHA256": "82AD02D488F0FFAF91436BCDFDA869C3DEC0D06E8B924DD079149658EAEB4239"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\mconf-idf.dir\\Labels.txt",
+    "Bytes": 710,
+    "SHA256": "1A6A81EFDC1B315D327A7BC9D728EBB6A8C6A6A09C5171596C4DE1DDA9C66FA1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\mconf-idf.dir\\Labels.json",
+    "Bytes": 1013,
+    "SHA256": "6B3851253C20317D5A7C9E8CE4949CAA7E89C99A267D46B1F17F4D55ED837B4B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spiffs\\CMakeFiles\\__idf_spiffs.dir\\spiffs_api.c.obj",
+    "Bytes": 34704,
+    "SHA256": "075434B4EA3F74824D8CFA45802F99ACB9B7B5AAE5090DA024CD353B6D87DF6B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\ap\\wpa_auth_ie.c.obj",
+    "Bytes": 65848,
+    "SHA256": "1A84B5CF31B97E916887F4E2CDD45017E7540B9FDF0377E2BE1E3AF4F35815DE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\ap\\wpa_auth.c.obj",
+    "Bytes": 215184,
+    "SHA256": "CEABC5DD0475195FCA97D7000C1ECDE43B26B1D7BA785C932362689CA64CDE04"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\ap\\ieee802_1x.c.obj",
+    "Bytes": 18960,
+    "SHA256": "FD85719555FCFFE59D2331200A8499B79016708FFD2BD9F24F7D3C69DEBD8062"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\src\\ap\\ap_config.c.obj",
+    "Bytes": 41968,
+    "SHA256": "5E27E3C5C4BE56EE9F444932ED2F934B9F861F2427B4A77B34BE04CFCBC9A859"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mqtt\\CMakeFiles\\__idf_mqtt.dir\\esp-mqtt\\mqtt_client.c.obj",
+    "Bytes": 233788,
+    "SHA256": "79B341EF449ECADB69381B4050411B45FAC6DA22024E56FFC0554C0E397002AE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\vfs\\libvfs.a",
+    "Bytes": 356450,
+    "SHA256": "96B8C3917731045E9FED52D34E6CA4CBCCB8773CF882D9468EAC7A22FDC1B327"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\vfs\\cmake_install.cmake",
+    "Bytes": 1070,
+    "SHA256": "B2EA93CCD6FEBF0A4052F7525228CC78AA2D787FD97047935E1E63865244DA48"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\git-data\\head-ref",
+    "Bytes": 41,
+    "SHA256": "88BFF5A6B16E7BF62AB18963D47CEB1F4E09E24E17DE20A926D87595CC8E4814"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\git-data\\HEAD",
+    "Bytes": 41,
+    "SHA256": "88BFF5A6B16E7BF62AB18963D47CEB1F4E09E24E17DE20A926D87595CC8E4814"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\git-data\\grabRef.cmake",
+    "Bytes": 1630,
+    "SHA256": "800EABA3FB224446090428283D011E125C3EE4869764260D470C53559CC45B84"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\feature_tests.cxx",
+    "Bytes": 10416,
+    "SHA256": "85DA72044B6F95AE43539D6A0D0E678C8728E380462990604CC4B56102C6954F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\feature_tests.c",
+    "Bytes": 722,
+    "SHA256": "49279D38CCD92908081863AB5913C164F1A5867CEA6B22FAADE6337B2ED07276"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\feature_tests.bin",
+    "Bytes": 632,
+    "SHA256": "AA185D1B028352F913B4535A7A95270E36A5D2B7A6E23C9AC171B04B6071809D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\tcp_transport\\CMakeFiles\\__idf_tcp_transport.dir\\transport_ws.c.obj",
+    "Bytes": 85632,
+    "SHA256": "D64FAF67B06766796B7033243CE3DED8C58A95626CD96200237B0C0D40B0D541"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\tcp_transport\\CMakeFiles\\__idf_tcp_transport.dir\\transport_utils.c.obj",
+    "Bytes": 10416,
+    "SHA256": "81B2DB9089FE7D370D613AA7E200AB28982BD1317B38F3BFADEC3B5BE5DB6E6B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\tcp_transport\\CMakeFiles\\__idf_tcp_transport.dir\\transport_tcp.c.obj",
+    "Bytes": 54912,
+    "SHA256": "A1D90773F506C7DB8978288445B839F155525D003E0C4788E2DDDB83927FF093"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\tcp_transport\\CMakeFiles\\__idf_tcp_transport.dir\\transport_ssl.c.obj",
+    "Bytes": 96932,
+    "SHA256": "C7323129818310715A56534B2C84BF7D178D795F494F36530A1722E0BA10933F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\tcp_transport\\CMakeFiles\\__idf_tcp_transport.dir\\transport.c.obj",
+    "Bytes": 69024,
+    "SHA256": "799EBF458C128313B56EC699259158A0571D663C40DA2E12CAFBDAA868C836D5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\log\\liblog.a",
+    "Bytes": 41004,
+    "SHA256": "7F561E230DA5E224F86EA2880C017E0C37BAD5C6D6DDAE7F4E70288F61E14061"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\log\\cmake_install.cmake",
+    "Bytes": 1070,
+    "SHA256": "5B459F1EE5BE131A8F5618FE3E896F9795E48626ACE2906A63DA2C54CB4D3A70"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wifi_provisioning\\cmake_install.cmake",
+    "Bytes": 1084,
+    "SHA256": "8B2131EDE5D598956D541AE1E9A524993B7999511996941E57A5551935456FAD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\wpa_supplicant\\CMakeFiles\\__idf_wpa_supplicant.dir\\port\\os_xtensa.c.obj",
+    "Bytes": 14236,
+    "SHA256": "C3CDB961067EBEE61DCC94C7A4F89F360A8419BE356650C63CAE11B9F45622F3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\CMakeOutput.log",
+    "Bytes": 30239,
+    "SHA256": "69E8FDA0C22C3D296539F89EBB65F55EA1A81E651C377CA491676D81BF92681E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\cmake.check_cache",
+    "Bytes": 86,
+    "SHA256": "95079B44BCEF481D601432C2FD3C654D7FE85B9C8386C355F2874502B47441D7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\main\\libmain.a",
+    "Bytes": 646408,
+    "SHA256": "B3C4D528EFBFB229B1935E7902020CE6260B9B0FF50615F2916EF71F9F2C02A8"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\main\\cmake_install.cmake",
+    "Bytes": 1017,
+    "SHA256": "9DF7121DFB7DDEA16CC469467B262B5A3FC7BB8F9A239A898AB137BB24BD52FE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\liblwip.a",
+    "Bytes": 3864754,
+    "SHA256": "7FEED12B97F95B5E42F761DCDD656BBDECF5F868D63C31F570BF2EA1837B68FB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\cmake_install.cmake",
+    "Bytes": 1071,
+    "SHA256": "D7802D4B4702410E092B5FEEBBD2CFCA98D827CB7BA73363B821D30C13E7DF83"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spiffs\\CMakeFiles\\__idf_spiffs.dir\\spiffs\\src\\spiffs_nucleus.c.obj",
+    "Bytes": 241032,
+    "SHA256": "0C7025B616E81492565C6EFEA48278039BF59D0DFA1458095D093F87BE472701"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spiffs\\CMakeFiles\\__idf_spiffs.dir\\spiffs\\src\\spiffs_hydrogen.c.obj",
+    "Bytes": 179652,
+    "SHA256": "B77E04F4F00A5D1BC2B61771C9D93DC3DB59F20A7F00CB19FE8454E0BB78B323"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spiffs\\CMakeFiles\\__idf_spiffs.dir\\spiffs\\src\\spiffs_gc.c.obj",
+    "Bytes": 68036,
+    "SHA256": "6E7A85C245899DA35F78A57E45BBC24DC0D80FEFDF8E4FBCBA8B5425E5D8030F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spiffs\\CMakeFiles\\__idf_spiffs.dir\\spiffs\\src\\spiffs_check.c.obj",
+    "Bytes": 107964,
+    "SHA256": "B3BD8169E5523A9433425855CCB4CA484484E51841EDE99D54618C0C3CEF0A34"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spiffs\\CMakeFiles\\__idf_spiffs.dir\\spiffs\\src\\spiffs_cache.c.obj",
+    "Bytes": 45256,
+    "SHA256": "BD04F8AF7765F4F9C7CE1F7BE1D5B6AA8AB9A89026F7E96819870498625F92E8"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spiffs\\CMakeFiles\\__idf_spiffs.dir\\esp_spiffs.c.obj",
+    "Bytes": 136060,
+    "SHA256": "24F635B547369FE4C04253246A272C5CF24C85FC2936332B1FB9A6C3DD6E767D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spi_ram\\CMakeFiles\\__idf_spi_ram.dir\\spi_ram_fifo.c.obj",
+    "Bytes": 55240,
+    "SHA256": "1B8132E1F99AF210B5ED8EA14A83BA93EC8943BE4725A552F03AC4907F050467"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\spi_ram\\CMakeFiles\\__idf_spi_ram.dir\\spi_ram.c.obj",
+    "Bytes": 74148,
+    "SHA256": "86A5A33B4AA672FD1AC953008A7A580E84A61517DDAAD096E3F88E1073097893"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeCache.txt",
+    "Bytes": 26167,
+    "SHA256": "4BA10B59147CE22078C321DC9A8DF3250FE820ED924EFDA19BEACBE726637759"
+  },
+  {
+    "Path": "Sof\\build\\auto\\build.ninja",
+    "Bytes": 2231221,
+    "SHA256": "5FF0E9E4BC809F74868B463EE0DCC9E6562AC92C8E1C9D78E7787D0998A014F1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\bootloader.dir\\Labels.txt",
+    "Bytes": 735,
+    "SHA256": "55A0C14B5D72A633918E41D7302278B5F6B9994392A0914F718E769E9938DD9A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\bootloader.dir\\Labels.json",
+    "Bytes": 1039,
+    "SHA256": "2F1A79C59F7FE0D12011022E41CA76CBBB3BA5AD59442BC3B10195AE4FB38308"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\bootloader-complete",
+    "Bytes": 0,
+    "SHA256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\secure_boot_signatures.c.obj",
+    "Bytes": 1088,
+    "SHA256": "2B80DDF103C594F29F44C9914D0C368642D99DDBEB6EE63D156B785D802E0100"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\secure_boot.c.obj",
+    "Bytes": 1068,
+    "SHA256": "8BCFC655A0C7AAB81C3FC9EE7E9B1275A218AFE978768035B0E979AE7156F654"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\flash_qio_mode.c.obj",
+    "Bytes": 1072,
+    "SHA256": "368CD571008A157FB6EA1905FF61AEEF091DF44F865B06AA4ADA3B8625E921CD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\flash_partitions.c.obj",
+    "Bytes": 15684,
+    "SHA256": "AE553F240D3E23D9E9A8E2D7AEDBC01C186644A97CBEAC3DF117790D13E4E28E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\flash_encrypt.c.obj",
+    "Bytes": 1072,
+    "SHA256": "F1F8B3F0CF4E2D6BA0580E4C8061B5AC381B28435FB25A8344555BEB1C239976"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\esp_image_format.c.obj",
+    "Bytes": 46148,
+    "SHA256": "F38A7FD00E139538EBDE245479122734D5526B75D2E9D0E9AE4CC46125BC2506"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\efuse.c.obj",
+    "Bytes": 1056,
+    "SHA256": "2B45EFF966C87D11611A3DEA139DBD1FDDEF355559C65937C108B46E82B87EEB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_utility.c.obj",
+    "Bytes": 45864,
+    "SHA256": "0C81A657B3BD15997347D392B0E19AA476195A6FFFB9237547B0EC84C1CE6D02"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_sha.c.obj",
+    "Bytes": 17660,
+    "SHA256": "34B94BB7A18D6CC7DFFED494E17DB00CB486890C9D1ACB611C0261BB43F3B97C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_random.c.obj",
+    "Bytes": 1080,
+    "SHA256": "91DE31068C93B2B14DC451CAD870816F840D97032AAC7E8F7A2CC20BA65FA29C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_init.c.obj",
+    "Bytes": 23944,
+    "SHA256": "94468EFB9D7456E16BB10E289F34D2E20F9ADB0B25D904507C6655DD965401A6"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_flash.c.obj",
+    "Bytes": 25932,
+    "SHA256": "87ACE2A58E39FBEFCECE7939D50F87E9B396A87195E716E3430346DCCC8FD12C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_common.c.obj",
+    "Bytes": 25220,
+    "SHA256": "85DBE45EB8F3E948B3D49F06CBEF1612DEBFC2840436B70E755AC20361B76F82"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_clock.c.obj",
+    "Bytes": 1080,
+    "SHA256": "DD28E297F242807C448142C1E153343E86A301B5070912E2E4A3A308D542DB3E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\log\\CMakeFiles\\__idf_log.dir\\log.c.obj",
+    "Bytes": 40756,
+    "SHA256": "39A1F47526AF9FC73A65393D58CA0AA8EDE7BD0A4CFDBE2CDB5388A23659CE99"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\pthread\\libpthread.a",
+    "Bytes": 184884,
+    "SHA256": "A1143878255804A835D96DA494F2F5724385DDEA7A4F693AAE1729E05F9DAF75"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\pthread\\cmake_install.cmake",
+    "Bytes": 1074,
+    "SHA256": "71F8503B68B80610CE13E7A961761D5DF1CAA6F6B16EDD21F04D73180C311E09"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mdns\\cmake_install.cmake",
+    "Bytes": 1071,
+    "SHA256": "07F9CCED10CC9CFB98572B0C8872CCC2BBB51FC79F002B6CCF819AB0DA45A979"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\ac_thermostat.elf.dir\\project_elf_src.c.obj",
+    "Bytes": 720,
+    "SHA256": "6758D5B92833541022C2DCF68F0D50073593B63228F8C5E85D63F1C11AF1E40C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader\\flash_bootloader_args.in.in2",
+    "Bytes": 85,
+    "SHA256": "1165CFA3E2A868233A8B5377A69E2DE76783AD56F36540D93936F0B67ECABE40"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\bootloader\\cmake_install.cmake",
+    "Bytes": 1077,
+    "SHA256": "C910BB3B0E4C5800CF44739948FFFCC1186D203F3B4B264B6DF233BEA7FE61B1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\main\\CMakeFiles\\__idf_main.dir\\startup_trace.c.obj",
+    "Bytes": 21512,
+    "SHA256": "D0A9D95CD89B7A2AB0FA8ED4D6D9EBA55BEFB126CD3E61916C2C311A1F2EE878"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\main\\CMakeFiles\\__idf_main.dir\\sleep_trace.c.obj",
+    "Bytes": 78696,
+    "SHA256": "B1502F189FE96164B4EE58789CA0548DE763E79C7CF76A14EECD75A70FDFC525"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\main\\CMakeFiles\\__idf_main.dir\\sensor.c.obj",
+    "Bytes": 55476,
+    "SHA256": "B9F8C6111B4368EEBD17ACFD2D1F9BC31EC50C13F6AD48C05132055480ABF5CD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\main\\CMakeFiles\\__idf_main.dir\\rules.c.obj",
+    "Bytes": 21444,
+    "SHA256": "747E0CEB73952E927E72318002CACC2AD1A4FA8DD8EEB69698300F64348D7CD3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\main\\CMakeFiles\\__idf_main.dir\\portal.c.obj",
+    "Bytes": 142172,
+    "SHA256": "FF4F1144EB911E426C58310E7665285F51A1B70B609F42A7CBB94E076DDF48A9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\main\\CMakeFiles\\__idf_main.dir\\noise_timer.c.obj",
+    "Bytes": 25004,
+    "SHA256": "E486639E9D6316C6162891A64EA408A65E61AAEDD6E003A621A4303F888CBF49"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\main\\CMakeFiles\\__idf_main.dir\\main.c.obj",
+    "Bytes": 157880,
+    "SHA256": "139817886FBCDA70B2B16959A138F4E11D6C191CEA1845271A6BE7E963F8A26A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\main\\CMakeFiles\\__idf_main.dir\\ir.c.obj",
+    "Bytes": 142516,
+    "SHA256": "B148D0D6FC01AACF0B4335EF054D8914C1C20BF743EEF9C2E268A2ED840D8B70"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\CMakeFiles\\__idf_freertos.dir\\port\\esp8266\\xtensa_vectors.S.obj",
+    "Bytes": 18868,
+    "SHA256": "1BA129924011B405CD307E19519E3618183C2134800F156ADCE28AA520095FE9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\CMakeFiles\\__idf_freertos.dir\\port\\esp8266\\xtensa_context.S.obj",
+    "Bytes": 3988,
+    "SHA256": "616CF8AD0FAFEAEFDDA493E5409501B383CFDEF6FB97B29119DFF2C623A285EB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\CMakeFiles\\__idf_freertos.dir\\port\\esp8266\\port.c.obj",
+    "Bytes": 58092,
+    "SHA256": "18A2788A8737201224AD895FC397FFFB4D88B4981ACACD1CBD445253EE6EE608"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\CMakeFiles\\__idf_freertos.dir\\port\\esp8266\\panic.c.obj",
+    "Bytes": 41752,
+    "SHA256": "B16A573D97AC3BA9891CB187349258AFDD6F76F7A1C7DEC9071CC87AC283F472"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\CMakeFiles\\__idf_freertos.dir\\port\\esp8266\\os_cpu_a.S.obj",
+    "Bytes": 8556,
+    "SHA256": "BE85E399DDDDF6FFFD1223ED56B2CA84FC75CE223A22EB486455D90DE6404C9C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\CMakeFiles\\__idf_freertos.dir\\port\\esp8266\\freertos_hooks.c.obj",
+    "Bytes": 14588,
+    "SHA256": "D213B39574541DD87EC1496634BC126DC03D1E95DAB015E28872E0EEBE09A871"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader-prefix\\tmp\\bootloader-cfgcmd.txt.in",
+    "Bytes": 13,
+    "SHA256": "261CB8BC1498A4D57E77AE81637164B2CE75F9869CF18CBA1F02AB6D2BDC57F0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader-prefix\\tmp\\bootloader-cfgcmd.txt",
+    "Bytes": 346,
+    "SHA256": "59A2EEDCB7E2CB3567AFE47C8292392C54E13C99D037D3305EFDA2BE8303EA0F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\libmbedx509.a",
+    "Bytes": 683732,
+    "SHA256": "F04F96D16AF35C446F51E5CF79FD25102B823B2BB22409B979DC920887151705"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\libmbedtls.a",
+    "Bytes": 1054156,
+    "SHA256": "46DEF64206F9C184C27E860213D399D23C2228B1A40945565C0B467230A3D961"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\libmbedcrypto.a",
+    "Bytes": 3486220,
+    "SHA256": "DCB5F87DD0E434A8711EC16D24D2261954A6571603B6F3298EEA58FA7A8F6CEA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\cmake_install.cmake",
+    "Bytes": 2138,
+    "SHA256": "3617C229BF9A22EECD31D9617DB733881A9DC01EA00A29B01169639C5BA4E00D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\CMakeFiles\\__idf_freertos.dir\\freertos\\timers.c.obj",
+    "Bytes": 66616,
+    "SHA256": "A30A46B43346FA7CD0335030B48EB8D3B85A0235363043CFFAE4C3B234214349"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\CMakeFiles\\__idf_freertos.dir\\freertos\\tasks.c.obj",
+    "Bytes": 180444,
+    "SHA256": "CDD7BC2BF2F8AC0FCF87197B117E6CF9DC97F6C2FAD4D11F05AEA987F8832762"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\CMakeFiles\\__idf_freertos.dir\\freertos\\stream_buffer.c.obj",
+    "Bytes": 70248,
+    "SHA256": "21307E0119234090789FC5EC4E5569725054C15622A3F073EF2154E872488E4E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\CMakeFiles\\__idf_freertos.dir\\freertos\\queue.c.obj",
+    "Bytes": 100432,
+    "SHA256": "0D616BBD29E96212331178D3506DDC65217813D786ECBDB259AECB1E897F8EDA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\CMakeFiles\\__idf_freertos.dir\\freertos\\list.c.obj",
+    "Bytes": 21708,
+    "SHA256": "60F7C38EF3820BA7E506C5DC33426B75CFF62DE3A404493DCA5E88AA28BD322B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freertos\\CMakeFiles\\__idf_freertos.dir\\freertos\\event_groups.c.obj",
+    "Bytes": 43880,
+    "SHA256": "051A626F9201365373A84EAE0D1ECE6AE32AAAAA1F13A651961EE1519C3E68F7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\pthread\\CMakeFiles\\__idf_pthread.dir\\pthread_local_storage.c.obj",
+    "Bytes": 37332,
+    "SHA256": "28E010A8E7D55071F8DBC5CED6D7C65F2192FF3895EC46596BC3494CFE32BA83"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\pthread\\CMakeFiles\\__idf_pthread.dir\\pthread_cond_var.c.obj",
+    "Bytes": 36300,
+    "SHA256": "450DCE54054E1F0D9041E8ED1DCB0FA06113B10170FAC4A3D7C6956A23448081"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\pthread\\CMakeFiles\\__idf_pthread.dir\\pthread.c.obj",
+    "Bytes": 109672,
+    "SHA256": "3D501A3D9D6F45298BDD6FB7A44A40F2F02B266F70A0CF25FDDC861A3A873D80"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\app_update\\libapp_update.a",
+    "Bytes": 94062,
+    "SHA256": "C193729432B532ECC6CDC98E1B8DAADDEB124762F19B69B0E110AF8B7D0D6329"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\app_update\\cmake_install.cmake",
+    "Bytes": 1077,
+    "SHA256": "CF09A4C0076521AA4CD54229C52FF174E18E5B1AE5D92F1832832066E986C350"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\cmake_install.cmake",
+    "Bytes": 1248,
+    "SHA256": "EFBFBFC94088D925853B052CFBA15CE976D75815B6F7735262B3FF7B08E3DAF9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\cmake_install.cmake",
+    "Bytes": 1344,
+    "SHA256": "9DAA4F6F801CAB8DB2781D752179B146CD14F67C8021E94A8A7BF20194697289"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\libfreemodbus.a",
+    "Bytes": 1303848,
+    "SHA256": "7A5CBEA447B6674DF874F8778903ED541889643270ACA19B100F47AAFCDD6A2E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\cmake_install.cmake",
+    "Bytes": 1077,
+    "SHA256": "0A272AA76EC3F0C626376A4EFDAC6B892AE552545D9A79B26852E52628129010"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\protocomm\\cmake_install.cmake",
+    "Bytes": 1076,
+    "SHA256": "46A0C763075E9648F7A8474EE3248985EF26831412B41EEE82B0088D87D020BE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\liblibsodium.a",
+    "Bytes": 2772118,
+    "SHA256": "27729DD892CB2513A93C08F6F6E8BD7F466BF21B9AD07E48D3E929C557AE089D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\cmake_install.cmake",
+    "Bytes": 1076,
+    "SHA256": "44A56858562A3426E73D9F707D42F98B5438CEC05E54A7E7915539F5B4A43102"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\include\\cmake_install.cmake",
+    "Bytes": 9604,
+    "SHA256": "14FAEC08FACD4A1EC9B206B8D4D4E4E5D34BD06CC19B82EE44129F56A5FB490D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\3.13.4\\CompilerIdCXX\\CMakeCXXCompilerId.cpp",
+    "Bytes": 19126,
+    "SHA256": "4DC6A8B546081BFCBF6B40B7F59343474629EAB228F3A77C0B76D2B7A1EE8DBA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\3.13.4\\CompilerIdCXX\\a.out",
+    "Bytes": 4200,
+    "SHA256": "0E0D14EE12254DBC4E3C7EBDA4F2B400AA9633A9D4FF67F9DAE229DF4177FAA4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader-prefix\\src\\bootloader-stamp\\bootloader-update",
+    "Bytes": 0,
+    "SHA256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader-prefix\\src\\bootloader-stamp\\bootloader-patch",
+    "Bytes": 0,
+    "SHA256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader-prefix\\src\\bootloader-stamp\\bootloader-mkdir",
+    "Bytes": 0,
+    "SHA256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader-prefix\\src\\bootloader-stamp\\bootloader-install",
+    "Bytes": 0,
+    "SHA256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader-prefix\\src\\bootloader-stamp\\bootloader-download",
+    "Bytes": 0,
+    "SHA256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader-prefix\\src\\bootloader-stamp\\bootloader-done",
+    "Bytes": 0,
+    "SHA256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader-prefix\\src\\bootloader-stamp\\bootloader-configure",
+    "Bytes": 0,
+    "SHA256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\vfs\\CMakeFiles\\__idf_vfs.dir\\vfs_uart.c.obj",
+    "Bytes": 126060,
+    "SHA256": "9D8F927864B9496C3800FC57C73E77074BCA018F2536215C93D11A1BD01E4682"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\vfs\\CMakeFiles\\__idf_vfs.dir\\vfs_semihost.c.obj",
+    "Bytes": 1052,
+    "SHA256": "8CC1457C6A30952959854D1CC7EE453BBBBED8D28708F62134EE5C41A9C437E5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\vfs\\CMakeFiles\\__idf_vfs.dir\\vfs.c.obj",
+    "Bytes": 227924,
+    "SHA256": "2F2F2C5ABACE395E8EE3F81A04D02D8D769FFFEBB4538D000B704895B23284B1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\app_update\\CMakeFiles\\__idf_app_update.dir\\esp_ota_ops.c.obj",
+    "Bytes": 79808,
+    "SHA256": "DF1058EDFC97057B7A29AA19A196791AE90D5A7BEE37F6230C75FA1D9A101FD1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\app_update\\CMakeFiles\\__idf_app_update.dir\\esp_app_desc.c.obj",
+    "Bytes": 13604,
+    "SHA256": "A1D143956BA7FF9916FE3CA1487541F792B982A9C39AB416AE2F7BA3AF324D5E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\dhcpserver_trace.c",
+    "Bytes": 40598,
+    "SHA256": "5689428E66246ED1D5B4A1ED01947B76028C542DCDC976438F8F5D5359190E53"
+  },
+  {
+    "Path": "Sof\\build\\auto\\config.env",
+    "Bytes": 2634,
+    "SHA256": "2BE0DE39AE52F2245D48DFEA26A97D486B84CEE15B8C83372A81B6827BF3654C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedx509.dir\\x509_csr.c.obj",
+    "Bytes": 41496,
+    "SHA256": "7286B8948D304D8110545440CDF12DF0DB06870FC438CFEC15208EE538023C97"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedx509.dir\\x509_crt.c.obj",
+    "Bytes": 214056,
+    "SHA256": "904A1C0D8CDCD2D82AE296F78E0A1AA45661FBD033A6411185C8724F79AC6FA4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedx509.dir\\x509_crl.c.obj",
+    "Bytes": 66296,
+    "SHA256": "DA2613EA9C292328097E67589B808378A248C143928BAD6C3A28B68C84BE3995"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedx509.dir\\x509_create.c.obj",
+    "Bytes": 41348,
+    "SHA256": "5F96C51A03248660651842F4F92A859E73B4251A49462D0878E724EDF5DC0CA7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedx509.dir\\x509write_csr.c.obj",
+    "Bytes": 39816,
+    "SHA256": "3BB761FE7452E8A77ADDEEC8DE0622E87D08565C2245CACBBC34FE151EF51CD7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedx509.dir\\x509write_crt.c.obj",
+    "Bytes": 68752,
+    "SHA256": "B6853B150C76B19A2A3A980E0F8A03ABCD6496018895116D4BFFCE1A116FDE67"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedx509.dir\\x509.c.obj",
+    "Bytes": 99432,
+    "SHA256": "D0F9D949E78A1CEF0B668C7E27D0DE629D89757D66A21D48D63AADFBDB9A8D61"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedx509.dir\\pkcs11.c.obj",
+    "Bytes": 7332,
+    "SHA256": "1B0DDAB5DE3A021B580FA338A00D99BC1762A5E754FCD35B55A53994F17D32A0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedx509.dir\\certs.c.obj",
+    "Bytes": 97300,
+    "SHA256": "97D1CEC857D482575CBA85099979D73B74585260C4C83753571E2D03C9EC07A5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\__\\__\\wlanif_dhcps.c.obj",
+    "Bytes": 57416,
+    "SHA256": "F512D5833CFE7B416524CCBE15239BA8D9FE59675DAE3E27FDAAC8F0233F591B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\__\\__\\lwip_timeouts.c.obj",
+    "Bytes": 57948,
+    "SHA256": "D5A7B975F0CBA47FAECD87DF91B5245CB8CC237684556080742D079D6A8424C4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\__\\__\\etharp_dhcps.c.obj",
+    "Bytes": 97088,
+    "SHA256": "0F8F60BC8F65964DAC962ACF20834715463C54E6E745F728D70FFDC6FAEE6B25"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\__\\__\\dhcpserver_trace.c.obj",
+    "Bytes": 141732,
+    "SHA256": "AB81E68731A9D826DB924664A17C6F7B29595488BD4458B7168981C9F54534E5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_event\\libesp_event.a",
+    "Bytes": 241062,
+    "SHA256": "5E74C16D90ADEA895D02003EAE0B11159D7571EF912D933135E248C17A920D77"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_event\\cmake_install.cmake",
+    "Bytes": 1076,
+    "SHA256": "D3098AE55B74FFA5A8B6CBE31789B75D99918422AF0C24361B245B016B4C472E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\3.13.4\\CompilerIdC\\CMakeCCompilerId.c",
+    "Bytes": 19611,
+    "SHA256": "9E8ACC6BD1F4433DEEC019F0785A036954AC3BD1209842877AC3F059EE9C03EE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\3.13.4\\CompilerIdC\\a.out",
+    "Bytes": 4216,
+    "SHA256": "32EE274B7DAE0BDEE7404EB7FB52445665F10CB0100A5588B4B0D6103CB89D6C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\rules.ninja",
+    "Bytes": 7383,
+    "SHA256": "61F0834D2C4CD81FFE0228CDCC66CA8BE1CB2B3691099E337162C68DDB9EC70D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\project_elf_src.c",
+    "Bytes": 0,
+    "SHA256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\project_description.json",
+    "Bytes": 1929,
+    "SHA256": "CB7FCEFDD34B70531A9E24D1AAEF790198BD4165ACE9906B143AAFBB9C328B0B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\port\\randombytes_esp8266.c.obj",
+    "Bytes": 12384,
+    "SHA256": "38880F22B264A2863BF97FE43184260072077565E2331139F8149AC8F507D25F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\3.13.4\\CMakeSystem.cmake",
+    "Bytes": 460,
+    "SHA256": "C61A7D2929A3CA1BE806F4A1B5270786788A6478531EA1E4F7B4230A36F99B8B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\3.13.4\\CMakeDetermineCompilerABI_CXX.bin",
+    "Bytes": 640,
+    "SHA256": "1868DC6F5FF8361A43D0AA0539DBA7CAC5576FE02AC3F70320F68A677C45BCF9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\3.13.4\\CMakeDetermineCompilerABI_C.bin",
+    "Bytes": 636,
+    "SHA256": "B236294E0B216702B76E710C30C043712B697C934146F35418719D38D66A20FD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\3.13.4\\CMakeCXXCompiler.cmake",
+    "Bytes": 3227,
+    "SHA256": "72E580F52A3C7373CDAE379B19A72291C0042E41BFAB1C30EA7FF7630537AE31"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\3.13.4\\CMakeCCompiler.cmake",
+    "Bytes": 2938,
+    "SHA256": "2E076520AFF3AEB15244B5B607AB0E0261F84CCC028D30EFDCB764CFB11F42EE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\CMakeFiles\\3.13.4\\CMakeASMCompiler.cmake",
+    "Bytes": 1141,
+    "SHA256": "5F741994293D504BABB4712F219EB6C6AE92550742D74693E09CD9686BE78DFC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedtls.dir\\ssl_cli.c.obj",
+    "Bytes": 197880,
+    "SHA256": "668101FB8E5448CB4886095D1DB68CE4A2B191764C98D4CBD93305AC329B7C79"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedtls.dir\\ssl_ciphersuites.c.obj",
+    "Bytes": 34340,
+    "SHA256": "1CB02578C234D9D2EDDE25773DDF8BA6BD43FCE30C76DB40938C5945E83E7966"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedtls.dir\\ssl_cache.c.obj",
+    "Bytes": 29324,
+    "SHA256": "6555B5B1D039BC1CCA208F4A6611ECD256371B561B418890027332F901053019"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedtls.dir\\debug.c.obj",
+    "Bytes": 7328,
+    "SHA256": "770453D18095769233340BD3DDEF0A3311C5491CDE98A9191161B117745B6F79"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedtls.dir\\ssl_srv.c.obj",
+    "Bytes": 211180,
+    "SHA256": "C3A916BB0FFF6D8756A4B0A854D85383597CCEC47B34A7FD2267F68A03AA5969"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedtls.dir\\ssl_cookie.c.obj",
+    "Bytes": 29856,
+    "SHA256": "79883BB9911E3BA167D1614CB46437B5824037B0A2BE3721EE8C9221EDF5F9A2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedtls.dir\\ssl_ticket.c.obj",
+    "Bytes": 56400,
+    "SHA256": "23A552A359975DC7A1A4DEFBBA6E6FE151CD56DCC30F30BEED1938C0AE8B2C6A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedtls.dir\\ssl_tls.c.obj",
+    "Bytes": 407672,
+    "SHA256": "5EACA7818AC05DDFC48F25F19C9F4CB7D41067115567A483B1B66773FB4D3074"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mqtt\\CMakeFiles\\__idf_mqtt.dir\\esp-mqtt\\lib\\mqtt_msg.c.obj",
+    "Bytes": 85600,
+    "SHA256": "8CACFD577A3E65B76344787B8602DB6FFC2C77E52AD20CE2BEA7FB215F8BFA76"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mqtt\\CMakeFiles\\__idf_mqtt.dir\\esp-mqtt\\lib\\mqtt_outbox.c.obj",
+    "Bytes": 55044,
+    "SHA256": "F78EB0B23225FFDE7151894F6B3F1C3C05A2F2E6B016433AA2F75390BA9D099B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\port\\esp8266\\vfs_lwip.c.obj",
+    "Bytes": 36464,
+    "SHA256": "311C1ED124213F31EA816946DC8923903712147AF2F925CB4B36B3F55925403E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_event\\CMakeFiles\\__idf_esp_event.dir\\event_send.c.obj",
+    "Bytes": 24560,
+    "SHA256": "B7F1FDF940FAC3722831821BC77DF2F36FF0D45D9EACA6201EB660C4C236DC82"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_event\\CMakeFiles\\__idf_esp_event.dir\\event_loop_legacy.c.obj",
+    "Bytes": 34836,
+    "SHA256": "36F09F1593D3CB9BAA990100857D811151BD2BA50736C3CD13CBFAC383A71E4C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_event\\CMakeFiles\\__idf_esp_event.dir\\esp_event_private.c.obj",
+    "Bytes": 23840,
+    "SHA256": "5268EA7FC34B4C2870A5C28CD2BC245CB8ABF9DEC5185DE057563F3B97B05F99"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_event\\CMakeFiles\\__idf_esp_event.dir\\esp_event.c.obj",
+    "Bytes": 110292,
+    "SHA256": "921598DF39F886E5323383A849C814D4D4CB87D27B48B292B2C4AB4E077B04AA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_event\\CMakeFiles\\__idf_esp_event.dir\\default_event_loop.c.obj",
+    "Bytes": 46324,
+    "SHA256": "B26C818C70C557E66BEECDB8E4E4A60F5A88328B40EACDD5C10B483465E3AE23"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mqtt\\CMakeFiles\\__idf_mqtt.dir\\esp-mqtt\\lib\\platform_esp32_idf.c.obj",
+    "Bytes": 27936,
+    "SHA256": "75B9682E8BA59F3313B032901E968556E8E68763CB4EA89F0AF2B491FDC0DAB1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp-wolfssl\\cmake_install.cmake",
+    "Bytes": 1078,
+    "SHA256": "F4D83E0AF187B4520C73620F5C4F9249CC4D6EE2DF25AD4E1C7CEBF98A4E7A5C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\port\\crypto_hash_mbedtls\\crypto_hash_sha512_mbedtls.c.obj",
+    "Bytes": 19940,
+    "SHA256": "A873B2E1B7F40677CF3E180240A1C796328AE7C1EA058553EBD358B329E4FBF9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\port\\crypto_hash_mbedtls\\crypto_hash_sha256_mbedtls.c.obj",
+    "Bytes": 19980,
+    "SHA256": "AC76F36B1BE8789093651356C502301442CB7E55E37B3F2A5818E1840AAE2992"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\protobuf-c\\libprotobuf-c.a",
+    "Bytes": 463996,
+    "SHA256": "AAF4993FBC3496483DAFAF8E18DD3BAA4D5E0E90BD40AC6F4E5AD5B4BA9A2BD4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\protobuf-c\\cmake_install.cmake",
+    "Bytes": 1077,
+    "SHA256": "8E9D9D738229E3989598B8141160EA4C8C2B29C6BDE1AC59D78D7B9217716EB9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\console\\libconsole.a",
+    "Bytes": 536858,
+    "SHA256": "99DC4D7AC4C61B18D984FBB7C78654C86E1261220DD4A9AEAF76188DE57018B3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\console\\cmake_install.cmake",
+    "Bytes": 1074,
+    "SHA256": "584C6F99DBC1BB2971B89F7C978D6F3F9017E767F21209FE5E8E2961ACC95189"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\slipif.c.obj",
+    "Bytes": 43004,
+    "SHA256": "091DCF61BAB0EE02610E2FBE1E4CF70D8EE1D80D5DC45F04E32B5DE0B9FFCC68"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp-tls\\libesp-tls.a",
+    "Bytes": 230998,
+    "SHA256": "EA828BA3806429C2E0B44AF644EE7B82A77992B758708C58873CAA3903966B7B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp-tls\\cmake_install.cmake",
+    "Bytes": 1074,
+    "SHA256": "02CBCCE544AEF07DC867752604D2C402EA615335315FA40824301E264202CD6A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_common\\libesp_common.a",
+    "Bytes": 32276,
+    "SHA256": "B5C0769B881E8B755412EDE518D918C52D459A763299B9473EACB35FEA04161F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_common\\cmake_install.cmake",
+    "Bytes": 1077,
+    "SHA256": "909388215F6AEF68A68F8A25EF3BA30377F711C478535223CFF7AC7661B67894"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\tcp_slave\\port\\port_tcp_slave.c.obj",
+    "Bytes": 107268,
+    "SHA256": "09042EEF5C9995EE6294EE965D2599170A2E8F133417C7462DAFB95F308131BB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\port\\esp8266\\netif\\dhcp_state.c.obj",
+    "Bytes": 32112,
+    "SHA256": "A5D9B7C81367884A60EAACCEA8AC2E97F80077F662B39285CEF938CF42CC3982"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedtls.dir\\__\\__\\port\\net_sockets.c.obj",
+    "Bytes": 66472,
+    "SHA256": "8E89B4B01A0F992BDD30EC332D7DA173B2A108DBFEE46674C6B0B6504D503E1F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedtls.dir\\__\\__\\port\\mbedtls_debug.c.obj",
+    "Bytes": 8216,
+    "SHA256": "6028F7B7DB7FB46B8595AA5E57C8430A40ADB26D512932B4F6945688D767A3D3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\mconf-idf-prefix\\tmp\\mconf-idf-cfgcmd.txt.in",
+    "Bytes": 13,
+    "SHA256": "261CB8BC1498A4D57E77AE81637164B2CE75F9869CF18CBA1F02AB6D2BDC57F0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\mconf-idf-prefix\\tmp\\mconf-idf-cfgcmd.txt",
+    "Bytes": 8,
+    "SHA256": "4338C530A76441CDA4F59C911C9FDF950E000F361B796FCD9DB755AAAE241FF9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\vj.c.obj",
+    "Bytes": 15056,
+    "SHA256": "2081F0BA62F8D7002C67FB79E0F96646A9ECCA045010DD3FA9F08E8173EA9025"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\port\\esp8266\\freertos\\sys_arch.c.obj",
+    "Bytes": 71284,
+    "SHA256": "A8A0FA13D319472CD672000CE27BD21BD2770A4AED643762D57658EC13461F4A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\utils.c.obj",
+    "Bytes": 15064,
+    "SHA256": "0F6ADE9CEE3CAA7D0B8024DDF7B56B41EB703BD26139408C0F1A061AE17D885E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\upap.c.obj",
+    "Bytes": 15060,
+    "SHA256": "0ADD2E0AB70A77DB6F33AC34740E9F921AD92F3C73FEBC7533C51415FC26F3DD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\pppos.c.obj",
+    "Bytes": 15064,
+    "SHA256": "BE84A44EB7F3E05FE9287ED50BFD93921E988B336AF24C5416C316AE93B1757F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\pppol2tp.c.obj",
+    "Bytes": 15068,
+    "SHA256": "4B902C6390B0417879F056961E671766B2FE745945EA20C0E8756806BAC1EBC9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\pppoe.c.obj",
+    "Bytes": 15064,
+    "SHA256": "244CFF9FDACA747C1ECA2507FB33DF7C9617EC459D8EFC3B40062E33C8552D52"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\pppcrypt.c.obj",
+    "Bytes": 15068,
+    "SHA256": "0A901C181031EECD3C913B5805FC23137F8582BAC2F3D36818316AC9EC415147"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esptool_py\\flash_project_args.in2",
+    "Bytes": 194,
+    "SHA256": "643DD959499767E7ABD32DE08E879DFA8AD6715C45CD555B7E0996027C835926"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\pppapi.c.obj",
+    "Bytes": 15064,
+    "SHA256": "DC6CC471BCE55A1103B27358AF47FABFDF4B18C2DA75F77F7FFAED4BDA2BEB1D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\ppp.c.obj",
+    "Bytes": 15060,
+    "SHA256": "7D71370BE718576000D800F9C847FE45CA100C4287F9E570C58DF9E7CFA5CD66"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esptool_py\\flash_project_args.in",
+    "Bytes": 120,
+    "SHA256": "639C730019ED2677F9C2F244076A2CF279C480AC5459A5D8CB846432AAFCECEC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\multilink.c.obj",
+    "Bytes": 15072,
+    "SHA256": "C818ADED55DE5368976B65FAF5C418C7637068D7472A7242CD84A8FE2E3F0B55"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esptool_py\\flasher_args.json.in2",
+    "Bytes": 895,
+    "SHA256": "A71AC8F8D7CDD40762BD99764D22C0B25595F97E62950B849B275F757775928B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\mppe.c.obj",
+    "Bytes": 15060,
+    "SHA256": "E6F25FEF2260BFDBD1E0AECC7AF45AB053E3740CE5818CAD6ACC46123CAB6692"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esptool_py\\flasher_args.json.in",
+    "Bytes": 601,
+    "SHA256": "B9FCC993F1E92DF0536BB131278F4ECC3A1BABFFE0864B561BAB0563CCB9F3F4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\magic.c.obj",
+    "Bytes": 15064,
+    "SHA256": "3D8E6DFF7CF232E0EF511D92FF66A49213B60AA10CAA833B35E4AEFB5FE6BC15"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\lcp.c.obj",
+    "Bytes": 15060,
+    "SHA256": "D0C1666DBC7273CED83DB241E67C9154A588597D732B69D4C725B52F22E99F17"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esptool_py\\cmake_install.cmake",
+    "Bytes": 1077,
+    "SHA256": "3DF97069A462588AAADC46251CB05B2E6B0F04C1D2E98FA8CE95682C368DC6A2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\ipv6cp.c.obj",
+    "Bytes": 15064,
+    "SHA256": "44100762F9DE0E0DC3E5BE67CC038DBA8B9A621CD5C01F307F9669562ECD733E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\ipcp.c.obj",
+    "Bytes": 15060,
+    "SHA256": "D97F697FB8B36671F793EF49CF27A2026A03C2283757EA5A8F8D6D67992A9DE3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\fsm.c.obj",
+    "Bytes": 15060,
+    "SHA256": "AFF75E555149E02856875743F9A0C583E3C06A5618B54E7052706CC78F36317E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\eui64.c.obj",
+    "Bytes": 15064,
+    "SHA256": "B2DA12B858590EE57B62A4F6596BA5E27F2663E03EF993BE2A8922DAFC7B1F62"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\ecp.c.obj",
+    "Bytes": 15060,
+    "SHA256": "C741D7D24F8FFA00C9A95C4088B8007E21E16C0FAF21BA44ECC7854923AC28B4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\eap.c.obj",
+    "Bytes": 15060,
+    "SHA256": "8BD4773B4AA10077A77CBAC26C8BAE8935348EBD0539B5935746EF7827419FCB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\demand.c.obj",
+    "Bytes": 15064,
+    "SHA256": "A064AA7CAFF26588CA8FA0D8E0AA7E7C8F8DD23F14057013CA3AAF64E1F39546"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\chap_ms.c.obj",
+    "Bytes": 15068,
+    "SHA256": "42403F3E7F8FB40B719E551BA885CA68D12078295653132789AF0FD46B03BAEE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\chap-new.c.obj",
+    "Bytes": 15068,
+    "SHA256": "D11F853E19C4930BBBB1CD1E25D02606A79B13F5CA4490DCA5A6DB868EB1364A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\chap-md5.c.obj",
+    "Bytes": 15068,
+    "SHA256": "BD771CEB712425FDF88269441616F9A2178955FF261385058BEAB6C3865D0C36"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\ccp.c.obj",
+    "Bytes": 15060,
+    "SHA256": "4935501015CE0631DABC684C80C6DDFC76F30AF83613CA7D32C87AFA9F8B16E1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ppp\\auth.c.obj",
+    "Bytes": 15060,
+    "SHA256": "3E98103C9F903B4B421137EB4BC4BC9D10E4E3C6EF12180694D1527011BF1609"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\lowpan6.c.obj",
+    "Bytes": 15064,
+    "SHA256": "7F05FD5B29D0FE14C389CB6DF8271B57F11E4BED77096998D3D93377B6227BE3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\netif\\ethernet.c.obj",
+    "Bytes": 30812,
+    "SHA256": "D673AC22F041A8B0C8E74DFD9F2FE7A0F286A90FC7C5B36023F58B959DF8C0BC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\tcp_slave\\modbus_controller\\mbc_tcp_slave.c.obj",
+    "Bytes": 110952,
+    "SHA256": "28F0587BAE07BFF9501DC7E87BE70C1B2789C01C17A2D85D9E013EF27C2E7E9C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\sdk_component.cmake",
+    "Bytes": 6901,
+    "SHA256": "B4BCAFF7A700B31A7E52CCB3FA4CBBEC868014B8A0233561C14DAC9DF756A9E4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\libesp8266.a",
+    "Bytes": 1716084,
+    "SHA256": "29F40611BCD2A3080F1A8EA22DA322ECEE3A5FA521DA133C0BE26C6F99F7BE08"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp-tls\\CMakeFiles\\__idf_esp-tls.dir\\esp_tls_mbedtls.c.obj",
+    "Bytes": 115988,
+    "SHA256": "803A0EA040901542296B90AD81DCFC1CB7B60DB0E9AE67407F33B277E95C320A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp-tls\\CMakeFiles\\__idf_esp-tls.dir\\esp_tls.c.obj",
+    "Bytes": 113952,
+    "SHA256": "CDD10338A885DA1687A6C0EAFA6526B96C4270E59F0CA6FDC618945BB6B2706F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\console\\CMakeFiles\\__idf_console.dir\\split_argv.c.obj",
+    "Bytes": 15420,
+    "SHA256": "9ACAE9FD52D400B8F77D67EAB62679E02746821AC8181B8C29AA91649CC9964A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\cmake_install.cmake",
+    "Bytes": 1031,
+    "SHA256": "65F3958DE3442CABB74AE9DDDD4D3EEBAC8209ECC78254098BA4D5B06F232426"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\ld\\esp8266.project.ld",
+    "Bytes": 9505,
+    "SHA256": "BEEA3EA9DA3ADEC7C41C8E6B86C0F97B8136495BC61926946A854668B6802EFC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\esp8266_out.ld",
+    "Bytes": 1687,
+    "SHA256": "984F18D602F5F841B17D6656CC95466315505480DC9B9D26F71E488B96CDEE02"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\port\\esp8266\\debug\\lwip_debug.c.obj",
+    "Bytes": 49948,
+    "SHA256": "BC40C1B94DF329B4542564A8C9D224788F8CA08B4B4EA3F34767424702298028"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\udp.c.obj",
+    "Bytes": 79680,
+    "SHA256": "7D2C6416B90E9B3102BF08C8D02DAEFA020F05889386DCBAA57F495C675C44BC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\tcp_out.c.obj",
+    "Bytes": 148572,
+    "SHA256": "7EA1F52DE90B9FF4430C93B0F5E096F606E8177E535C9740F5E7FA9994BCAE6F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\tcp_in.c.obj",
+    "Bytes": 133140,
+    "SHA256": "46F9B7BAACBB9B12120CACDDFC0DC8D0CDDB263FAA5A76069794AE7A296CD804"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\tcp.c.obj",
+    "Bytes": 191428,
+    "SHA256": "2A646CEBB4B16B218862AD1FAF1B250889D233244495B99742408903F913526E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\sys.c.obj",
+    "Bytes": 15052,
+    "SHA256": "A12FC73ED832D87F0E1BE1B5D336F479EC94D204FBFA878BDCCDBACE7F3E999A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\stats.c.obj",
+    "Bytes": 15060,
+    "SHA256": "6E1E74AA0F99035A7890BEA3113EF7296BF4BA165FC6D54300B2A3A1B6BFF744"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\raw.c.obj",
+    "Bytes": 54892,
+    "SHA256": "8B7BA59EA0FEC5141460518ED6AFC543B5B4641680B1ECF0494CE05BCB2D0EB4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\pbuf.c.obj",
+    "Bytes": 129280,
+    "SHA256": "41B4FD6331E0110E7EC726641F37D7A139FF1E847C52B75A19E516FF20C67E53"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\netif.c.obj",
+    "Bytes": 92864,
+    "SHA256": "9ECE6D26CBA3387F7237DFEC587EE58B3A06C63D367E6A750C6AB4E3BB217C04"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\memp.c.obj",
+    "Bytes": 43552,
+    "SHA256": "44BD025D368EB7082C9404FBBFE0D6952C9772961601D29AC56E012A2780E195"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\mem.c.obj",
+    "Bytes": 24508,
+    "SHA256": "65E0D64327FDEE8B7E73A5BC993DBA310B491FE6AC6A998CA679B89528B098D5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\build.ninja",
+    "Bytes": 127988,
+    "SHA256": "9CD8A1DE0A74B691BCADFBC2D15B56A4FE5A819FE918A875DC24D396F972A93C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\bootloader.map",
+    "Bytes": 89645,
+    "SHA256": "17FB124D1DE318820847A19767325A7C7AC9EE35E970EE1F62030BFCC321778B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\bootloader.elf",
+    "Bytes": 140096,
+    "SHA256": "9D9CF2A136AE56417E27DA8FF61A7D917508D9EFA42D2EC2956262CAA1F84486"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\bootloader.bin",
+    "Bytes": 9984,
+    "SHA256": "CC25AFF7BECFCF9921AE96227B7227FE05B30A62A2147792E5CAAE072172DD26"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\.ninja_log",
+    "Bytes": 3508,
+    "SHA256": "6C9D74917200E5BA4A5F0D585204362BCE9F943932EB4ADCF6232D27EE43D531"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\.ninja_deps",
+    "Bytes": 18976,
+    "SHA256": "61ED6B600AC92CA745883256A2081C6EC2822161050DFFE363C8CAAC0872CE00"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\.bin_timestamp",
+    "Bytes": 74,
+    "SHA256": "9E42FAA05184F1C89A82FA3A3FB9347403FC866B5A6553FE7F7935AD0A0CD8C7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\compile_commands.json",
+    "Bytes": 33282,
+    "SHA256": "727D974D9A95974101FC2E5DDA569C92DE20BF501E25340AD31CD57DB30A04EB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\cmake_install.cmake",
+    "Bytes": 1644,
+    "SHA256": "9D17197C37396BE0D53675B72308ACA05EBDB358191D1ED3C361C7324CD49FC3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp_timing.c.obj",
+    "Bytes": 15656,
+    "SHA256": "C785B8472036FB65B70A9908945E71A775E4ACE6D7ABBEB9877E152BEC2FC780"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp_sha512.c.obj",
+    "Bytes": 18172,
+    "SHA256": "1C1EA0FE42FC64014F9675B01EA9DD6ED2B206EE5CA0F7ED6367392CAEE11DFE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp_sha256.c.obj",
+    "Bytes": 18168,
+    "SHA256": "6ACCB524756785515CEEE0181467345BC2E6CF55D6FAE0B81C7E67BD6058CF5C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp_sha1.c.obj",
+    "Bytes": 17216,
+    "SHA256": "1D59D6D0955EF758488EFDF5C006A73167714AFBE9F85649A5AD6BFD3EA512B9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp_mem.c.obj",
+    "Bytes": 10868,
+    "SHA256": "3D52B4BB2F900EAC514E9A36E5F1BB670D0931B2BEB3C1FF9E8AF601E0FADC41"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp_hardware.c.obj",
+    "Bytes": 10148,
+    "SHA256": "205F96DEF258F3B85F64694819B082C30BC818C6B85487F10817648578959911"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp_aes.c.obj",
+    "Bytes": 40660,
+    "SHA256": "6EEA7BCB385EF53115A740BE3EABA20811E7C4425E51184E4714AF54989774DA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\console\\CMakeFiles\\__idf_console.dir\\linenoise\\linenoise.c.obj",
+    "Bytes": 118632,
+    "SHA256": "DBE12340DA80D94C7C388A6C82FF9428010AA033197434E368CB27DEE168B63F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\console\\CMakeFiles\\__idf_console.dir\\commands.c.obj",
+    "Bytes": 34392,
+    "SHA256": "639B4B3C8913135C87FC24F64BBD0310B768A5D376F206F21CF9DC243AE12F19"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_ringbuf\\libesp_ringbuf.a",
+    "Bytes": 119504,
+    "SHA256": "6D9739BDA4B1D29F61A35E14A813878CB728ADAA4CCF451A5783481FCD7715DC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_ringbuf\\cmake_install.cmake",
+    "Bytes": 1078,
+    "SHA256": "0DA462DFB9D0DE69AAA9FB80D582265DDC830307CE5BB0B6A49C09CB67F8EC41"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_common\\CMakeFiles\\__idf_esp_common.dir\\src\\stack_check.c.obj",
+    "Bytes": 7352,
+    "SHA256": "742C5D02CE73922A0921ADAA23786169B285FF8E37A6B90BAE82857DA08FCDFE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_common\\CMakeFiles\\__idf_esp_common.dir\\src\\esp_err_to_name.c.obj",
+    "Bytes": 24588,
+    "SHA256": "74E88E020C3485D197F735E6C0C096828684AD3B56836D215B2A00C46E461933"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_https_ota\\libesp_https_ota.a",
+    "Bytes": 39120,
+    "SHA256": "B34B9FD044C4CD1206846229C165DAB1E880DD6E870CE5DCDAD265DD75E208F1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_https_ota\\cmake_install.cmake",
+    "Bytes": 1080,
+    "SHA256": "F2BD7EFB45AC1F657464E3113AF34FC5EAB171745C180B57D8A56C25D708C703"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\protobuf-c\\CMakeFiles\\__idf_protobuf-c.dir\\protobuf-c\\protobuf-c\\protobuf-c.c.obj",
+    "Bytes": 463092,
+    "SHA256": "1BE9D1C3042F5D79B5B095E0AD67241D121628A416103A64E1D812AA5170CBBD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\tcp_master\\port\\port_tcp_master.c.obj",
+    "Bytes": 135392,
+    "SHA256": "B56B2EB6B14663334B69650184F1B274B49EF1533EEDD76F275AEFF3F2E7446D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\sodium\\version.c.obj",
+    "Bytes": 4680,
+    "SHA256": "4F156C79FCF79D28F1F207197053E0CE4D6D0A23488C4EBF8FD3B6CFCDB3FF14"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\sodium\\utils.c.obj",
+    "Bytes": 49688,
+    "SHA256": "D1D362875860621D0B0F352A86AE94012338C87CD90999CB77385CD468EF6D11"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\sodium\\runtime.c.obj",
+    "Bytes": 20772,
+    "SHA256": "BEC6F94C3E45DDF3C7E0A38BE8AB2E8102F1795A3D15A677E595E9FB28CF198F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\sodium\\core.c.obj",
+    "Bytes": 13368,
+    "SHA256": "CCAFB0C32F401DE6DBE5DEBC1751F76A7D546A8D53F3AB9B359B8AB902E1FED1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv6\\nd6.c.obj",
+    "Bytes": 15060,
+    "SHA256": "02EAFC7915C2ECB0F3196C330E47F362A57A8DD5EFC668EEE545DDF7176A23F6"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv6\\mld6.c.obj",
+    "Bytes": 15060,
+    "SHA256": "4B39825C2DAF195C3FAA04CF2E8767B40E08F1FD1023AF91F886E9B167B64411"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv6\\ip6_frag.c.obj",
+    "Bytes": 18840,
+    "SHA256": "2D46F15ADA15F00D4C8DDFF97CCE133C38994BE83E7241BCCCA95E2D469A0EB5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv6\\ip6_addr.c.obj",
+    "Bytes": 15068,
+    "SHA256": "2BF7017D693CD6210C8412E33B5CFA953F501086DB194EB03E41191D0392DBBD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv6\\ip6.c.obj",
+    "Bytes": 15060,
+    "SHA256": "95E9F4FC497B7E542384C4398DEA70DE5E60E167AD1B6A133A944AEB8AFBD753"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv6\\inet6.c.obj",
+    "Bytes": 15064,
+    "SHA256": "0872A34F862C3313240757D0AF4D7BAB0D73F7D2BF74EB337D0EBD9236BF9F15"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv6\\icmp6.c.obj",
+    "Bytes": 15064,
+    "SHA256": "8D201D741B7C45F491F518DE95F73E617CE8F9277DD0BF971CC05F46AA065C1A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv6\\ethip6.c.obj",
+    "Bytes": 15064,
+    "SHA256": "99A7DD2EAA5499578C4B78F9739004908782974B1322081B3485201C19E59434"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv6\\dhcp6.c.obj",
+    "Bytes": 15064,
+    "SHA256": "3AB872D9C80999F02967C6C5881A508F928D80AB6F14A06C1D20AFF114BAB575"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\TargetDirectories.txt",
+    "Bytes": 5243,
+    "SHA256": "35B261671C0EB11134A71C04A067CDC968AFB6DF03F6F9EBBE948A4B4519EB37"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\console\\CMakeFiles\\__idf_console.dir\\argtable3\\argtable3.c.obj",
+    "Bytes": 366484,
+    "SHA256": "4D8D84E4354EAA6912DBD24B83A5B9CEF99A210ACBE5796C992A404D7E27E5EC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\partition_table\\cmake_install.cmake",
+    "Bytes": 1082,
+    "SHA256": "2EBEDEB4DC43918880E5E6BE7DF90D220558BD4FB93E299F615B3FCB44B20973"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\tcp_master\\modbus_controller\\mbc_tcp_master.c.obj",
+    "Bytes": 153944,
+    "SHA256": "61019053330F299A96F38F2AB7D811BAD03B4B71CF31FFF30A18A68504883F26"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\randombytes\\randombytes.c.obj",
+    "Bytes": 23708,
+    "SHA256": "91A45C5CB553272DB13F264EAD218D7B3C6FF1179DA67DA5097A1039D7EDD057"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\mconf-idf.dir\\Labels.txt",
+    "Bytes": 820,
+    "SHA256": "04C7D0FCFC74AEAEF4D277CA14DF992AA7121F76FD6DF88E61D7B4680A1C11DD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\mconf-idf.dir\\Labels.json",
+    "Bytes": 1123,
+    "SHA256": "1F077654359F5AD85FF0158E790838D76571AD14BDABDCD75C52C8994A8B893D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_gdbstub\\libesp_gdbstub.a",
+    "Bytes": 97484,
+    "SHA256": "F9BFDDD8E118CD19510C688EB5CC13D1F40F96312ED387D718D8AFE3853A40FF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_gdbstub\\cmake_install.cmake",
+    "Bytes": 1078,
+    "SHA256": "29CD4C92A1C5A268E6A9BBF369C861416CA4D5EFD3A909038C5AC947C9CB8C10"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp8266\\sha512.c.obj",
+    "Bytes": 43864,
+    "SHA256": "FB3DBFCAFCA74F085DC441B231213EAC55CC7DA6D142E91C1B12AB9B432DA10F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp8266\\sha256.c.obj",
+    "Bytes": 27116,
+    "SHA256": "FE0347BF6148B5A59CAF9422BC035D21ECEBB52CD9561F38C569848A5E79F753"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp8266\\sha1.c.obj",
+    "Bytes": 30032,
+    "SHA256": "E6460A43B85163265896C5AF89F5C873BFB4C9E3147153C04DF79596EEA9EA84"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp8266\\md5.c.obj",
+    "Bytes": 25228,
+    "SHA256": "A52EE21211DEE8156FA329299D09BD58B3FFF4AEFBCE43C332B1A44BD4452FD9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp8266\\base64.c.obj",
+    "Bytes": 39628,
+    "SHA256": "06FC2577EDEE67412A44E0E1BE06CD23C0656C2E685653DEA433F6F2E13679D3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp8266\\arc4.c.obj",
+    "Bytes": 15348,
+    "SHA256": "38462F75F4D0C750C7A9DF917F845D3189BFE8C19E05322F16CDF6E985743F0A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\__\\__\\port\\esp8266\\aes.c.obj",
+    "Bytes": 146924,
+    "SHA256": "D26EA1E870EAD176D1CE7150C4C810A725212B8410014B4484BB22CBDEE8537D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\xtea.c.obj",
+    "Bytes": 7324,
+    "SHA256": "225802B53395F7F4A6A3B7E96B3058CD830949B60405ACC82C719C45A71DE235"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\version_features.c.obj",
+    "Bytes": 15528,
+    "SHA256": "7490FAFA4322B1DEE736A29075B6B67127EE55722F0C3594EEF0C1B51F928F12"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\version.c.obj",
+    "Bytes": 11408,
+    "SHA256": "01E5DD681BC71105FAF2A2FA1F66C0080FD80324716A8A3448421713B028F35C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\timing.c.obj",
+    "Bytes": 7456,
+    "SHA256": "734EAF04FEDB5D8601529847664D667C0CAC36B2438221D6B1781B1524F8640C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\threading.c.obj",
+    "Bytes": 7336,
+    "SHA256": "54EE4851F71A8D73AC5DBC9C5C007EFF7C584FF2D89D01A61B9DCFDA0699F349"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\sha512.c.obj",
+    "Bytes": 23248,
+    "SHA256": "38B5023DA3FD51747E2888F5B8F4F4340C6C0B4C1E0D2E57E585FB5B8AAC57DF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\sha256.c.obj",
+    "Bytes": 22888,
+    "SHA256": "C5D9F80DEDC08D612D2A88AD6C78A565743269B0DA9E06B4E9CEF7E12EE4E18C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\sha1.c.obj",
+    "Bytes": 20636,
+    "SHA256": "2FD644F284D69797CC13CFF27F701A64E87030C84CF0C99747A46876A20F68B6"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\rsa_internal.c.obj",
+    "Bytes": 48000,
+    "SHA256": "935A7B7940F29E0E424D5345ED6DE26CE7091B451564268FE1F34CE7833D845F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\rsa.c.obj",
+    "Bytes": 233592,
+    "SHA256": "3B59DCAFACF8E7D8AAAC00CCE03AE6E729ABFFA3EE054E9344DE033007568A61"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\ripemd160.c.obj",
+    "Bytes": 7336,
+    "SHA256": "B1ADDEE64822BA8C5BEBFE8E7506B9465252B9EE911D2B293CA6D4BA2B807C83"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\poly1305.c.obj",
+    "Bytes": 7332,
+    "SHA256": "080B3C61F7D14464411DD58C6173CAA468E5B0456EB017D4F7972E72325CB4A5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\platform_util.c.obj",
+    "Bytes": 9984,
+    "SHA256": "30F4227E2CB2CDA4B213D49FCA8C1B2C2E22E3F63A83B0C77129C0C4FAD61206"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\platform.c.obj",
+    "Bytes": 13792,
+    "SHA256": "BBC7C80ADC21C74F7A403BC25087A300C6757F549BB8D9FDA42B219543D3DAF3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\pk_wrap.c.obj",
+    "Bytes": 67336,
+    "SHA256": "0D0E661E4B1C701A0F43384CC2CDC8D3EF71EFA2E9DDD50439B04F9F5E1ED1E5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\pkwrite.c.obj",
+    "Bytes": 53832,
+    "SHA256": "C221C3EB30DC1B66251AA4AD7FCD06BFB7FBEEE589E263A474DB1BA98599C97D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\pkparse.c.obj",
+    "Bytes": 119772,
+    "SHA256": "26803661B7958DB481ADCCCEAEDBAACA88C439971F4766D2F3B98AE5EF75872D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\pkcs5.c.obj",
+    "Bytes": 44688,
+    "SHA256": "A9016751219CE989645D3CA0748A07A780A70ADB780B08BB5CFF35B2EFB61C13"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\pkcs12.c.obj",
+    "Bytes": 44732,
+    "SHA256": "2914952F6FB4D9D41FAB805DC370D29E7B14B31BFBAFA36ED94614A144F6D89A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\pk.c.obj",
+    "Bytes": 57528,
+    "SHA256": "BEE8875849A2DDEE71775F00BE5372DFFA7866BACA2F2A45A122F3FB15ADAED3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\pem.c.obj",
+    "Bytes": 51740,
+    "SHA256": "DB69D6ACFB15BD9CEF5D3970AE91C96D4847F00EF63E868574478DD18CD4574E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\padlock.c.obj",
+    "Bytes": 7332,
+    "SHA256": "6563CFF66C8382D5FD232A443A9875A3B947AB71C9E80C3BA2D3A916908BD69A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\oid.c.obj",
+    "Bytes": 76516,
+    "SHA256": "76675C37F2DBC09A4E146108DF67005195B498A7D114487D9D7BE900DB0AE65C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\nist_kw.c.obj",
+    "Bytes": 7332,
+    "SHA256": "A88381367D04D7A44B9F1AF5C8C7F15CE627867FE9BE35F95E16C1A2C4C87E83"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\memory_buffer_alloc.c.obj",
+    "Bytes": 7356,
+    "SHA256": "0B0A9EB2725EF58656D00767F9543571A1F507552F3CED281CD648E8AAD98840"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\md_wrap.c.obj",
+    "Bytes": 56408,
+    "SHA256": "90FECB9655CE529CAB59F7668C1A6033622F96CE010D2BBDAF479787FB157D17"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\md5.c.obj",
+    "Bytes": 53612,
+    "SHA256": "BF20444048FD762F1E06B4EEC513953697F3648C73C23DE1ED5A9F5003C57537"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\md4.c.obj",
+    "Bytes": 7324,
+    "SHA256": "818CA4CBCFB59FA995E5F0259EE62C06A1133CEE6264DAEE1BA355DFBE58C51A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\md2.c.obj",
+    "Bytes": 7324,
+    "SHA256": "836CBD13C98F92850C9DC65122881298D1208EDD05302682A6F480D24CD9A6C0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\md.c.obj",
+    "Bytes": 58652,
+    "SHA256": "8646D75D98919A6F7D5D5A6877821D068EF6461561C93BA0E04037FAAD2736A9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\hmac_drbg.c.obj",
+    "Bytes": 60512,
+    "SHA256": "A7E56981426F2440DB57D9992D0364C121E32653F9F0528A0291B06F3E182130"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\hkdf.c.obj",
+    "Bytes": 7324,
+    "SHA256": "A6E0F9509390B974B736488F3D753BB15DE9F683919C16584D3BFF6E7702411A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\havege.c.obj",
+    "Bytes": 7332,
+    "SHA256": "8E8CE5CBC61BE2812C787FA404FCCB92B0A50BFCC6F65B66C816DF86A92DAB86"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\gcm.c.obj",
+    "Bytes": 79124,
+    "SHA256": "0B63A9D26638F4C8728C95C3A6D368DF739B418B9C911B22152FE7B5B83067E7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\error.c.obj",
+    "Bytes": 76128,
+    "SHA256": "D7A65911515CEAE7033BBEE53B5072E97A213F2E9691F2619343DC52221F8F42"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\entropy_poll.c.obj",
+    "Bytes": 7340,
+    "SHA256": "50422BDF70BC721D669CA9E4C0B780BD2ABA5A4762D4E32728882B800FBB5DE2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\entropy.c.obj",
+    "Bytes": 54000,
+    "SHA256": "64DD7D80AE8A0AA223774AC32222891C551232F02598C3B9F2F75D47BC46D39B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\ecp_curves.c.obj",
+    "Bytes": 235640,
+    "SHA256": "8388AF0420C74AFCD9A4FC38968771B4119360C1C4EA3D2B76A5ADEBF9E96951"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\ecp.c.obj",
+    "Bytes": 271488,
+    "SHA256": "921D9C0B10951FB79C065172A453EBC092DDE584A6921E34CD9F49411855C024"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\ecjpake.c.obj",
+    "Bytes": 7332,
+    "SHA256": "4E5D8D9FC8E8B4EE812DECD70BFF2CBDDE2BB8E914856FEDE9D73CFFD73F52FE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\ecdsa.c.obj",
+    "Bytes": 81232,
+    "SHA256": "29E199E51627E939582C9B35F0215E8304BE501F756991640EFCC013045820E2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\ecdh.c.obj",
+    "Bytes": 61208,
+    "SHA256": "6A7B8DC38071F73FE719A2AA006E300556D4A710C66118E9D3D6287A0BE3D801"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\dhm.c.obj",
+    "Bytes": 71276,
+    "SHA256": "D25D58C2CF15F528D5E7A6FE3D796F9FB203C620CF0A6583CFC7649E2749CBD8"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\des.c.obj",
+    "Bytes": 7324,
+    "SHA256": "19CA1509B14979F9149AD1F79705FF1D6EB8CDA5CEB7A43EED6DD09F97328F33"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\ctr_drbg.c.obj",
+    "Bytes": 66288,
+    "SHA256": "A5F5C2845951AB7416A5E094EE73D51F19F6737C64F9FC4B6A286B9D5DB21B46"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\cmac.c.obj",
+    "Bytes": 7324,
+    "SHA256": "514138869AA772173D5C15D77CC4018897858E25CB8873132802B4192003D299"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\cipher_wrap.c.obj",
+    "Bytes": 57536,
+    "SHA256": "86CA06F591B21286FCFD85B76DCCAA0643A9D75AFDD86BA31C70407728D63211"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\cipher.c.obj",
+    "Bytes": 102444,
+    "SHA256": "6FDCB2B00F0944A48BB554A7C224A7C411ACAE8781B71801DF009E97393BB0DC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\chachapoly.c.obj",
+    "Bytes": 7340,
+    "SHA256": "3C1F48ECF2D963058A0B0FF6B5857353AC17B85E2E26BC4AB816E1E82A596009"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\chacha20.c.obj",
+    "Bytes": 7332,
+    "SHA256": "690B4B1F348A68BC76B29B7D4991B45783B4A12EB1B1263000CC9ABEA7EE49F7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\ccm.c.obj",
+    "Bytes": 58120,
+    "SHA256": "DEFCECA04747CAC8C8E2D77C6BE74114E2A9528EE9D0FDE291AD84FF04FC67AE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\camellia.c.obj",
+    "Bytes": 7332,
+    "SHA256": "5AA65B518FA623D44258F8015A60A54EB6C01EA265A54D276E3133448B4638CA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\blowfish.c.obj",
+    "Bytes": 7332,
+    "SHA256": "71AF672D82867D6A3A5426DABC901186EB42CAAE6EF228C6C7F73671DF32BB61"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\bignum.c.obj",
+    "Bytes": 305132,
+    "SHA256": "8844B5B363D73582EB6DAB51D2DA05EB32BD6863C98B7DE37E3DAF0122D31FAA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\base64.c.obj",
+    "Bytes": 28932,
+    "SHA256": "1423C1DA7BCD613852D3A0CA1AD67305C97DA428726ABDC6234F3AFA610AE22D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\asn1write.c.obj",
+    "Bytes": 58356,
+    "SHA256": "DDD77E58F4E06F8A64D6790FF8047739EE348480E20BD81E3021014758EE7431"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\asn1parse.c.obj",
+    "Bytes": 41980,
+    "SHA256": "EAE50F65717A3C996DD5CE08A7AD9AB3880CFC88B13A3CCDDE4622082033C1AE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\aria.c.obj",
+    "Bytes": 7324,
+    "SHA256": "141BF8246DCCD5472C00E6863E10091423258FCC388ED54B49AD0379F5401B45"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\arc4.c.obj",
+    "Bytes": 7324,
+    "SHA256": "FB9DBF694B3DCA91559DC14FDFFB60F86A3760F98E3E51E283D6FDDA72C745EC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\aesni.c.obj",
+    "Bytes": 7328,
+    "SHA256": "5D3A584085DCC7BE86212BB9EE7C4CFDE3B10F6D2B0DF21CD5339C2078D83247"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\mbedtls\\mbedtls\\library\\CMakeFiles\\mbedcrypto.dir\\aes.c.obj",
+    "Bytes": 47416,
+    "SHA256": "937EE5B9CD5252AF0B03892FD546383C05B9F094D0873BE1601F77FF37B864CC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv4\\ip4_napt.c.obj",
+    "Bytes": 15068,
+    "SHA256": "6E882BFAB6239EC43EE42220A9DAA98449459461F776FB9572B84DC53BFCF46B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv4\\ip4_frag.c.obj",
+    "Bytes": 29224,
+    "SHA256": "8A2B79289FFCA767FA9C9E5C3ABCBEF1CCD4367DAD7A66EB7CEEC1F5EB6969DB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv4\\ip4_addr.c.obj",
+    "Bytes": 41128,
+    "SHA256": "5B13FD7CC2AF8D7C7D29055F686E36D7F3BB766EE77C17842CAF552AE1E6DBF3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv4\\ip4.c.obj",
+    "Bytes": 74136,
+    "SHA256": "3FD1BE424C243219B74272A72E039F6A26F3256319028A5C19BF2B6745A9E5ED"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv4\\igmp.c.obj",
+    "Bytes": 69396,
+    "SHA256": "0E9657D4B09711DE2C43E0A2710052FAB8EBF172033207ED4C6C2B1B5481C162"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\spi_flash\\libspi_flash.a",
+    "Bytes": 161818,
+    "SHA256": "35610A382B37523198524AF0D9172B419F35FDEF8EC40496D6F58892209BE01B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv4\\icmp.c.obj",
+    "Bytes": 36308,
+    "SHA256": "26C8ED12D616351D81A7ED3F6FE369AF06E575227DDD7B8191F473F2C9E9E104"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\spi_flash\\cmake_install.cmake",
+    "Bytes": 1073,
+    "SHA256": "599791E8766FEBFFBE5A47F55AD05C8DB9CFF0CFC906752AB681F23B33AAAD83"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv4\\dhcp.c.obj",
+    "Bytes": 163160,
+    "SHA256": "A7EEE14583DB5EAA06DF8C667FD9F913B786888D320A691E790FD91E9983025C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ipv4\\autoip.c.obj",
+    "Bytes": 15064,
+    "SHA256": "44663CA12C110306DC8C093ECBBEE73B806FC3D5D5D7620474CDA83023ACD028"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\ip.c.obj",
+    "Bytes": 19752,
+    "SHA256": "8E6BD846973D1D6D80F690744307E9DCCECC3829C0D53D3578672985C572CDD7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\init.c.obj",
+    "Bytes": 27576,
+    "SHA256": "AFDCC1181FC935FD44ECF191E489558DE4B0D77B6A628F84998B539CF8202DAB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\inet_chksum.c.obj",
+    "Bytes": 41192,
+    "SHA256": "35E08537E202754B2D5B8C8BDFFFD95C1B889E84BE52B649C7670626365F7CDF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\dns.c.obj",
+    "Bytes": 99724,
+    "SHA256": "BB80814B5B8F128DA26E9AC466A8CD2A8D57B9FB3C8834EFC7D8AF848D335063"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\core\\def.c.obj",
+    "Bytes": 30304,
+    "SHA256": "9D8BC49E696B70C69E67F5D26EC9FBB01B6BEC3157E433AA08E0068539CDD2D2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_ringbuf\\CMakeFiles\\__idf_esp_ringbuf.dir\\ringbuf.c.obj",
+    "Bytes": 118708,
+    "SHA256": "0454D1358488FD6422410A0DBEF867837A27EDC17CD9E97404AA34C8569E4CC4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\git-data\\head-ref",
+    "Bytes": 41,
+    "SHA256": "88BFF5A6B16E7BF62AB18963D47CEB1F4E09E24E17DE20A926D87595CC8E4814"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\git-data\\HEAD",
+    "Bytes": 41,
+    "SHA256": "88BFF5A6B16E7BF62AB18963D47CEB1F4E09E24E17DE20A926D87595CC8E4814"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\git-data\\grabRef.cmake",
+    "Bytes": 1696,
+    "SHA256": "E9F4F830F5A8892AD26F9FF2774403AB53020AF375878A887BE177F58A3B5A50"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\feature_tests.cxx",
+    "Bytes": 10416,
+    "SHA256": "85DA72044B6F95AE43539D6A0D0E678C8728E380462990604CC4B56102C6954F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\feature_tests.c",
+    "Bytes": 722,
+    "SHA256": "49279D38CCD92908081863AB5913C164F1A5867CEA6B22FAADE6337B2ED07276"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\feature_tests.bin",
+    "Bytes": 632,
+    "SHA256": "AA185D1B028352F913B4535A7A95270E36A5D2B7A6E23C9AC171B04B6071809D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\port\\porttimer_m.c.obj",
+    "Bytes": 33104,
+    "SHA256": "F4E3C072FEB5C7F3420829C72C9D86EE2B24994F4A7E760612A9656604C6361E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\port\\porttimer.c.obj",
+    "Bytes": 17816,
+    "SHA256": "FE0C642E2E5139A0AE7F90DA0A1F453535975C1397706752DA5828BBB3ACAAD2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\port\\portother_m.c.obj",
+    "Bytes": 17164,
+    "SHA256": "51CCB6487330D1293B000784D19F65BD61841073BAF0D4A889154C70FB7F7DD3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\port\\portother.c.obj",
+    "Bytes": 18484,
+    "SHA256": "19552D49E42CA5A703DFABC6E1D12D276257968B25394E9147866B2AECB2FCFF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\port\\portevent_m.c.obj",
+    "Bytes": 50452,
+    "SHA256": "5C8E311D119661063F9FBCB4388A5F22288CBB974EC4EBF309B6E67866DE223A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\port\\portevent.c.obj",
+    "Bytes": 26728,
+    "SHA256": "A661AF6D78E37C8526E2FD9F62610E50C93E7D61BA882678D9CD5176E08ACED9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\port\\port.c.obj",
+    "Bytes": 28512,
+    "SHA256": "FC0CC1F971F6926B72FC0A6B6B27B756E0B20808A847524D3EE06A9583F44708"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_server\\libesp_http_server.a",
+    "Bytes": 450258,
+    "SHA256": "926B84E24AA7C08CB19606F7E19937F78727014F924AEB5E7B68E1C044C53AC1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_server\\cmake_install.cmake",
+    "Bytes": 1039,
+    "SHA256": "87AF05F4B511CA3D8C8F65F97C76F1A0036AED1DFDBBB9DBF893C3418D4BF932"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_https_ota\\CMakeFiles\\__idf_esp_https_ota.dir\\src\\esp_https_ota.c.obj",
+    "Bytes": 38888,
+    "SHA256": "84CB1D8F5907D9B23D6DA669B96CEF6712A603858E69ADB5A87687F4A261238F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\__\\__\\esp_sleep.c.obj",
+    "Bytes": 67096,
+    "SHA256": "FE274D3E8E4159D19FA37FA6725637743CD8B5DE08C4ED9834CE8587EF3D4183"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\CMakeOutput.log",
+    "Bytes": 30415,
+    "SHA256": "A739E20090A02BBCF800FE87600B31F5DDCE80CBCE5DCA81AEB4B6B059C72295"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\cmake.check_cache",
+    "Bytes": 86,
+    "SHA256": "95079B44BCEF481D601432C2FD3C654D7FE85B9C8386C355F2874502B47441D7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\openssl\\libopenssl.a",
+    "Bytes": 389428,
+    "SHA256": "841CF34250CB8574D627F2E4FC0B34B232738AF6AA8217118625755EC2011F9F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\openssl\\cmake_install.cmake",
+    "Bytes": 1074,
+    "SHA256": "3227BEAD9888E17341E1C89B5C3206171B0EEB0D8AD74E8AABD148C539007793"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\tcp\\mbtcp_m.c.obj",
+    "Bytes": 24700,
+    "SHA256": "9933274EDB6DC1412A8EECB7EAE5964AFF37FDF51D7859A69AE56F46805F1DE4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\tcp\\mbtcp.c.obj",
+    "Bytes": 24536,
+    "SHA256": "FBFF05DEE4D1ADBA56487D624BA7C1EFFF5407823742996C9C8C63066D21A3AB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\mb_m.c.obj",
+    "Bytes": 58008,
+    "SHA256": "A05D717737A4CAF9AE1349AF6D3DCC81849603E03647553B75EC96D866C33988"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\mb.c.obj",
+    "Bytes": 39068,
+    "SHA256": "6907EBBD4A913F61D17702C2BE5902E8567F527FB4495DD654CBB9F442BB3AA7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_verify\\sodium\\verify.c.obj",
+    "Bytes": 8696,
+    "SHA256": "48C9170A5A9B13C8FDE496C7EADB0A24CEE3BA31E478F8F9B11CF928E3A82F9A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\newlib\\libnewlib.a",
+    "Bytes": 202790,
+    "SHA256": "A32A507DB5154BDEA0B0F842956A441AA0B5330CECCAB735A3F7AE3B525858BB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\newlib\\cmake_install.cmake",
+    "Bytes": 1073,
+    "SHA256": "B5DB9D0B5E645B1708EDF18E6B92FF9879627171179D588473C4B24BE5A15A64"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_client\\libesp_http_client.a",
+    "Bytes": 301764,
+    "SHA256": "C82F537AC4F684D05A9AC89E38FA6D96D789D4D6F8C52FF2532818A15CE7D89B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_client\\cmake_install.cmake",
+    "Bytes": 1082,
+    "SHA256": "6344452B40BD9A49663F1088E761DEE215C5ABCCF4BCB4B82D17A95F7D45C174"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\bootloader.elf.dir\\project_elf_src.c.obj",
+    "Bytes": 720,
+    "SHA256": "6758D5B92833541022C2DCF68F0D50073593B63228F8C5E85D63F1C11AF1E40C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\apps\\sntp\\sntp.c.obj",
+    "Bytes": 58604,
+    "SHA256": "F7A976AC27F49004F5187037F96C41D91683C39CD8F796A4D96DEC668BAEAC99"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\functions\\mbutils.c.obj",
+    "Bytes": 24640,
+    "SHA256": "62E335820B103D68C2F25116470867D55EF3D3A7FCAF592D98D8FE63294F60F9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\functions\\mbfuncother.c.obj",
+    "Bytes": 21452,
+    "SHA256": "7441446DFB623C379AC4F9ED5B42AA267E2A86019D85F5EE14ACF2F9E9CB12F4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\functions\\mbfuncinput_m.c.obj",
+    "Bytes": 25624,
+    "SHA256": "D95FACCC92D15652415A8E2941D92C5A586AC12642F1DCA2D69A3C2468C1DCBD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\functions\\mbfuncinput.c.obj",
+    "Bytes": 21056,
+    "SHA256": "DDF7E1F9EA114AFC04E1917C5BD1DF109259F327CFA3EFB29FB115DBE6241415"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\functions\\mbfuncholding_m.c.obj",
+    "Bytes": 49688,
+    "SHA256": "0E6B34CE51EA8293435623F31BB52092B1D9E06CAE3F552CCACB98675C6EFE93"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\functions\\mbfuncholding.c.obj",
+    "Bytes": 32988,
+    "SHA256": "655FFC511CBEFBD02533D19827469917EE0F23F005E3E46578EF9A72C88720A1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\functions\\mbfuncdisc_m.c.obj",
+    "Bytes": 26168,
+    "SHA256": "9D955652E480F15A61A3E1042485898E1049C3F7816F5337A3B09FAA88CCA700"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\functions\\mbfuncdisc.c.obj",
+    "Bytes": 21412,
+    "SHA256": "6B2A058DC436BF3B12BCF0BE945CDADAA052D0DAA82434A172B5BE170436B2ED"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\functions\\mbfuncdiag.c.obj",
+    "Bytes": 1072,
+    "SHA256": "18ED910DF98E0513B059C8575D59004AECAB80AC6BB786483F293D163035592C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\functions\\mbfunccoils_m.c.obj",
+    "Bytes": 42072,
+    "SHA256": "3FB329278E326E4F90E02C39852A6B374CBDE8F228EB18E159502EC3C578F74C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\modbus\\functions\\mbfunccoils.c.obj",
+    "Bytes": 29024,
+    "SHA256": "520AD52B04615FE658A68B91606C0B706B3BAE1D119FA50D43A8711E15AAF2A4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_gdbstub\\CMakeFiles\\__idf_esp_gdbstub.dir\\xtensa\\gdbstub_xtensa.c.obj",
+    "Bytes": 22736,
+    "SHA256": "E4C385FDE22B9D23ED98B4A142583AB67D6D5A490C1A122ADD4AA8BD7AD0F52C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\spi_flash\\CMakeFiles\\__idf_spi_flash.dir\\src\\spi_flash_raw.c.obj",
+    "Bytes": 35236,
+    "SHA256": "E0F5E2F30525E8C9C11CF303BAEF2845F884E48C716BBF0CBB25182B7DF330B7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\spi_flash\\CMakeFiles\\__idf_spi_flash.dir\\src\\spi_flash.c.obj",
+    "Bytes": 79260,
+    "SHA256": "1C82342BFE9CB8B60B62021ED81EA2E7A6F6DD1ED4987DEA9E7E89199CEEA01E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\spi_flash\\CMakeFiles\\__idf_spi_flash.dir\\src\\partition.c.obj",
+    "Bytes": 44752,
+    "SHA256": "38FD133F8A7E6A124B9FA218FCC6CFF6BE74A381C2342D142FC34EB34F71E82B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_server\\CMakeFiles\\__idf_esp_http_server.dir\\httpd_uri.c.obj",
+    "Bytes": 55004,
+    "SHA256": "F0E973F3864609520D19DA28987AF86B367CFCA3510F3DBAE222FD81BC4E49B6"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\apps\\netbiosns\\netbiosns.c.obj",
+    "Bytes": 39544,
+    "SHA256": "9F62E8B1FD3DA22577BDE06C3B2EDB8E9F698484AE3C7F78FE7B6987C63773DB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_server\\CMakeFiles\\__idf_esp_http_server.dir\\httpd_txrx.c.obj",
+    "Bytes": 90780,
+    "SHA256": "6D765304D17A8C3175576576F6A3E44168B2F196FB3B1C2578C119828F98CB88"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_server\\CMakeFiles\\__idf_esp_http_server.dir\\httpd_parse.c.obj",
+    "Bytes": 118564,
+    "SHA256": "78A1DC0DF524F339F5AA43498CFF16EBFF395285BF62ED29B83A2E061367CB39"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_server\\CMakeFiles\\__idf_esp_http_server.dir\\httpd_main.c.obj",
+    "Bytes": 82856,
+    "SHA256": "899834522199119ECCD9F960142FFBB34B31FD3C95A141FB979B49FFB6A05835"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\common\\esp_modbus_slave_tcp.c.obj",
+    "Bytes": 17800,
+    "SHA256": "1A8F7C4F97E229AB5D4C3C16B5927AE802C098EADE07D86640F494687B4A09F1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\common\\esp_modbus_slave.c.obj",
+    "Bytes": 54612,
+    "SHA256": "8DEF89C6BFFD70C7480CE7FF1A1B79996037BE7FD0E8D723039123FC2094BD91"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\common\\esp_modbus_master_tcp.c.obj",
+    "Bytes": 17816,
+    "SHA256": "F53CF9A6D7CCAB1A94765129DE73E52F8AB82B18ACFB72C3BD652F3BAE2259E5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\freemodbus\\CMakeFiles\\__idf_freemodbus.dir\\common\\esp_modbus_master.c.obj",
+    "Bytes": 65248,
+    "SHA256": "8E2A79AAD7371CEBBC92490BFCF8684AC85427AF9ADCFAA7EF5CD764D2F4F212"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_stream\\xsalsa20\\stream_xsalsa20.c.obj",
+    "Bytes": 12580,
+    "SHA256": "7141DBF5F0FFBBD19668C031D523CF9B6839721A0F54CA350F4A15233791D356"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\nvs_flash\\libnvs_flash.a",
+    "Bytes": 756146,
+    "SHA256": "D521B1B38E5460B6952D8DAB45F439752CFC0576762DF8E8E7E007C3FAFBC30E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\nvs_flash\\cmake_install.cmake",
+    "Bytes": 1076,
+    "SHA256": "45B2C0DF5505B04954CCAC38C5B2AE3801D780DA6CA205016CCD1B09391905B3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\spi_flash\\CMakeFiles\\__idf_spi_flash.dir\\port\\port.c.obj",
+    "Bytes": 1080,
+    "SHA256": "A074197E3EB36FAAC4EF1CA2209B7EBDD28D32DF07D404A52D798515A4FE0B95"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_gdbstub\\CMakeFiles\\__idf_esp_gdbstub.dir\\src\\packet.c.obj",
+    "Bytes": 27644,
+    "SHA256": "FC4369C01A1B78DBED6C86A478BC3932868626E6CE02AC22FFF00A365D0BF173"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_gdbstub\\CMakeFiles\\__idf_esp_gdbstub.dir\\src\\gdbstub.c.obj",
+    "Bytes": 33624,
+    "SHA256": "CF8AE6640101801ABA1342AAF9B09D008825BE6F7FEA064142BEE7E966A2A8F7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\fatfs\\libfatfs.a",
+    "Bytes": 604068,
+    "SHA256": "DD1120219E02E3A5EAF1BA67A760631375ED74E88DF67A2FBD31D2A2587D5CFB"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\fatfs\\cmake_install.cmake",
+    "Bytes": 1072,
+    "SHA256": "E6144AA76AE60247C672F69EBC399E0B426BE8548FA6E560DD14B1FE5E42DC0B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\api\\tcpip.c.obj",
+    "Bytes": 62492,
+    "SHA256": "6B7A4802A7A76677EB59246D4FAB3C61533A6E4020E642DA309B1070A482C59E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\api\\sockets.c.obj",
+    "Bytes": 351932,
+    "SHA256": "0F148F21FF3264CA3A315D08CC09FCD10FC9A5D53A6249EC7B329A8A35E22A82"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\api\\netifapi.c.obj",
+    "Bytes": 15060,
+    "SHA256": "CCECE4CF61893A00B1C28A4CE0A82F6DC5CD6133D97AD5EBD97407CA8261C2B2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\api\\netdb.c.obj",
+    "Bytes": 42512,
+    "SHA256": "EB10D33EB4453EE218FDA9BCDACC6673A5C2E96FDFABC26CA3FD53FA533D1A45"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\api\\netbuf.c.obj",
+    "Bytes": 34408,
+    "SHA256": "C5A1A5377A5C9ECC4151AEA2C094254F3D234AF27EB6C29174A7D32CECF66CD5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\api\\if_api.c.obj",
+    "Bytes": 21024,
+    "SHA256": "0580CA1DA5D10318CA54CF5239D94ABB5BE448A4F5B4A205A11EEF506BC88188"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\api\\err.c.obj",
+    "Bytes": 17572,
+    "SHA256": "86B78F189996601FF713496FAA9DBBC9DD5324BC6CC16ED7B1EC18B58691ED13"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\api\\api_msg.c.obj",
+    "Bytes": 178744,
+    "SHA256": "81FEEF178DD9AD90521D9DE759D41609143640AF7861BA19C011133BE9EB76F3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\lwip\\src\\api\\api_lib.c.obj",
+    "Bytes": 117380,
+    "SHA256": "5ECE4A34495CE70478A8AD6E65BB5F1DE7932F51FD939307743D9C806DC8C9FF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_stream\\salsa20\\stream_salsa20.c.obj",
+    "Bytes": 17444,
+    "SHA256": "3D74F8A81675E9CE34B4C6CEAF94612F8FD9A8FE190BC046D937177299E75FB7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\partition_table\\cmake_install.cmake",
+    "Bytes": 1079,
+    "SHA256": "491B1ABED3CC150265A3A436F6F19A61989202674C7A6FA9C1B2A20F78D414EA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_gdbstub\\CMakeFiles\\__idf_esp_gdbstub.dir\\esp8266\\gdbstub_esp8266.c.obj",
+    "Bytes": 12628,
+    "SHA256": "01E11358ECF0C4B4CEA90361F573BB79875C1F165DCF3D82A2C4CAC8B3EB89B2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\openssl\\CMakeFiles\\__idf_openssl.dir\\platform\\ssl_port.c.obj",
+    "Bytes": 9872,
+    "SHA256": "50CDBC7A69DED59F83FE5C4D6BA0A827C2AACEE047A1D1A3511081648C30E806"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\openssl\\CMakeFiles\\__idf_openssl.dir\\platform\\ssl_pm.c.obj",
+    "Bytes": 95156,
+    "SHA256": "160A3B961BB589808C603D4912490AF1264D9181256E609FB57372B4E0B47094"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\openssl\\CMakeFiles\\__idf_openssl.dir\\library\\ssl_x509.c.obj",
+    "Bytes": 48028,
+    "SHA256": "ED4F28A514C55A6E7DBBFDFFA32B2235B1A21FA8D9DF32364909B9C86508AC9D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\openssl\\CMakeFiles\\__idf_openssl.dir\\library\\ssl_stack.c.obj",
+    "Bytes": 13144,
+    "SHA256": "765A259D2806DFF9350583FAA38B54B15148C7F951147BBFB0202E5A6DB72DB9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\openssl\\CMakeFiles\\__idf_openssl.dir\\library\\ssl_pkey.c.obj",
+    "Bytes": 34228,
+    "SHA256": "65A09E1B3E1693B676F4CE717C1C2F22D51611AF7859FBE4DD8B18C7F98F807C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\openssl\\CMakeFiles\\__idf_openssl.dir\\library\\ssl_methods.c.obj",
+    "Bytes": 32560,
+    "SHA256": "C1BD07342FE1541FB31F09D1348CF4D04A4C01C245338A0362586499F736106C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\openssl\\CMakeFiles\\__idf_openssl.dir\\library\\ssl_lib.c.obj",
+    "Bytes": 137504,
+    "SHA256": "84FA7E121AE6595530911CE0B565834EB23A3D17F8993C9770ECF82F93531B61"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\openssl\\CMakeFiles\\__idf_openssl.dir\\library\\ssl_cert.c.obj",
+    "Bytes": 14848,
+    "SHA256": "6E2C4672FBCD537D10E81F9658F970D6E3CA2791857319A5A124593740AF7989"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_client\\CMakeFiles\\__idf_esp_http_client.dir\\esp_http_client.c.obj",
+    "Bytes": 190564,
+    "SHA256": "F8EA19D307C8B8122E514523777587A0EA18C69CC2E9B144EFA8F057AA7B18AD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\apps\\sntp\\sntp.c.obj",
+    "Bytes": 32372,
+    "SHA256": "E5A5EDF204361607060D2DBF01A75EE876837EC13EBB3DC9B3169C0D4BE63CCE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_client\\CMakeFiles\\__idf_esp_http_client.dir\\lib\\http_utils.c.obj",
+    "Bytes": 25820,
+    "SHA256": "76717AE06DECCD5872AA5824B2F587FB4C38D4E94D9755119A912BC5994DB7EF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_client\\CMakeFiles\\__idf_esp_http_client.dir\\lib\\http_header.c.obj",
+    "Bytes": 44344,
+    "SHA256": "7ACEB354D3A396517081DDD72909AD4277876A3F54E7D5FE4255CEEC86837BF6"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_client\\CMakeFiles\\__idf_esp_http_client.dir\\lib\\http_auth.c.obj",
+    "Bytes": 39208,
+    "SHA256": "AA5170C66DBE77804968A1FBCCC59183337E110390CEAA9B9CE77244755FFA22"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_stream\\salsa20\\ref\\salsa20_ref.c.obj",
+    "Bytes": 14768,
+    "SHA256": "8D5F4713BB821B7845C1D4A53022FDEA1C600C649549C54FF460A124B5BA4A10"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_stream\\crypto_stream.c.obj",
+    "Bytes": 9348,
+    "SHA256": "59CFF21C96C7896155E8E214C898A56BFC47B9459B524C9E7864A55985648C62"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\newlib\\CMakeFiles\\__idf_newlib.dir\\src\\time.c.obj",
+    "Bytes": 43936,
+    "SHA256": "4FF7A791CCA8A413FABD5862AF5EB04A937E7B62AE1928F517B67DE0EB58CD91"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\newlib\\CMakeFiles\\__idf_newlib.dir\\src\\termios.c.obj",
+    "Bytes": 13636,
+    "SHA256": "3A3EAB31406710136F2A0FEC9E7BFDF76307E7B6F420DBEDE07D351BCA5FFBCF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\newlib\\CMakeFiles\\__idf_newlib.dir\\src\\syscall.c.obj",
+    "Bytes": 26828,
+    "SHA256": "44D8E6C746B6AFF38077F821BC03435788F5BA10E8F5D6BEB4CC051BB7BBA5F1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\newlib\\CMakeFiles\\__idf_newlib.dir\\src\\select.c.obj",
+    "Bytes": 17884,
+    "SHA256": "6D95371BC8C609B4658D5E94B195395F965B185B6A761D03966983391EB7108B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\newlib\\CMakeFiles\\__idf_newlib.dir\\src\\reent_init.c.obj",
+    "Bytes": 28280,
+    "SHA256": "D081DCEF28AC475B2117BF648576605B47692838E938F20856132AFB3B53F93C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\newlib\\CMakeFiles\\__idf_newlib.dir\\src\\random.c.obj",
+    "Bytes": 10908,
+    "SHA256": "4BF588AE98B359AB571B747E0A0D549BF0E7C05486D0D102EDDF102EC8ADE0D4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\newlib\\CMakeFiles\\__idf_newlib.dir\\src\\locks.c.obj",
+    "Bytes": 38332,
+    "SHA256": "B95910A7A49C0DBBCB4C755E4FA862F34382EE36A5E2E5AB62D3C37F4B71B9B7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\newlib\\CMakeFiles\\__idf_newlib.dir\\src\\esp_malloc.c.obj",
+    "Bytes": 21676,
+    "SHA256": "2C4ADD87A8B46C9CE7C537E183B7966856055E5761F90BDD8DAA15BC2FD0F1A5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\main\\libmain.a",
+    "Bytes": 16636,
+    "SHA256": "DB4E82BD0F02C248E1C51B1420A772790A1D7EC452074E23610D450885B0D14C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\main\\cmake_install.cmake",
+    "Bytes": 1090,
+    "SHA256": "DC0AFF7BF86D46FE410CFE2BF60193FA9ACB37385F5580279962A9DC33169D3D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\apps\\ping\\ping_sock.c.obj",
+    "Bytes": 74696,
+    "SHA256": "EA1A849E335C47EA55BDB9B53B2E846005C05A29385A632FA2C58F02E6B945F7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\apps\\ping\\ping.c.obj",
+    "Bytes": 31924,
+    "SHA256": "86D31BB486F5AE7AC81CC458FF506ED80228EF43B7DC5F4E0B6ACCBF686E5B04"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\lwip\\CMakeFiles\\__idf_lwip.dir\\apps\\ping\\esp_ping.c.obj",
+    "Bytes": 32816,
+    "SHA256": "AE277D65BC2A41A34F81CE680219AFC7BDE9CE6A4644F923324D2649D21D5958"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\3.13.4\\CMakeDetermineCompilerABI_CXX.bin",
+    "Bytes": 640,
+    "SHA256": "1868DC6F5FF8361A43D0AA0539DBA7CAC5576FE02AC3F70320F68A677C45BCF9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\3.13.4\\CMakeDetermineCompilerABI_C.bin",
+    "Bytes": 636,
+    "SHA256": "B236294E0B216702B76E710C30C043712B697C934146F35418719D38D66A20FD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\3.13.4\\CMakeCXXCompiler.cmake",
+    "Bytes": 3227,
+    "SHA256": "72E580F52A3C7373CDAE379B19A72291C0042E41BFAB1C30EA7FF7630537AE31"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\3.13.4\\CMakeCCompiler.cmake",
+    "Bytes": 2938,
+    "SHA256": "2E076520AFF3AEB15244B5B607AB0E0261F84CCC028D30EFDCB764CFB11F42EE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\3.13.4\\CMakeASMCompiler.cmake",
+    "Bytes": 1141,
+    "SHA256": "5F741994293D504BABB4712F219EB6C6AE92550742D74693E09CD9686BE78DFC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeCache.txt",
+    "Bytes": 18194,
+    "SHA256": "2DBEE0E5A7DBD1D9CEA218DF446AD2826C79EA0C4D42D70A6ABA46DDB510F128"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_kdf\\crypto_kdf.c.obj",
+    "Bytes": 9204,
+    "SHA256": "A928ADC988772F4776A5ABF8C2F4BA9C221E947E5C65737CEF8E51669BA9DEAC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\3.13.4\\CompilerIdCXX\\CMakeCXXCompilerId.cpp",
+    "Bytes": 19126,
+    "SHA256": "4DC6A8B546081BFCBF6B40B7F59343474629EAB228F3A77C0B76D2B7A1EE8DBA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\3.13.4\\CompilerIdCXX\\a.out",
+    "Bytes": 4200,
+    "SHA256": "0E0D14EE12254DBC4E3C7EBDA4F2B400AA9633A9D4FF67F9DAE229DF4177FAA4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_generichash\\crypto_generichash.c.obj",
+    "Bytes": 21088,
+    "SHA256": "5F48BD846D763D3E0FE6BD9CC2F6BF0F9C0DD47EE6F99EED57ECEF115651560F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_stream\\chacha20\\stream_chacha20.c.obj",
+    "Bytes": 24732,
+    "SHA256": "AFFD9E75362570F9E3C82E988AF35D5015231BC784930966AE0B52B383CAB5D1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_auth\\hmacsha512256\\auth_hmacsha512256.c.obj",
+    "Bytes": 20656,
+    "SHA256": "BBDA75ADF349E157CE9F6C979DBB031F55724B57190FF1A4D1492B4D5092520C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_kdf\\blake2b\\kdf_blake2b.c.obj",
+    "Bytes": 14488,
+    "SHA256": "B1A3D023354B394D860E2E3825A2882B03CCC07D83A0001C73F7509CD0A1A6BC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\main\\CMakeFiles\\__idf_main.dir\\bootloader_start.c.obj",
+    "Bytes": 16376,
+    "SHA256": "6D03C34182CF89580CFD6B1A88A3D0DE75FD707AE9678EA50469A4A8CE0EA3B1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_auth\\hmacsha512\\auth_hmacsha512.c.obj",
+    "Bytes": 23572,
+    "SHA256": "E57E02FB0520391D700A4BB01CA347D52B10FBB792653D9783290F79A43DB1A2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\3.13.4\\CompilerIdC\\CMakeCCompilerId.c",
+    "Bytes": 19611,
+    "SHA256": "9E8ACC6BD1F4433DEEC019F0785A036954AC3BD1209842877AC3F059EE9C03EE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\3.13.4\\CompilerIdC\\a.out",
+    "Bytes": 4216,
+    "SHA256": "32EE274B7DAE0BDEE7404EB7FB52445665F10CB0100A5588B4B0D6103CB89D6C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\libbootloader_support.a",
+    "Bytes": 195256,
+    "SHA256": "D39F845CCD4C17E3A04975E0A148DF4835BF6C268F0D85FDAD34808DC42DF306"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\cmake_install.cmake",
+    "Bytes": 1082,
+    "SHA256": "78574073528F6D87E83DD6221F90DD0A725BDBEB80F24145D2251629B7446858"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\CMakeFiles\\3.13.4\\CMakeSystem.cmake",
+    "Bytes": 460,
+    "SHA256": "C61A7D2929A3CA1BE806F4A1B5270786788A6478531EA1E4F7B4230A36F99B8B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\config.env",
+    "Bytes": 675,
+    "SHA256": "7F6375CE769434F818C9C977F102361FE3D6A36CAAA40D3F2131128B365CCFB4"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_auth\\hmacsha256\\auth_hmacsha256.c.obj",
+    "Bytes": 23576,
+    "SHA256": "49AC2FC582817673036A43308904FE4A32EF6D08ED78D10AD71F9F65DCD11399"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_auth\\crypto_auth.c.obj",
+    "Bytes": 14444,
+    "SHA256": "19A94F52D1CD1499F785C4C6DF53178EAD5D9AF9C71DA1FABAC815BFD3450B6B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_generichash\\blake2b\\ref\\generichash_blake2b.c.obj",
+    "Bytes": 35296,
+    "SHA256": "67250B433E5A92FF81AA2A72F299C64FE09CF7CAD8E1DE6F728CFFBDA4C38542"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_generichash\\blake2b\\ref\\blake2b-ref.c.obj",
+    "Bytes": 52532,
+    "SHA256": "59CC61AB85C4D2C2CC1FA56EBC6E3EA4802445541B718CD63AE0633B0246E5F7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_generichash\\blake2b\\ref\\blake2b-compress-ssse3.c.obj",
+    "Bytes": 7404,
+    "SHA256": "4F4843ABE7198812006E278E18271B996D3DC488FC6A3501AF361F3C0E93EC12"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_generichash\\blake2b\\ref\\blake2b-compress-sse41.c.obj",
+    "Bytes": 7404,
+    "SHA256": "E9A50D9BCEE12610514E3607A40A99F46C6510E9C4B6069992C02ED3E9651B10"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_generichash\\blake2b\\ref\\blake2b-compress-ref.c.obj",
+    "Bytes": 195848,
+    "SHA256": "6C86845BEC028CD53B4908DBE63E6341EC014890DB96768E2E3454E77A4B1441"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_generichash\\blake2b\\ref\\blake2b-compress-avx2.c.obj",
+    "Bytes": 7404,
+    "SHA256": "CE34884CC3BB15F13819F7A1DFD6FAA7330DD46C94BE196C3318EE1B06D3EBF3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_generichash\\blake2b\\generichash_blake2.c.obj",
+    "Bytes": 14416,
+    "SHA256": "7733050E73B2BFC605563B1EC09D6443F0DBBE6302313A47B00F16615F60F073"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_hash\\crypto_hash.c.obj",
+    "Bytes": 11140,
+    "SHA256": "282B2A791D8C0096447023215BBC01FFE5BB9A821DDD2C9AD0CAD89EDF193602"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_stream\\chacha20\\ref\\chacha20_ref.c.obj",
+    "Bytes": 70676,
+    "SHA256": "F3017981BFAA660E923B40BB4FDE2B5F66C0E9CFA9CFA98575B3238F83FE09D7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\log\\liblog.a",
+    "Bytes": 19800,
+    "SHA256": "03F75D38DB86DA18E2BF448E640CA7DFA85DC2769EC2A871F8F2EC3B7E0409CE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\log\\cmake_install.cmake",
+    "Bytes": 1067,
+    "SHA256": "17593A77D3DDFA668183006B2C4900AB7A1C6471B96C676861D071A2C9430E6D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\fatfs\\CMakeFiles\\__idf_fatfs.dir\\vfs\\vfs_fat_spiflash.c.obj",
+    "Bytes": 47052,
+    "SHA256": "870852738116176C25BF452AEF183DD11EF5D0E10799240F471DADC7E9D47D9E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\fatfs\\CMakeFiles\\__idf_fatfs.dir\\vfs\\vfs_fat.c.obj",
+    "Bytes": 149272,
+    "SHA256": "DC6C5F5EA5C14CB66495BBBE790C007D0D60B9063A70011272C8DEFD8D88A9AF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\config\\sdkconfig.json",
+    "Bytes": 5961,
+    "SHA256": "8926790D02E397105E41902F5AB8238349B3619DF17E4B3A590A40B2C8D6F0F2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\config\\sdkconfig.h",
+    "Bytes": 15728,
+    "SHA256": "509FF7BB45A3E02A4E88DF908BD7F87771BE80F9D28A8958D1E697765E7481EE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\config\\sdkconfig.cmake",
+    "Bytes": 13717,
+    "SHA256": "DA88866C7BFB290F69334BB1A3AFD098FCB3639999349F0DD498E7F29840B729"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\config\\kconfig_menus.json",
+    "Bytes": 136627,
+    "SHA256": "A9D8DE17B196EC15D2E132248CFFB61C9472EE98F6F1BD0E64C13332C3878E4E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\fatfs\\CMakeFiles\\__idf_fatfs.dir\\src\\ffunicode.c.obj",
+    "Bytes": 14784,
+    "SHA256": "A222D4EACF1F077AC237C5D4AD8945E978C7661B2EA394AD9DE075CAEF12A595"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\fatfs\\CMakeFiles\\__idf_fatfs.dir\\src\\ff.c.obj",
+    "Bytes": 269308,
+    "SHA256": "088A2AB82A90E341A1B9311795DBE10A112960EA651AFE163D5D73DE781C5267"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_hash\\sha256\\hash_sha256.c.obj",
+    "Bytes": 9012,
+    "SHA256": "5F9FCE91E57C93B6771E84A1C9087DAC08EDA2A818F9FA30921129017F424843"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_core\\salsa\\ref\\core_salsa_ref.c.obj",
+    "Bytes": 54940,
+    "SHA256": "FE292D8607C81874BBB53501CC71811FE32196E20C951964E0831BAD7BE51B74"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\nvs_flash\\CMakeFiles\\__idf_nvs_flash.dir\\src\\nvs_types.cpp.obj",
+    "Bytes": 24780,
+    "SHA256": "69DC197C3622165095E9B29C9453BBF8D50100C64E1609EA2C76BF77C9CA7268"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\nvs_flash\\CMakeFiles\\__idf_nvs_flash.dir\\src\\nvs_storage.cpp.obj",
+    "Bytes": 134460,
+    "SHA256": "8A9C59AB6B3CE0B0466066745F67F252EC26722B2198D3D29BB64E4FCCEC99A5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\nvs_flash\\CMakeFiles\\__idf_nvs_flash.dir\\src\\nvs_pagemanager.cpp.obj",
+    "Bytes": 112688,
+    "SHA256": "F113429CA3D63C3CBE0E1EE0F090DF93543A4F3A7F9AD34C116E4483D6B21FF7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\nvs_flash\\CMakeFiles\\__idf_nvs_flash.dir\\src\\nvs_page.cpp.obj",
+    "Bytes": 180600,
+    "SHA256": "4D898AF7EE7A5004F3F16274A413D4260ABB520006213A24EBB6002DEA6C359A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\nvs_flash\\CMakeFiles\\__idf_nvs_flash.dir\\src\\nvs_item_hash_list.cpp.obj",
+    "Bytes": 50000,
+    "SHA256": "1830E8015DEC2ACF56DEFE53A057E26A3D03CB2798802D4AE62C6132BF6CAAA0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\nvs_flash\\CMakeFiles\\__idf_nvs_flash.dir\\src\\nvs_api.cpp.obj",
+    "Bytes": 250232,
+    "SHA256": "FF299136A2179B82C88273808934861902204A5E806874E5AB7CBB9AE2CD49B0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\task_wdt.c.obj",
+    "Bytes": 26740,
+    "SHA256": "1A9F3200160764C81082439A74336E9A1066D7C0EAD6995C7F1EDAC8E8501C07"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\system_api.c.obj",
+    "Bytes": 56980,
+    "SHA256": "95F322BBEC0B18A135044C59A390F43E96067E76E1979BDB5A756B4B07DB4C00"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\startup.c.obj",
+    "Bytes": 31116,
+    "SHA256": "01249190EBAE7159C7C99CCBAF5BD14C3067033D6C2FB36D3A4DB7CA37C46D82"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\smartconfig_ack.c.obj",
+    "Bytes": 46080,
+    "SHA256": "8CF0797E584E2508FC95E222A051BFD55A467F2D3E28C00B3FBB2AE83994AE4D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\smartconfig.c.obj",
+    "Bytes": 27340,
+    "SHA256": "EBB9CA8ECB49708E5DA00BDC2B26F900BE88FDE2AE78D9CF129112D82CCDF827"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\rom.c.obj",
+    "Bytes": 11460,
+    "SHA256": "B003DB372D6915F4466DECD9233B4235BCFEA2D69334635DB1CB478BC28C4734"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\reset_reason.c.obj",
+    "Bytes": 19188,
+    "SHA256": "76141ABB8479AA7B4F829F7D31DC1E474107B80A8BCA0EFB6617C5B8EB0077DA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\phy_init.c.obj",
+    "Bytes": 53584,
+    "SHA256": "159116E9D7933D6AB393B902CD8C6073A8B19CC6A887168B4535A64F55A74113"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\hw_random.c.obj",
+    "Bytes": 12192,
+    "SHA256": "2D204DD0BAEAD67CD4ECB5421D4B960CE929792FCED4E2342904C484A4E02F37"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\ets_printf.c.obj",
+    "Bytes": 35448,
+    "SHA256": "DBD54E7A3D2A2B67D32CBBDB971AFF73E63BFA313915D826C56F8BFD8920287E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\esp_wifi_os_adapter.c.obj",
+    "Bytes": 45240,
+    "SHA256": "AB84C34DC0BD02724E5D86AE6E2D7B86FC197A6B10D776BD79D4E160A78B6BB5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\esp_wifi.c.obj",
+    "Bytes": 44924,
+    "SHA256": "C669A8124731FE9B0378577489335C51EB9BD41C49486D0D30DA47EEEE917193"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\esp_timer.c.obj",
+    "Bytes": 45236,
+    "SHA256": "57A035C2662A020481F848C3C4A1277D4AEC8997D69EC350AC664238BA85DDA2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\esp_fast_boot.c.obj",
+    "Bytes": 46756,
+    "SHA256": "8CA79A0D534D0FA2B40C1ADA28FBAC2504F7EAADF4C7A3C84E5F6A0A98C36607"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\crc.c.obj",
+    "Bytes": 13544,
+    "SHA256": "264096CE6BBF5061EE571F3C196264A90D7F0303890D84F98F0FD2A54CA1FAC5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\chip_boot.c.obj",
+    "Bytes": 1056,
+    "SHA256": "E6E65986C3D246A0C5DDB0E6ED673E8A4F419C6C2C066D692C5BD0165F9F356E"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\source\\backtrace.c.obj",
+    "Bytes": 14696,
+    "SHA256": "AFEB6C129E5DB5470A675CF9EC9058EB1EE2687D428F24C44C1A07565DD25438"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader\\cmake_install.cmake",
+    "Bytes": 1074,
+    "SHA256": "546398214F96C405658C1A3474A797894B4A42CF26DDBC52EE2F43BC6101A5E8"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_hash\\sha512\\hash_sha512.c.obj",
+    "Bytes": 9012,
+    "SHA256": "B7629198A083D79BDC709ACDE319888BE6F642C2691924C28B91C9D94DC8C3C7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_sign\\ed25519\\sign_ed25519.c.obj",
+    "Bytes": 20936,
+    "SHA256": "1E51642EF919E46084AD35136579CA98090CC6F62896B2B9E4BD6A26E1F35A03"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\log\\CMakeFiles\\__idf_log.dir\\log.c.obj",
+    "Bytes": 19616,
+    "SHA256": "0F838B67C77152F26F1D69BF05AF8F999A488B0B1F26432C8C2A074FD8EAB081"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\fatfs\\CMakeFiles\\__idf_fatfs.dir\\port\\freertos\\ffsystem.c.obj",
+    "Bytes": 22732,
+    "SHA256": "3D32093BED3EC0F83170E2B86479BA7537CC494BE36CE76299B993EC06134FBC"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_scalarmult\\curve25519\\scalarmult_curve25519.c.obj",
+    "Bytes": 9176,
+    "SHA256": "1EE14E0A781BA388975F60106CC36CF84BDA1EE26147919C9BACC26F2DE018BA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_server\\CMakeFiles\\__idf_esp_http_server.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp_http_server\\src\\util\\ctrl_sock.c.obj",
+    "Bytes": 30372,
+    "SHA256": "4CDF10B19CE0D5C4D4E46ED3900BF36085BAE5BFEBA6D78AB6E80422C99E3903"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp_http_server\\CMakeFiles\\__idf_esp_http_server.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp_http_server\\src\\httpd_sess.c.obj",
+    "Bytes": 70600,
+    "SHA256": "FBBA7A788616B8FFC009C5A5F774E572CD1F61D318CAAA51829AFB0C3C716FBF"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_aead\\xchacha20poly1305\\sodium\\aead_xchacha20poly1305.c.obj",
+    "Bytes": 26012,
+    "SHA256": "B3DF7CE14B75AD3976F0CE448D8D2F4D9B50DF0C6A7D957706AFF2330B55F438"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_core\\hsalsa20\\ref2\\core_hsalsa20_ref2.c.obj",
+    "Bytes": 36984,
+    "SHA256": "4A2C758FC5BFC7C744F66660CBEEA6838DEDDD6A0250ACDE566C539D0612192B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_sign\\ed25519\\ref10\\sign.c.obj",
+    "Bytes": 20972,
+    "SHA256": "CFF25D73707170DF76D1A2C6F161D9422F15F977FEE2BF557122F2FF0D14DC4A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_sign\\ed25519\\ref10\\open.c.obj",
+    "Bytes": 25096,
+    "SHA256": "F93F1D89D4A0FFFD0DBC3FDA2E7738D769F43D310E05026156905484B581EDB2"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_sign\\ed25519\\ref10\\obsolete.c.obj",
+    "Bytes": 23568,
+    "SHA256": "444FE773C3682AE83BBBBB4B717547BED10478E85BC423C0FB19B92CB8CEA1F6"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_sign\\ed25519\\ref10\\keypair.c.obj",
+    "Bytes": 19056,
+    "SHA256": "73C59CE78642C26CBDF1B0B370BB16ECAC3EFF31FEB5687280B8D03540917E5D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_core\\hsalsa20\\core_hsalsa20.c.obj",
+    "Bytes": 4528,
+    "SHA256": "3978E47AD74DA1A152D4E503731B2C72F964B59BD410DD9370862CD044839E95"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_sign\\crypto_sign.c.obj",
+    "Bytes": 27336,
+    "SHA256": "F9689F8EEFFF81F586B1FC10DB810D30AC35DC65917BF028DCBFB981FE1A3F02"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\cmake_install.cmake",
+    "Bytes": 1852,
+    "SHA256": "C8D57A4EEFEB0A742654A3977EEBBB274916AB22652DE84DB88D5BA63E306CAE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_onetimeauth\\poly1305\\onetimeauth_poly1305.c.obj",
+    "Bytes": 20228,
+    "SHA256": "E2323B1C4731FEDBE7A931317BC63AB4B390BBC6CDD4A505B0B9581B52DA0DD3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_scalarmult\\curve25519\\ref10\\x25519_ref10.c.obj",
+    "Bytes": 37568,
+    "SHA256": "00A1EBEC5C3E40C82BC2849E754783AB5C5DA7512DDC725ADB7339B77F2B57D9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\fatfs\\CMakeFiles\\__idf_fatfs.dir\\diskio\\diskio_wl.c.obj",
+    "Bytes": 35760,
+    "SHA256": "EBAB6A45C949CE3FBC0347790DBABFE41EF3BE5EC8E42C7D52192E7541C42BB7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\fatfs\\CMakeFiles\\__idf_fatfs.dir\\diskio\\diskio_rawflash.c.obj",
+    "Bytes": 32116,
+    "SHA256": "880E4D29D0508317B14426B9E15D6BA5C1F5E09BB52BF2EF28D38EC35C371F22"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\fatfs\\CMakeFiles\\__idf_fatfs.dir\\diskio\\diskio.c.obj",
+    "Bytes": 31308,
+    "SHA256": "34BA653A9167D4DAE24AA84941939C8ADB35D49DB27AE43D3A619FDCB8A7E9FA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_scalarmult\\crypto_scalarmult.c.obj",
+    "Bytes": 7536,
+    "SHA256": "65F25ADB28D7B27FAAD37438604BD011E32A123BE52176620D0AC8D0967C7ECA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_onetimeauth\\crypto_onetimeauth.c.obj",
+    "Bytes": 19428,
+    "SHA256": "C7E38E383B03E6F5B4061077EE09F44DF7ACF59112EED207165BBD3A99690157"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\esp8266\\libesp8266.a",
+    "Bytes": 40826,
+    "SHA256": "A5581026356E56C119CDFF515837C42FE893482179E990AA2DC49CB6A6BC49C9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_kx\\crypto_kx.c.obj",
+    "Bytes": 23724,
+    "SHA256": "267736FCA43EC5E6C950FB9FEEEF60B506D3BB02909FE75991CC1F4EF617F17B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\esp8266\\cmake_install.cmake",
+    "Bytes": 1071,
+    "SHA256": "D445AAFBE10C5AB0B6AABB7A3A45C24A6FA799E90F9CA1279605B45E903C3C14"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_shorthash\\crypto_shorthash.c.obj",
+    "Bytes": 7752,
+    "SHA256": "4A4FCA12F2BEF76004D230679FFEB24CB3DDB84FEF838691708205E908C48912"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\esp_common\\cmake_install.cmake",
+    "Bytes": 1074,
+    "SHA256": "8663EB635FA7ACCD070210CEA67BFC3C71EC30314B62F7C966AAB4D213C87089"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\driver\\hspi_logic_layer.c.obj",
+    "Bytes": 53344,
+    "SHA256": "78035AC3F58A25B46D977E6D4EC2FDF3C2DE6274F745E23AEE3583D184D25611"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\driver\\gpio.c.obj",
+    "Bytes": 92288,
+    "SHA256": "571DEC1BC361C4E8914F4AC18369FEED03BB0D6A7ED623AD7406F0A5B2A44EC7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\driver\\adc.c.obj",
+    "Bytes": 38560,
+    "SHA256": "15EE3EAAEF899F8B767C401C42E95A80AF38A492CE3AAE4515AE55DA125C5138"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\driver\\i2c.c.obj",
+    "Bytes": 128908,
+    "SHA256": "195C0F8226BE3FCA350B6307995D26F10F546E59CF4E0B4D41E29A48081FF4A5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\driver\\hw_timer.c.obj",
+    "Bytes": 51220,
+    "SHA256": "8DB7714C7BC5C5BB431623D66942BBD6AC2271254500096F64EB83B47A266132"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\driver\\i2s.c.obj",
+    "Bytes": 148640,
+    "SHA256": "D6ACA7456F9802F85F3CD03B4ADBED410D5B880BFD036298A947E34C06F31280"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\driver\\uart.c.obj",
+    "Bytes": 176060,
+    "SHA256": "0803377C39CDAC02884C34299272F8D7FE0240B2B936E450F6E29197A5CBE060"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\driver\\spi.c.obj",
+    "Bytes": 137144,
+    "SHA256": "F0E8F570CCBBCDE7EBD50A8BED665E360D0A1B42906A9B685AF713C7C5771078"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\driver\\pwm.c.obj",
+    "Bytes": 95824,
+    "SHA256": "B9B76474B3E0FC5650BD6A8DB420D57F9A1C38AE0295482D12CD7AF9A95AB6A7"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\driver\\ledc.c.obj",
+    "Bytes": 68876,
+    "SHA256": "7BEE04A2767BC37705CB9764EFFC43C3DC2035D19A08E3DE27F6591447203D4C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\driver\\ir_tx.c.obj",
+    "Bytes": 68896,
+    "SHA256": "41F3FBC453B3A6CF3CAE46495F278B20A8219F6DA05191DC7DF25B24BFE25C3D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\D_\\APPS\\Espressif\\frameworks\\ESP8266_RTOS_SDK\\components\\esp8266\\driver\\ir_rx.c.obj",
+    "Bytes": 49196,
+    "SHA256": "8D3DB1A8CAE169FBC5D1F67109B46C55436F0CF4ED83AF07402FC7FFBDFFBFA6"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_shorthash\\siphash24\\shorthash_siphashx24.c.obj",
+    "Bytes": 3548,
+    "SHA256": "B6C45E040C442A4AF2184C6D0BEBF0174D892C17FB344595E7F8F79BBA8CA0AA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_shorthash\\siphash24\\shorthash_siphash24.c.obj",
+    "Bytes": 3540,
+    "SHA256": "1125F0B2EA996446E5E0F58B84045CBC425243B285409B554C8C793601F8DFAA"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\esptool_py\\cmake_install.cmake",
+    "Bytes": 1074,
+    "SHA256": "8DA55BA82906CEB987E5F18D391306303EAD394135D70B65E2B5E843017740D6"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_core\\hchacha20\\core_hchacha20.c.obj",
+    "Bytes": 39616,
+    "SHA256": "FA8B7CAC38E3B0DA1136CE13452A4FF3B96473C5FFA65AE702ED88149A26D019"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_onetimeauth\\poly1305\\donna\\poly1305_donna.c.obj",
+    "Bytes": 53420,
+    "SHA256": "19AF69F5D018D3F6B3849C25232581AC8F263B3A251198B6A13A0B68269AC608"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\secure_boot_signatures.c.obj",
+    "Bytes": 1120,
+    "SHA256": "405BAB00B433B01A8BA942A11B899D3B58E91C280D7792767FA447290F6DD445"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\secure_boot.c.obj",
+    "Bytes": 1100,
+    "SHA256": "35CECBED4935B919CE73EE68070A824E388C111913905103C4000B70D8C824BE"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\flash_qio_mode.c.obj",
+    "Bytes": 1104,
+    "SHA256": "CB246C59D5AB334401841706D3EB663DCE24578F5DE87CE93613FBEC9F5E8D98"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\flash_partitions.c.obj",
+    "Bytes": 15528,
+    "SHA256": "22F66119B2B860B5E06B989DC08EB607CBBE56FEE8E0722F05AF8B56390F7511"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\flash_encrypt.c.obj",
+    "Bytes": 1104,
+    "SHA256": "9ACCC37764282EB21AD963A9E983A0A377D91419A41764F3574FC9CF46727827"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\esp_image_format.c.obj",
+    "Bytes": 37508,
+    "SHA256": "ED9A799927C5160E2514AC99C23FA246ADDDA03D4469C716F18BAAD78FAA725A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\efuse.c.obj",
+    "Bytes": 1088,
+    "SHA256": "77BF1CDAE9C1D62BD36AE70982EBB782E54825DF4B3CD587D4EEF88B0C512249"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_utility.c.obj",
+    "Bytes": 45740,
+    "SHA256": "2CE3A5CBDA8FABD4D54C3EC6CDB2E13CF1666A4E6C16F5FBCC7A332FE3F8EE15"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_sha.c.obj",
+    "Bytes": 12988,
+    "SHA256": "8FD7496EAD8C540042D4570E261C17AEF9DD9999E6EDA304A6A9626A7F66F031"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_init.c.obj",
+    "Bytes": 23152,
+    "SHA256": "335BB53528CF6E6C7238FDC81D7F9527C2C8EE1933A78CBEF89D455671C60C3F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_random.c.obj",
+    "Bytes": 1112,
+    "SHA256": "F8DEFB33A027BA021B7AB476A6A70340C1FC98BCC648AB89BDB16ED66756C60B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_flash.c.obj",
+    "Bytes": 25344,
+    "SHA256": "48B66998578CC4B076C20F52C5563AA2D151F3FD12A897554BD4475F54F2306F"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_common.c.obj",
+    "Bytes": 25252,
+    "SHA256": "EB6D073E62AF6E5E52D526B5C1849794C1853253A6A53F3580DF5C41865F52C5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\bootloader_support\\CMakeFiles\\__idf_bootloader_support.dir\\src\\bootloader_clock.c.obj",
+    "Bytes": 1112,
+    "SHA256": "9149A56015145B16FEB4755842BE325E2E11F9B4C15B083F99AB9165F538ED80"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_shorthash\\siphash24\\ref\\shorthash_siphashx24_ref.c.obj",
+    "Bytes": 61504,
+    "SHA256": "F3A44A756786C98EB4D2AD9EEAA4BB13167CE1B9F785E426E4F6428E80A76933"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_shorthash\\siphash24\\ref\\shorthash_siphash24_ref.c.obj",
+    "Bytes": 45764,
+    "SHA256": "560D8D5A21F2B73EFBCFEDDC4507F8CCD146022C5BEC1FA00F68A7267956346C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_secretbox\\crypto_secretbox.c.obj",
+    "Bytes": 11152,
+    "SHA256": "6AC9654EFA8D71888E28B2DAF1515A098414576CCA4B78E59F4E051A7A297B08"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_secretbox\\crypto_secretbox_easy.c.obj",
+    "Bytes": 26624,
+    "SHA256": "C6147565B1264B8BD28A83D23ACBC1AE37A4E81B12A2A40FD2FA3507F147B95A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\jsmn\\libjsmn.a",
+    "Bytes": 28486,
+    "SHA256": "21002908B54120318385B2488CF83E258DE023EDDD567477002F4459D2F5AB9B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\jsmn\\cmake_install.cmake",
+    "Bytes": 1071,
+    "SHA256": "C2172CC4F86D231E330DC574932249DA7D8E38190A83C092CBAC36B8BCF69B38"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_aead\\chacha20poly1305\\sodium\\aead_chacha20poly1305.c.obj",
+    "Bytes": 51536,
+    "SHA256": "D551D72281A8C80353806D9535A76083A0584B6D385BCA2FC3BEC809024F31E9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\crypto_pwhash.c.obj",
+    "Bytes": 26148,
+    "SHA256": "99C431EE4DAE01CE1598E5BD3F43D73BC32E363EA4DA5185FB953A3DE2398B71"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\json\\libjson.a",
+    "Bytes": 428504,
+    "SHA256": "C9BBF6E466CD78898A574A4E665ECAAC71B51715B36C7601C2DBFAF71CBB2F62"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\json\\cmake_install.cmake",
+    "Bytes": 1071,
+    "SHA256": "081A51ED422EAB124E0A30BF55D8B06AD0CFC5180B7C2176F1B65FC474C43A06"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\http_parser\\libhttp_parser.a",
+    "Bytes": 205588,
+    "SHA256": "E6C17FA1A21628D7F708D3235D82292F9F7BD427A737102ADC59E680854DFAA6"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\http_parser\\cmake_install.cmake",
+    "Bytes": 1078,
+    "SHA256": "0D13001BEAF19AA3971D5581206EF12AC4BEECF6380E1D58D4CC4F2A309AEF99"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_box\\crypto_box_easy.c.obj",
+    "Bytes": 28064,
+    "SHA256": "AE23E5F5644897D79B39C6C2868780B08164D70F23B36B0628AC40A73A617978"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_box\\crypto_box.c.obj",
+    "Bytes": 19108,
+    "SHA256": "55EA44FC5B029A5BF38295300F90DA7D89A2DFB32D0D8676BF1C429A3916CA73"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_box\\crypto_box_seal.c.obj",
+    "Bytes": 17948,
+    "SHA256": "C61FCA4021F348AD471E7FB765EFEE926219AA1ADA80CB7492E1C533FA36FDE8"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_secretbox\\xsalsa20poly1305\\secretbox_xsalsa20poly1305.c.obj",
+    "Bytes": 19340,
+    "SHA256": "74251651F5EE056B6F557788BA2EA9E05A8E2A6C6E43DD926D6931354F75F498"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\scryptsalsa208sha256\\scrypt_platform.c.obj",
+    "Bytes": 15264,
+    "SHA256": "509DBE35915D8A9AF9282C94B0BD4507361D22072344B740BCDB956D136E1CFD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\scryptsalsa208sha256\\pwhash_scryptsalsa208sha256.c.obj",
+    "Bytes": 36192,
+    "SHA256": "DE28F35C80321A69FD13EA9D812242D52D8DDDEF901AFA40CC28686798B5C225"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\scryptsalsa208sha256\\pbkdf2-sha256.c.obj",
+    "Bytes": 16164,
+    "SHA256": "491C13346A8933E6728667211543BC85EE638C7FC46CD307513EB51C85732422"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_box\\curve25519xsalsa20poly1305\\box_curve25519xsalsa20poly1305.c.obj",
+    "Bytes": 28696,
+    "SHA256": "02351E1C09DD37A9500CC763DE9670EFD8F5DDA30AF567151D9110A3A97A180C"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\scryptsalsa208sha256\\crypto_scrypt-common.c.obj",
+    "Bytes": 36844,
+    "SHA256": "554E4E93A6C6EED5D96440C3F1359F875E359F8E30F637D605898840CA8F7F3B"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\argon2\\argon2-fill-block-ref.c.obj",
+    "Bytes": 221304,
+    "SHA256": "AD4C313C6FF9C6DB02ED0C0AF3EAAF0CA1DF91F1B0B17997039C49B48D48EA0D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\argon2\\argon2-encoding.c.obj",
+    "Bytes": 53588,
+    "SHA256": "45DE1A45EEA4229DB3002C9E00676E4FDD168B6F555C61744384F221C164E3AD"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\argon2\\argon2-core.c.obj",
+    "Bytes": 60168,
+    "SHA256": "4380E7951508ECD80168756262C1A1EC9839CB88E19CD02BE858E13DDFE44611"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\argon2\\argon2.c.obj",
+    "Bytes": 34528,
+    "SHA256": "B00119ABCF3487C4B27ECC5C0219FB311D57429C1A1A3AFD2412D5B71D9C4BA9"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\argon2\\argon2-fill-block-ssse3.c.obj",
+    "Bytes": 7396,
+    "SHA256": "06E23B0E3C8D4C8C7F35FB8E918C9B92D2E6D3A40F27F97AB9643809F82F7D0D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\argon2\\blake2b-long.c.obj",
+    "Bytes": 17484,
+    "SHA256": "93776F325E828708405EAED7954C3CF49CBE7BA3606B4CF2034143AFD965813A"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\argon2\\pwhash_argon2i.c.obj",
+    "Bytes": 32372,
+    "SHA256": "04EC800911ADB6A15B26DD6CB9DBCCCC23110127068B0263EA6959A7A927D449"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_core\\curve25519\\ref10\\curve25519_ref10.c.obj",
+    "Bytes": 553888,
+    "SHA256": "614973F392EFE2ADCC3C8E78C083988436517142E4E70DE8BC3CB232397933B5"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\source\\ets_printf.c.obj",
+    "Bytes": 14136,
+    "SHA256": "FACD7C282C517962B61F4259A589E6A20965134FA8EB21AAEC0A02391AE9DAD1"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\source\\esp_fast_boot.c.obj",
+    "Bytes": 15500,
+    "SHA256": "F78079010DEA6DC89B866347D85A5423E8B67BAFA098E4C658B70033765E3887"
+  },
+  {
+    "Path": "Sof\\build\\auto\\bootloader\\esp-idf\\esp8266\\CMakeFiles\\__idf_esp8266.dir\\source\\crc.c.obj",
+    "Bytes": 10672,
+    "SHA256": "30CC41C7E8E6F4496B75BE68A1CF4ECC08BC5496842B64A33ED72ABFB7C6AEB0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\libsodium\\CMakeFiles\\__idf_libsodium.dir\\libsodium\\src\\libsodium\\crypto_pwhash\\scryptsalsa208sha256\\nosse\\pwhash_scryptsalsa208sha256_nosse.c.obj",
+    "Bytes": 42240,
+    "SHA256": "97DD60F26239A141082A5361259D1BEB4196989245CC8FB7BCC5011D88414E4D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\jsmn\\CMakeFiles\\__idf_jsmn.dir\\src\\jsmn.c.obj",
+    "Bytes": 28324,
+    "SHA256": "492481340EB02D35F78679A7FFD2A92726E59D0B516D0904BBDEA4EAC4DC1D9D"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\http_parser\\CMakeFiles\\__idf_http_parser.dir\\src\\http_parser.c.obj",
+    "Bytes": 205060,
+    "SHA256": "D0857F8004F89C1B99515FB03FD455EAAAE6456CD8A36A77DCE6F5B41D9BCCD3"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\json\\CMakeFiles\\__idf_json.dir\\cJSON\\test.c.obj",
+    "Bytes": 32800,
+    "SHA256": "672C72B01BCD1423709FCB488942D75D2F2FEAAF88598FD7F3734FABAF6BC669"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\json\\CMakeFiles\\__idf_json.dir\\cJSON\\cJSON_Utils.c.obj",
+    "Bytes": 131984,
+    "SHA256": "A147E122AAE433AE4DA520B583E440C258FE6BDED2CC1CECCD4A6245C775D3C0"
+  },
+  {
+    "Path": "Sof\\build\\auto\\esp-idf\\json\\CMakeFiles\\__idf_json.dir\\cJSON\\cJSON.c.obj",
+    "Bytes": 261036,
+    "SHA256": "693FD846827633D4A45FF92E531D59ABDD24443F142BB70D485F0B4C6D014094"
+  }
+]

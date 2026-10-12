@@ -1,0 +1,28 @@
+{
+  "baseline_files": 912,
+  "role_ledger_counts": {
+    "bug": 912,
+    "performance": 912,
+    "completeness": 912,
+    "dead_code": 912
+  },
+  "missing": [],
+  "input_changes": [],
+  "generated_changes": [
+    "Sof\\build\\auto\\.ninja_deps",
+    "Sof\\build\\auto\\.bin_timestamp",
+    "Sof\\build\\auto\\.ninja_log",
+    "Sof\\build\\auto\\ac_thermostat.bin",
+    "Sof\\build\\auto\\ac_thermostat.elf",
+    "Sof\\build\\auto\\ac_thermostat.map",
+    "Sof\\build\\auto\\noise_power\\libpp.a",
+    "Sof\\build\\auto\\noise_power\\libcore.a",
+    "Sof\\build\\auto\\full_flash.hex",
+    "Sof\\build\\auto\\full_flash.bin",
+    "Sof\\build\\auto\\esp-idf\\lwip\\liblwip.a",
+    "Sof\\build\\auto\\build.ninja",
+    "Sof\\build\\auto\\esp-idf\\esp8266\\libesp8266.a",
+    "Sof\\build\\auto\\esp-idf\\esp8266\\ld\\esp8266.project.ld"
+  ],
+  "boundary": "Statuses retain each reviewer's actual scope; registration is not semantic review."
+}

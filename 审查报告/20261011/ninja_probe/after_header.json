@@ -1,0 +1,13 @@
+{
+  "command": [
+    "D:\\APPS\\Espressif\\tools\\ninja\\1.9.0\\ninja.exe",
+    "-f",
+    "tests/build.ninja",
+    "-j",
+    "12"
+  ],
+  "cwd": "D:\\空调温度\\审查报告\\20261011\\ninja_probe",
+  "exit": 0,
+  "stdout": "ninja: no work to do.\n",
+  "stderr": ""
+}

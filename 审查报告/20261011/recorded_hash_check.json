@@ -1,0 +1,32 @@
+[
+  {
+    "Path": "Sof\\main\\app.h",
+    "MatchesRecordedHash": true,
+    "Current": "5051C45D46C13D1BC1D05FC24FFB98139C2764EFEBC3CB35812F6817A3943802",
+    "Recorded": "5051c45d46c13d1bc1d05fc24ffb98139c2764efebc3cb35812f6817a3943802"
+  },
+  {
+    "Path": "Sof\\main\\ir.c",
+    "MatchesRecordedHash": true,
+    "Current": "6850BA5CCAD982A0FAD951CBE054DB4B6819365ED4119928F41807C1AC41C05A",
+    "Recorded": "6850ba5ccad982a0fad951cbe054db4b6819365ed4119928f41807c1ac41c05a"
+  },
+  {
+    "Path": "Sof\\main\\ir.h",
+    "MatchesRecordedHash": true,
+    "Current": "D61355531DCB2C02CB7E3C1678D91A1B5F2EB7FBA8B289044EAE5C0BC7270CCD",
+    "Recorded": "d61355531dcb2c02cb7e3c1678d91a1b5f2eb7fba8b289044eae5c0bc7270ccd"
+  },
+  {
+    "Path": "Sof\\main\\Kconfig.projbuild",
+    "MatchesRecordedHash": true,
+    "Current": "273CC5DAB39689184D349F4BA7271BA7E66E8D4EAEA9AEB7DB55C6EA2D767F3F",
+    "Recorded": "273cc5dab39689184d349f4ba7271ba7e66e8d4eaea9aeb7db55c6ea2d767f3f"
+  },
+  {
+    "Path": "Sof\\main\\main.c",
+    "MatchesRecordedHash": false,
+    "Current": "BD68346A21BB43AECF8444AD58D0FF1B20A40505E38FE5BA2F62630C7599AAB4",
+    "Recorded": "c57b74324be14c6a9c4591f10599669b22cbaa5e72dd7a618c54e80880dac074"
+  }
+]

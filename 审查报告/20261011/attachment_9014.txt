@@ -1,0 +1,125 @@
+PAGE 1
+UNISONIC TECHNOLOGIES CO., LTD 
+9014                             NPN SILICON TRANSISTOR       
+www.unisonic.com.tw                          1 of 3 
+Copyright © 2014 Unisonic Technologies Co., Ltd QW-R201-031.C 
+PRE-AMPLIFIER, LOW LEVEL 
+& LOW NOISE 
+  FEATURES 
+* High total power dissipation. (450mW) 
+* Excellent hFE linearity. 
+* Complementary to UTC 9015 
+TO-92
+1
+ ORDERING INFORMATION 
+Ordering Number Package Pin Assignment Packing Lead Free Halogen Free 1 2 3 
+9014L-x-T92-B 9014G-x-T92-B TO-92 E B C Tape Box 
+9014L-x-T92-K 9014G-x-T92-K TO-92 E B C Bulk 
+Note:  Pin assignment: E: Emitter    B :  B a s e      C :  C o l l e c t o r  
+ 
+ MARKING INFORMATION 
+PACKAGE MARKING 
+TO-92 
+ 
+PAGE 2
+9014                             NPN SILICON TRANSISTOR                    
+UNISONIC TECHNOLOGIES CO., LTD               2 of 3 
+           www.unisonic.com.tw                                                                             Q W - R 2 0 1 - 0 3 1 . C  
+ ABSOLUTE MAXIMUM RATINGS (TA=25°C, unless otherwise specified) 
+PARAMETER SYMBOL RATINGS UNIT 
+Collector-Base Voltage V CBO 50 V 
+Collector-Emitter Voltage V CEO 45 V 
+Emitter-Base Voltage V EBO 5 V 
+Collector Current I C 100 mA 
+Collector Dissipation P C 450 mW 
+Junction Temperature T J +150 °C 
+Storage Temperature T STG -55 ~ +150 °C 
+Note: Absolute maximum ratings are those values beyond which the device could be permanently damaged. 
+Absolute maximum ratings are stress ratings only and functional device operation is not implied. 
+ ELECTRICAL CHARACTERISTICS (TA=25°C, unless otherwise specified) 
+PARAMETER SYMBOL TEST CONDITIONS MIN TYP MAX UNIT
+Collector-Base Breakdown Voltage BV CBO I C=100A, IE=0 50   V 
+Collector-Emitter Breakdown Voltage  BV CEO I C=1mA, IB=0 45   V 
+Emitter-Base Breakdown Voltage BV EBO I E=100A, IC=0 5   V 
+Collector Cut-Off Current I CBO V CB=50V, IE=0   50 nA 
+Emitter Cut-Off Current I EBO V EB=5V, IC=0   100 nA 
+DC Current Gain h FE V CE=5V, IC=1mA 60 280 1000  
+Collector-Emitter saturation voltage V CE(SAT) IC=100mA, IB=5mA  0.14 0.3 V 
+Base-Emitter saturation voltage V BE(SAT) IC=100mA, IB=5mA  0.84 1.0 V 
+Base-Emitter on voltage V BE(ON) V CE=5V, IC=2mA 0.58 0.63 0.7 V 
+Output Capacitance C ob V CB=10V, IE=0, f=1MHz  2.2 3.5 pF 
+Current Gain-Bandwidth Porduct f T V CE=5V, IC=10mA 150 270  MHz
+Noise Figure NF VCE=5V, IC=0.2mA 
+f=1KHz, RS=2K  0.9 10 dB 
+ CLASSIFICATION OF hFE 
+RANK A B C D 
+RANGE 60-150 100-300 200-600 400-1000 
+ 
+PAGE 3
+9014                             NPN SILICON TRANSISTOR                    
+UNISONIC TECHNOLOGIES CO., LTD               3 of 3 
+           www.unisonic.com.tw                                                                             Q W - R 2 0 1 - 0 3 1 . C  
+ TYPICAL CHARACTERISTICS 
+ 
+IB=160µA
+IB=140µA
+IB=120µA
+IB=100µA
+IB=80µA
+0 1 02 0 3 0 4 05 0
+0
+20
+40
+60
+80
+100
+Static Characteristic
+Collector Current , IC(mA)
+Collector-Emitter Voltage, VCE(V)
+15 3 100 1000
+10
+30
+1000
+DC Current Gain
+DC Current Gain, hFE
+Collector Current, IC(mA)
+100
+500
+10
+30
+50
+70
+90
+IB=60µA
+50
+10 30 50 300
+IB=40µA
+IB=20µA
+300
+VCE=5V
+ 
+ 
+ 
+Saturation Voltage, 
+VBE(SAT), VCE(SAT), (mV)
+Current Gain-Bandwidth Product, fT(MHz)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+UTC assumes no responsibility for equipment failures that result from using products at values that
+exceed, even momentarily, rated values (such as maximum ratings, operating condition ranges, or
+other parameters) listed in products specifications of any and all UTC products described or contained
+herein. UTC products are not designed for use in life support appliances, devices or systems where
+malfunction of these products can be reasonably expected to result in personal injury. Reproduction in
+whole or in part is prohibited without the prior written consent of the copyright owner. The information
+presented in this document does not form part of any quotation or contract, is believed to be accurate
+and reliable and may be changed without notice.
+ 

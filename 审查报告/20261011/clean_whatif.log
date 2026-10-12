@@ -1,0 +1,15 @@
+跳过：build\s1_checkpoint（不存在）
+跳过：build\s1_build.log（不存在）
+跳过：.ninja_deps（不存在）
+跳过：.ninja_log（不存在）
+候选：build_ascii，140 个文件，4985972 字节
+候选：__pycache__，2 个文件，33349 字节
+候选：tests\__pycache__，7 个文件，346720 字节
+候选合计：3 个目标，149 个文件，5366041 字节
+What if: Performing the operation "删除过程文件" on target "D:\空调温度\Sof\build_ascii".
+跳过：build_ascii（WhatIf 或未确认）
+What if: Performing the operation "删除过程文件" on target "D:\空调温度\Sof\__pycache__".
+跳过：__pycache__（WhatIf 或未确认）
+What if: Performing the operation "删除过程文件" on target "D:\空调温度\Sof\tests\__pycache__".
+跳过：tests\__pycache__（WhatIf 或未确认）
+结果：删除 0 个文件，跳过 7 个目标，失败 0 次，已确认释放 0 字节
