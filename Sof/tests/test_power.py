@@ -59,7 +59,7 @@ enum { ESP_OK, ESP_FAIL, ESP_ERR_INVALID_ARG, ESP_ERR_INVALID_STATE,
        ESP_ERR_NO_MEM, ESP_ERR_NOT_FOUND, ESP_ERR_TIMEOUT, ESP_ERR_INVALID_SIZE,
        ESP_ERR_INVALID_RESPONSE, ESP_ERR_INVALID_CRC, ESP_ERR_NVS_NOT_FOUND };
 enum { GPIO_NUM_0=0, GPIO_NUM_1=1, GPIO_NUM_2=2, GPIO_NUM_4=4, GPIO_NUM_5=5, GPIO_NUM_12=12,
-       GPIO_NUM_13=13, GPIO_NUM_14=14, GPIO_NUM_15=15 };
+       GPIO_NUM_13=13, GPIO_NUM_14=14, GPIO_NUM_15=15, GPIO_NUM_16=16 };
 enum { ESP_LOG_NONE };
 typedef int (*putchar_like_t)(int);
 void esp_log_level_set(const char *, int);
@@ -218,6 +218,8 @@ void test_log(const char *tag, const char *fmt, ...) {
     if (strstr(fmt, "learn slot %d failed") || strstr(fmt, "learn slot %d saved"))
         assert(GPIO.pin[5].int_type == GPIO_INTR_DISABLE);
     if (strstr(fmt, "IR RX callback removal failed")) rx_cleanup_logs++;
+    if (strstr(fmt, "GPIO16 learning disable failed")) enable_low_logs++;
+    if (strstr(fmt, "GPIO16 low recovery failed")) enable_recovery_logs++;
     if (drop_send_logs && busy) return;
 #endif
 #if defined(TEST_IDLE_PINS) || defined(TEST_IR_NVS)
@@ -298,6 +300,12 @@ esp_err_t gpio_config(const gpio_config_t *cfg) {
     }
 #endif
 #ifdef TEST_IR_NVS
+    if (cfg->pin_bit_mask & (1U << 16)) {
+        assert(cfg->mode == GPIO_MODE_OUTPUT && !enable_high);
+        assert(cfg->pull_up_en == GPIO_PULLUP_DISABLE);
+        assert(cfg->pull_down_en == GPIO_PULLDOWN_DISABLE && cfg->intr_type == GPIO_INTR_DISABLE);
+        enable_configured = true;
+    }
     if (cfg->pin_bit_mask & (1U << 5)) {
         assert(cfg->mode == GPIO_MODE_INPUT && cfg->pull_up_en == GPIO_PULLUP_ENABLE);
         assert(cfg->pull_down_en == GPIO_PULLDOWN_DISABLE && cfg->intr_type == GPIO_INTR_DISABLE);
@@ -314,6 +322,7 @@ esp_err_t gpio_set_intr_type(int pin, int type) {
 #endif
 #ifdef TEST_IR_NVS
     assert(pin == 5 && type == GPIO_INTR_ANYEDGE && rx_handler == capture_isr);
+    assert(enable_high && enable_delayed);
     assert(GPIO.pin[5].int_type == GPIO_INTR_DISABLE && GPIO.status_w1tc == (1U << 5));
     rx_enable_calls++;
     if (rx_enable_error) return rx_enable_error;
@@ -326,6 +335,7 @@ esp_err_t gpio_isr_handler_add(int pin, TaskFunction_t cb, void *arg) {
 #endif
 #ifdef TEST_IR_NVS
     assert(pin == 5 && rx_pullup && GPIO.pin[5].int_type == GPIO_INTR_DISABLE);
+    assert(enable_high && enable_delayed);
     assert(cb == capture_isr && arg == NULL);
     rx_add_calls++;
     if (rx_add_error) return rx_add_error;
@@ -1940,6 +1950,10 @@ static uint8_t audio_reg;
 static unsigned clock_reads, clock_writes, fail_clock_write, bad_clock_read;
 static unsigned invalid_divider;
 static unsigned sleep_locks, sleep_lock_calls, sleep_unlock_calls;
+static bool enable_configured, enable_high, enable_delayed;
+static bool enable_high_failed, expect_low_failure;
+static unsigned enable_high_calls, enable_delay_calls, enable_low_fails;
+static unsigned enable_low_logs, enable_recovery_logs;
 static bool ap_on = true;
 bool portal_is_on(void) { return ap_on; }
 static unsigned start_calls;
@@ -1983,7 +1997,10 @@ static void test_ir_exit(void) {
     critical_depth--;
 }
 void esp_sleep_lock(void) { assert(sleep_locks == 0); sleep_locks++; sleep_lock_calls++; }
-void esp_sleep_unlock(void) { assert(sleep_locks == 1); sleep_locks--; sleep_unlock_calls++; }
+void esp_sleep_unlock(void) {
+    assert(sleep_locks == 1 && !enable_high);
+    sleep_locks--; sleep_unlock_calls++;
+}
 int rom_i2c_readReg_Mask(int block, int host, int reg, int msb, int lsb) {
     assert(sleep_locks == 1);
     assert(block == 0x67 && host == 4 && reg == 4 && msb == 7 && lsb == 7);
@@ -2018,6 +2035,13 @@ static bool capture_timeout;
 static bool run_learn, task_failed;
 static bool learning_led;
 static unsigned learning_updates;
+void ets_delay_us(uint32_t us) {
+    assert(us == 20000 && critical_depth == 0 && busy && learning_led);
+    assert(sleep_locks == 1);
+    assert(enable_high && !enable_delayed && GPIO.pin[5].int_type == GPIO_INTR_DISABLE);
+    enable_delayed = true;
+    enable_delay_calls++;
+}
 TickType_t xTaskGetTickCount(void) { return learn_tick; }
 int64_t esp_timer_get_time(void) {
     return simulate_capture ? (capture_delays ? (capture_timeout ? 800000 : 200000) : 1000) : 0;
@@ -2025,6 +2049,8 @@ int64_t esp_timer_get_time(void) {
 void vTaskDelay(TickType_t ticks) {
     assert(GPIO.pin[5].int_type == GPIO_INTR_ANYEDGE && rx_handler == capture_isr && busy);
     assert(learning_led);
+    assert(enable_high && enable_delayed);
+    assert(sleep_locks == 1);
     assert(ticks > 0); /* Yielding without blocking starves lower-priority tasks. */
     TickType_t expected = pdMS_TO_TICKS(2);
     assert(ticks == (expected ? expected : 1));
@@ -2044,7 +2070,12 @@ void vTaskDelay(TickType_t ticks) {
         if (capture_shape == 8) capture_count = 3;
     }
 }
-void vTaskDelete(TaskHandle_t task) { (void)task; assert(!learning_led); }
+void vTaskDelete(TaskHandle_t task) {
+    (void)task;
+    assert(!learning_led && (!enable_high || expect_low_failure));
+    assert(sleep_locks == (expect_low_failure ? 1U : 0U));
+    assert(busy == expect_low_failure);
+}
 BaseType_t xTaskCreate(TaskFunction_t fn, const char *name, unsigned stack,
                       void *arg, unsigned pri, TaskHandle_t *handle) {
     (void)name; (void)stack; (void)pri; (void)handle;
@@ -2081,8 +2112,22 @@ BaseType_t xSemaphoreGiveFromISR(SemaphoreHandle_t sem, BaseType_t *wake) {
     (void)sem; semaphore_ready = true; *wake = pdTRUE; return pdTRUE;
 }
 esp_err_t gpio_set_level(int pin, uint32_t level) {
-    (void)pin; (void)level;
-    return ir_init_testing ? ir_init_result() : ESP_OK;
+    if (ir_init_testing && ir_init_result() != ESP_OK) return ESP_FAIL;
+    if (pin == 16) {
+        assert(critical_depth == 0 && level <= 1);
+        if (level) {
+            assert(enable_configured && busy && learning_led && !enable_high);
+            assert(sleep_locks == 1);
+            enable_high_calls++;
+            enable_delayed = false;
+            if (enable_high_failed) return ESP_FAIL;
+        } else if (enable_low_fails) {
+            enable_low_fails--;
+            return ESP_FAIL;
+        }
+        enable_high = level != 0;
+    }
+    return ESP_OK;
 }
 int gpio_get_level(int pin) {
     (void)pin;
@@ -2118,6 +2163,7 @@ esp_err_t nvs_get_blob(nvs_handle handle, const char *key, void *data, size_t *s
 esp_err_t nvs_set_blob(nvs_handle handle, const char *key, const void *data, size_t size) {
     assert(handle == 1 && size <= sizeof(saved_codes[0]));
     assert(GPIO.pin[5].int_type == GPIO_INTR_DISABLE);
+    assert(enable_high && enable_delayed);
     if (set_error) return set_error;
     int slot = strcmp(key, "ir0") == 0 ? 0 : 1;
     memset(&saved_codes[slot], 0, sizeof(saved_codes[slot]));
@@ -2217,6 +2263,7 @@ static void reset_send(void) {
     for (int i = 0; i < 8; i++) codes[0].duration[i] = 100;
 }
 static void check_software(esp_err_t expected) {
+    assert(!enable_high);
     ap_on = false;
     assert(ir_send(0) == expected);
     assert(strcmp(send_report.backend, "software") == 0);
@@ -2254,6 +2301,7 @@ static void check_waveform(unsigned period) {
     assert(send_report.segments == codes[0].count && send_report.late_cycles <= TEST_CPU_MHZ * 4U / 10U);
 }
 static void check_cleanup(esp_err_t expected) {
+    assert(!enable_high);
     assert(ir_send(0) == expected);
     assert(stop_calls == 1 && disarm_calls == 1 && !busy);
     assert(send_report.error == expected && send_report.slot == 0 && report_pending);
@@ -2280,13 +2328,14 @@ int main(void) {
     limits.count = 7; assert(!code_valid(&limits)); limits.count = 8;
     limits.duration[0] = 65001; assert(!code_valid(&limits));
     limits.duration[0] = 7; assert(!code_valid(&limits));
-    for (ir_init_fail_at = 1; ir_init_fail_at <= 10; ir_init_fail_at++) {
+    for (ir_init_fail_at = 1; ir_init_fail_at <= 12; ir_init_fail_at++) {
         ir_init_calls = 0;
-        esp_err_t expected = ir_init_fail_at == 5 ? ESP_ERR_NO_MEM : ESP_FAIL;
+        esp_err_t expected = ir_init_fail_at == 7 ? ESP_ERR_NO_MEM : ESP_FAIL;
         assert(ir_init() == expected && ir_init_calls == ir_init_fail_at);
     }
     ir_init_testing = false;
     assert(ir_init() == ESP_OK && !i2s_running && !timer_running && !ir_is_busy());
+    assert(enable_configured && !enable_high && enable_high_calls == 0);
     assert(!ir_has_code(-1) && !ir_has_code(2));
     assert(ir_send(-1) == ESP_ERR_INVALID_ARG && ir_send(2) == ESP_ERR_INVALID_ARG);
     assert(ir_start_learn(-1) == ESP_ERR_INVALID_ARG && ir_start_learn(2) == ESP_ERR_INVALID_ARG);
@@ -2294,6 +2343,7 @@ int main(void) {
     assert(ir_is_busy());
     assert(ir_start_learn(0) == ESP_ERR_INVALID_STATE);
     assert(busy_reject_logs == 1 && learning_updates == 0);
+    assert(enable_high_calls == 0 && enable_delay_calls == 0 && !enable_high);
     busy = false;
     /* Exercise actual GPIO ISR edges, ignored high edge and buffer overflow. */
     GPIO.in = 1U << IR_RX;
@@ -2493,7 +2543,14 @@ int main(void) {
     assert(!learning_led && learning_updates == updates_before + 2);
     assert(strcmp(last_learn_stage, "task-create") == 0);
     assert(rx_add_calls == 0 && rx_enable_calls == 0 && GPIO.pin[5].int_type == GPIO_INTR_DISABLE);
+    assert(enable_high_calls == 0 && enable_delay_calls == 0 && !enable_high);
     task_failed = false; run_learn = true;
+    enable_high_failed = true;
+    assert(ir_start_learn(0) == ESP_OK && ir_last_error() == ESP_FAIL && !busy);
+    assert(strcmp(last_learn_stage, "learn-enable-high") == 0);
+    assert(enable_high_calls == 1 && enable_delay_calls == 0 && !enable_high);
+    assert(rx_add_calls == 0 && rx_enable_calls == 0);
+    enable_high_failed = false;
     rx_add_error = ESP_FAIL;
     assert(ir_start_learn(0) == ESP_OK && ir_last_error() == ESP_FAIL && !busy);
     assert(strcmp(last_learn_stage, "rx-handler-add") == 0);
@@ -2527,6 +2584,29 @@ int main(void) {
     assert(rx_cleanup_logs == 2 && GPIO.pin[5].int_type == GPIO_INTR_DISABLE);
     rx_remove_error = ESP_OK;
     assert(ir_start_learn(1) == ESP_OK && ir_state() == IR_SAVED && ir_has_code(1));
+    assert(!enable_high && enable_high_calls == enable_delay_calls + 1);
+    unsigned add_before = rx_add_calls;
+    unsigned low_logs_before = enable_low_logs;
+    enable_low_fails = 1;
+    assert(ir_start_learn(1) == ESP_OK && ir_state() == IR_ERROR && !busy);
+    assert(ir_last_error() == ESP_FAIL && !enable_high);
+    assert(strcmp(last_learn_stage, "learn-enable-low") == 0);
+    assert(rx_add_calls == add_before + 1 && enable_low_logs == low_logs_before + 1);
+    enable_low_fails = 2; expect_low_failure = true;
+    assert(ir_start_learn(1) == ESP_OK && ir_state() == IR_ERROR && busy);
+    assert(ir_last_error() == ESP_FAIL && enable_high && enable_recovery_logs == 1);
+    assert(ir_is_busy() && sleep_locks == 1);
+    assert(ir_start_learn(0) == ESP_ERR_INVALID_STATE);
+    assert(ir_send(0) == ESP_ERR_INVALID_STATE);
+    assert(GPIO.pin[5].int_type == GPIO_INTR_DISABLE && rx_handler == NULL);
+    /* 模拟重启前解除故障，恢复测试环境；产品须重启才会清除阻塞状态。 */
+    assert(gpio_set_level(16, 0) == ESP_OK);
+    esp_sleep_unlock(); busy = false;
+    expect_low_failure = false;
+    simulate_capture = false; enable_low_fails = 1;
+    assert(ir_start_learn(0) == ESP_OK && ir_last_error() == ESP_ERR_TIMEOUT && !busy);
+    assert(!enable_high && strcmp(last_learn_stage, "wait-signal") == 0);
+    simulate_capture = true;
     assert(memcmp(&codes[0], &saved_codes[0], saved_sizes[0]) == 0);
     memset(codes, 0, sizeof(codes)); /* Lose RAM while preserving committed NVS. */
     assert(ir_init() == ESP_OK && ir_has_code(0) && ir_has_code(1));
@@ -2627,7 +2707,7 @@ int main(void) {
     saved_codes[0].version = 99;
     memset(codes, 0, sizeof(codes));
     assert(ir_init() == ESP_OK && !ir_has_code(0) && ir_has_code(1));
-    puts("power IR: RX IRQ lifecycle/failures, I2S/software edges, full frames, wrap/NMI, sleep lock/retry, cleanup and NVS passed");
+    puts("power IR: GPIO16 learning/sleep guard, RX IRQ lifecycle/failures, I2S/software edges, full frames, wrap/NMI, sleep lock/retry, cleanup and NVS passed");
     return 0;
 }
 '''

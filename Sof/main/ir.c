@@ -15,6 +15,7 @@
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "rom/uart.h"
+#include "rom/ets_sys.h"
 #include "nvs.h"
 #include "app.h"
 #include "ir.h"
@@ -28,6 +29,7 @@
 
 #define IR_RX GPIO_NUM_5
 #define IR_TX GPIO_NUM_14
+#define IR_LEARN_EN GPIO_NUM_16
 #define IR_MAX 960
 #define IR_VERSION 1
 #define IR_GAP_UNITS 10000
@@ -287,10 +289,18 @@ static void learn_task(void *arg)
     /* 在编译期选择至少一个 tick，保持 100/1000 Hz 等配置的等待行为。 */
     const TickType_t poll_ticks = pdMS_TO_TICKS(2) ? pdMS_TO_TICKS(2) : 1;
     esp_err_t err = ESP_OK;
-    const char *stage = "rx-handler-add";
+    bool low_ready = true;
+    const char *stage = "learn-enable-high";
     capture_count = 0;
     capture_started = capture_overflow = false;
     isr_call_count = 0;
+    /* GPIO16 高电平期间禁止自动休眠；确认退出拉低后才释放。 */
+    esp_sleep_lock();
+    err = gpio_set_level(IR_LEARN_EN, 1);
+    if (err != ESP_OK) goto finish;
+    /* 提前使能 20 ms；等待、采集及保存期间持续高电平，退出时拉低。 */
+    ets_delay_us(20000);
+    stage = "rx-handler-add";
     trace_rx("begin", stage);
     GPIO.status_w1tc = 1U << IR_RX;
     err = gpio_isr_handler_add(IR_RX, capture_isr, NULL);
@@ -404,25 +414,55 @@ remove_isr:
     if (err == ESP_OK) {
         codes[learn_slot] = candidate;
         app_reset_rule(learn_slot);
-        learn_state = IR_SAVED;
-        ESP_LOGI(TAG, "learn slot %d saved: %u pulses, %u kHz, code=%08x; NVS verified",
-                 learn_slot + 1, (unsigned)candidate.count, (unsigned)candidate.carrier_khz,
-                 (unsigned)code_hash(&candidate));
     }
 finish:
+    {
+        esp_err_t low_err = gpio_set_level(IR_LEARN_EN, 0);
+        if (low_err != ESP_OK) {
+            ESP_LOGE(TAG, "GPIO16 learning disable failed: %s", esp_err_to_name(low_err));
+            esp_err_t retry_err = gpio_set_level(IR_LEARN_EN, 0);
+            if (retry_err != ESP_OK) {
+                low_ready = false;
+                ESP_LOGE(TAG, "GPIO16 low recovery failed: %s; output level uncertain; sleep blocked, restart required",
+                         esp_err_to_name(retry_err));
+            }
+            if (err == ESP_OK) {
+                stage = "learn-enable-low";
+                err = low_err;
+            }
+        }
+    }
     if (err != ESP_OK) {
         learn_error = err;
         learn_state = IR_ERROR;
         trace_rx("failed", stage);
         ESP_LOGE(TAG, "learn slot %d failed: %s; stage=%s", learn_slot + 1, esp_err_to_name(err), stage);
+    } else {
+        learn_state = IR_SAVED;
+        ESP_LOGI(TAG, "learn slot %d saved: %u pulses, %u kHz, code=%08x; NVS verified",
+                 learn_slot + 1, (unsigned)candidate.count, (unsigned)candidate.carrier_khz,
+                 (unsigned)code_hash(&candidate));
     }
     app_set_learning(false);
-    busy = false;
+    if (low_ready) {
+        esp_sleep_unlock();
+        busy = false;
+    }
     vTaskDelete(NULL);
 }
 
 esp_err_t ir_init(void)
 {
+    /* 先预置输出锁存为低，再切换为推挽输出，避免初始化高脉冲。 */
+    esp_err_t err = gpio_set_level(IR_LEARN_EN, 0);
+    if (err != ESP_OK) return err;
+    gpio_config_t enable = {
+        .pin_bit_mask = 1ULL << IR_LEARN_EN, .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE, .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE
+    };
+    err = gpio_config(&enable);
+    if (err != ESP_OK) return err;
     gpio_config_t rx = {
         .pin_bit_mask = 1ULL << IR_RX, .mode = GPIO_MODE_INPUT,
         .pull_up_en = GPIO_PULLUP_ENABLE, .pull_down_en = GPIO_PULLDOWN_DISABLE,
@@ -433,7 +473,7 @@ esp_err_t ir_init(void)
         .pull_up_en = GPIO_PULLUP_DISABLE, .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE
     };
-    esp_err_t err = gpio_config(&rx);
+    err = gpio_config(&rx);
     if (err != ESP_OK) return err;
     err = gpio_config(&tx);
     if (err != ESP_OK) return err;

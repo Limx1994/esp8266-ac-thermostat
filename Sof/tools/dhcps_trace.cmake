@@ -19,6 +19,8 @@ endfunction()
 
 set(dhcps_fragment "${CMAKE_CURRENT_LIST_DIR}/dhcps_trace.inc")
 trace_dhcps_part(dhcps_code "#if ESP_DHCP\n" "#if ESP_DHCP\n#include \"${dhcps_fragment}\"\n" 1)
+trace_dhcps_part(dhcps_code "        switch ((s16_t) *optptr) {"
+    "        /* PAD has no length byte. */\n        if (*optptr == 0) {\n            optptr++;\n            continue;\n        }\n\n        switch ((s16_t) *optptr) {" 1)
 trace_dhcps_part(dhcps_code "    m->flags = htons(BOOTP_BROADCAST);"
     "    /* Preserve the client's BOOTP broadcast flag. */" 1)
 trace_dhcps_part(dhcps_code "    switch (parse_msg(pmsg_dhcps, tlen - 240)) {"

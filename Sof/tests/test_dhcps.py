@@ -75,6 +75,7 @@ static ip4_addr_t arp_ip, last_dest;
 static struct eth_addr arp_mac;
 static u16_t request_flags;
 static bool request_ci, request_sid = true;
+static unsigned request_pad;
 static unsigned char wire[2048];
 static size_t wire_len;
 static char logs[4096];
@@ -153,13 +154,18 @@ static void request(u8_t type, u8_t last_ip, bool split) {
     m.flags = htons(request_flags);
     if (request_ci) { const u8_t ci[] = {192,168,4,2}; memcpy(m.ciaddr,ci,4); }
     memcpy(m.options,cookie,4);
-    u8_t *opt = add_msg_type(m.options+4,type);
+    u8_t *opt = m.options+4;
+    if (request_pad & 1) *opt++=0;
+    opt = add_msg_type(opt,type);
+    if (request_pad & 2) *opt++=0;
+    if (request_pad & 8) *opt++=0;
     if (last_ip) {
         *opt++=50; *opt++=4; *opt++=192; *opt++=168; *opt++=4; *opt++=last_ip;
         if (request_sid) {
             *opt++=54; *opt++=4; *opt++=192; *opt++=168; *opt++=4; *opt++=1;
         }
     }
+    if (request_pad & 4) *opt++=0;
     add_end(opt);
     struct pbuf *p = pbuf_alloc(0,split ? 241 : 300,0); assert(p);
     memcpy(p->payload,&m,p->len);
@@ -197,7 +203,7 @@ static void check_reply(u8_t type, FILE *out) {
     /* The intended BOOTP flag changes; all other payload bytes stay identical. */
     u8_t normalized[sizeof(*m)]; memcpy(normalized,wire,sizeof(normalized));
     normalized[10]=normalized[11]=0;
-    assert(fwrite(normalized,1,sizeof(normalized),out) == sizeof(normalized));
+    if (out) assert(fwrite(normalized,1,sizeof(normalized),out) == sizeof(normalized));
 }
 int main(int argc, char **argv) {
     assert(argc == 2); FILE *out = fopen(argv[1],"wb"); assert(out);
@@ -326,6 +332,24 @@ int main(int argc, char **argv) {
     assert(dhcps_trace_send(&netif,&pcb_instance,relay,&broadcast,68,&m)==ERR_OK);
     assert(last_dest.addr==UINT32_MAX && arp_calls==before_arp);
     pbuf_free(relay); assert(!live_pbufs);
+    /* Legal SELECTING requests: PAD before/between options and before END.
+       Keep the unmodified SDK payload comparison limited to common cases. */
+    const unsigned pad_cases[] = {2,10,1,4,7};
+    request_sid = true;
+    dhcps_retry_reset(true);
+    for (unsigned i=0; i<sizeof(pad_cases)/sizeof(pad_cases[0]); i++) {
+        request_pad = pad_cases[i];
+        for (unsigned split=0; split<2; split++) {
+            request_flags = split ? BOOTP_BROADCAST : 0;
+            unsigned sent_before = sent, assigned_before = assigned;
+            request(DHCPREQUEST,2,split != 0);
+            assert(sent == sent_before+1);
+            check_reply(DHCPACK,NULL);
+            assert(assigned == assigned_before+1);
+        }
+    }
+    request_pad = 0; request_flags = 0;
+    puts("SDK DHCP PAD: legal SELECTING, consecutive PAD, END, split pbuf and BOOTP flags passed");
 #endif
     dhcps_stop(&netif); assert(!plist && !netif.dhcps_pcb);
     fclose(out); puts("SDK DHCP DISCOVER/OFFER, REQUEST/ACK/retry/NAK, send error and cleanup passed");

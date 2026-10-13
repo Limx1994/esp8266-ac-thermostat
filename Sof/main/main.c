@@ -21,6 +21,15 @@
 #include "sleep_trace.h"
 #include "rom/uart.h"
 
+/* 1: power test -- enter indefinite deep sleep as soon as app_main starts.
+ * 0: normal application behavior.
+ * Re-flash firmware with 0 to restore normal operation.
+ */
+#ifndef APP_FORCE_DEEP_SLEEP_ON_BOOT
+#define APP_FORCE_DEEP_SLEEP_ON_BOOT 0
+//305μA
+#endif
+
 static const char *TAG = "thermostat";
 static SemaphoreHandle_t status_lock;
 static app_status_t current;
@@ -564,6 +573,15 @@ static TickType_t update_temp(void)
 
 void app_main(void)
 {
+#if APP_FORCE_DEEP_SLEEP_ON_BOOT
+    /* Deep sleep indefinitely; external RST or power cycle is required.
+     * GPIO12 and GPIO13 cannot wake the ESP8266 from deep sleep.
+     * This test deliberately skips Wi-Fi, ADC, sensors and all app init.
+     */
+    esp_deep_sleep(0);
+    abort(); /* Should never return. */
+#endif
+
     ESP_LOGI(TAG, "starting");
     main_handle = xTaskGetCurrentTaskHandle();
     rule_trend_reset(&trend);

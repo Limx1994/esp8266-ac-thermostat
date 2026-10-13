@@ -75,11 +75,11 @@ python flash.py --port COM3 --dry-run
 
 ## 当前状态
 
-本版：**1.0D · 2026-10-13**，标签 `v1.0D`；发布附件与核验结果见 [本地发布](Sof/README.md#本地发布)。
+本版：**1.0E · 2026-10-13**，标签 `v1.0E`；发布附件与核验结果见 [本地发布](Sof/README.md#本地发布)。
 
 2026-10-12 用户确认：**本项目所有功能均已通过实机验证**。该结论依据用户确认；本轮另执行软件检查与发布附件校验，不将软件测试当作实机测量记录。
 
-1.0D 纳入独立供电固定等待、转换结束状态及读数校验、1-Wire 时序诊断和有限重试；编译偏移与网页偏移合并后只舍入一次。网页温度校准范围为 ±20 ℃，温度校准请求必须携带当前样本的 `sampleId`，旧客户端缺少该字段会被拒绝；NVS 格式兼容。固定项目内 SDK 和新驱动，保留 80 MHz、热点温度 15 秒/电压 2 秒采集、关闭热点后 60 秒采温和 120～600 秒趋势自动发送。
+1.0E 新增 GPIO16 红外学习控制和 DHCP PAD 选项解析修正，保留默认关闭的启动深睡测试入口。GPIO16 新增时序尚待实机验证，2026-10-12 的确认不包含此后新增改动。延续独立供电固定等待、转换结束状态及读数校验、1-Wire 时序诊断和有限重试；编译偏移与网页偏移合并后只舍入一次。网页温度校准范围为 ±20 ℃，温度校准请求必须携带当前样本的 `sampleId`，旧客户端缺少该字段会被拒绝；NVS 格式兼容。固定项目内 SDK 和新驱动，保留 80 MHz、热点温度 15 秒/电压 2 秒采集、关闭热点后 60 秒采温和 120～600 秒趋势自动发送。
 
 软件检查与发布内容见 [本地发布](Sof/README.md#本地发布)。实机结论依据用户对当前功能的确认；本轮不重新烧录或测量。历史文档中的 `3.994 V / 10 µA` 缺少对应镜像及测量条件，不用作当前版本的定量功耗结果。
 
@@ -95,7 +95,7 @@ python flash.py --port COM3 --dry-run
 ## 下载与许可
 
 - [GitHub 仓库](https://github.com/Limx1994/esp8266-ac-thermostat)
-- [1.0D Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0D)：分段烧录包、完整镜像及 SHA256 校验清单。保留规则和红外编码时使用分段烧录；完整镜像会清除 NVS。旧版本见 [1.0C Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0C)。
+- [1.0E Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0E)：分段烧录包、完整镜像及 SHA256 校验清单。保留规则和红外编码时使用分段烧录；完整镜像会清除 NVS。旧版本见 [1.0D Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0D)。
 - 项目采用 [PolyForm Noncommercial 1.0.0](LICENSE)，附带第三方工具保留其原有许可。
 
 ---
