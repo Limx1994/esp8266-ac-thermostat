@@ -45,6 +45,7 @@ static int16_t temp_adjust10;
 typedef struct { uint16_t reference_mv, base_mv; } battery_adjust_t;
 static battery_adjust_t battery_adjust = {1, 1};
 static int16_t base_temp10;
+static int16_t base_raw16;
 static uint16_t base_battery_mv;
 static TickType_t temp_sample_tick, battery_sample_tick;
 static bool battery_sample_ap;
@@ -277,7 +278,7 @@ static esp_err_t load_calibration(void)
     size_t size = sizeof(offset);
     err = nvs_get_blob(handle, "temp_adj", &offset, &size);
     if (err == ESP_ERR_NVS_NOT_FOUND) { offset = 0; err = ESP_OK; }
-    else if (err == ESP_OK && (size != sizeof(offset) || offset < -50 || offset > 50))
+    else if (err == ESP_OK && (size != sizeof(offset) || offset < -200 || offset > 200))
         err = ESP_ERR_INVALID_STATE;
     if (err == ESP_OK) {
         size = sizeof(voltage);
@@ -298,7 +299,7 @@ static esp_err_t load_calibration(void)
     return ESP_OK;
 }
 
-esp_err_t app_calibrate(bool battery, int reference, bool *storage_failed)
+esp_err_t app_calibrate(bool battery, int reference, uint32_t sample_id, bool *storage_failed)
 {
     if (!storage_failed) return ESP_ERR_INVALID_ARG;
     *storage_failed = false;
@@ -308,13 +309,19 @@ esp_err_t app_calibrate(bool battery, int reference, bool *storage_failed)
     TickType_t age = xTaskGetTickCount() - (battery ? battery_sample_tick : temp_sample_tick);
     bool valid = battery ? current.battery_valid && battery_sample_ap && base_battery_mv :
                            current.temp_valid;
-    if (!portal_is_on() || !valid || age > pdMS_TO_TICKS(battery ? 5000 : 20000)) {
+    if (!portal_is_on() || !valid || age > pdMS_TO_TICKS(battery ? 5000 : 20000) ||
+        (!battery && (!sample_id || sample_id != current.temp_sample_id))) {
+        ESP_LOGW(TAG, "calibration rejected: type=%s sample=%u current=%u age_ticks=%u valid=%d",
+                 battery ? "battery" : "temperature", (unsigned)sample_id,
+                 (unsigned)current.temp_sample_id, (unsigned)age, valid);
         xSemaphoreGive(status_lock);
         return ESP_ERR_INVALID_STATE;
     }
     int offset = reference - base_temp10;
     battery_adjust_t voltage = {(uint16_t)reference, base_battery_mv};
-    if (battery ? !battery_adjust_valid(&voltage) : (offset < -50 || offset > 50)) {
+    if (battery ? !battery_adjust_valid(&voltage) : (offset < -200 || offset > 200)) {
+        ESP_LOGW(TAG, "calibration out of range: type=%s reference=%d offset10=%d",
+                 battery ? "battery" : "temperature", reference, offset);
         xSemaphoreGive(status_lock);
         return ESP_ERR_INVALID_ARG;
     }
@@ -335,7 +342,9 @@ esp_err_t app_calibrate(bool battery, int reference, bool *storage_failed)
             current.battery_mv = adjusted_battery(base_battery_mv);
         } else {
             temp_adjust10 = offset;
-            current.temp10 = base_temp10 + temp_adjust10;
+            current.temp10 = sensor_temperature(base_raw16, temp_adjust10);
+            ESP_LOGI(TAG, "temperature calibration applied: sample=%u raw16=%d reference10=%d offset10=%d final10=%d",
+                     (unsigned)sample_id, (int)base_raw16, reference, offset, (int)current.temp10);
             memset(states, 0, sizeof(states));
             rule_trend_reset(&trend);
         }
@@ -462,7 +471,7 @@ static TickType_t update_temp(void)
     ir_report_last_send();
     ESP_LOGI(TAG, "sampling: AP=%s", portal_is_on() ? "on" : "off");
     sleep_trace_report();
-    int16_t temp10;
+    int16_t temp10, raw16;
     bool external_power;
     TickType_t sample_tick = xTaskGetTickCount();
     esp_err_t err = sensor_start(&external_power);
@@ -481,7 +490,7 @@ static TickType_t update_temp(void)
         if (auto_sleep) adc_sleep_seen = true;
         set_auto_sleep(false);
         if (conversion_sleep) trace_buttons("conversion-done", conversion_wait, 0);
-        err = sensor_finish(&temp10);
+        err = sensor_finish(&temp10, &raw16);
     }
     bool fire[2] = { false, false };
     bool control_on = !portal_is_on();
@@ -490,9 +499,14 @@ static TickType_t update_temp(void)
     current.temp_valid = err == ESP_OK;
     if (err == ESP_OK) {
         base_temp10 = temp10;
+        base_raw16 = raw16;
         temp_sample_tick = xTaskGetTickCount();
-        temp10 += temp_adjust10;
+        if (++current.temp_sample_id == 0) ++current.temp_sample_id;
+        temp10 = sensor_temperature(raw16, temp_adjust10);
         current.temp10 = temp10;
+        ESP_LOGI(TAG, "temperature sample=%u raw16=%d base10=%d offset10=%d final10=%d AP=%d",
+                 (unsigned)current.temp_sample_id, (int)raw16, (int)base_temp10,
+                 (int)temp_adjust10, (int)temp10, !control_on);
         if (control_on) {
             uint32_t now_ms = xTaskGetTickCount() * portTICK_PERIOD_MS;
             if (!rule_trend_step(&trend, temp10, now_ms)) {

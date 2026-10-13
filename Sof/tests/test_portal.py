@@ -481,6 +481,7 @@ void app_get_status(app_status_t *st) {
     st->battery_valid = battery_valid;
     st->battery_error = battery_valid ? ESP_OK : ESP_FAIL;
     st->temp_valid = status_alt;
+    st->temp_sample_id = 1;
     for (unsigned i = 0; i < 2; i++) {
         st->rules[i].rising = status_alt;
         st->rules[i].enabled = status_alt;
@@ -489,7 +490,8 @@ void app_get_status(app_status_t *st) {
 esp_err_t app_save_rule(int slot, const rule_cfg_t *cfg) {
     action_slot = slot; action_rule = *cfg; action_calls++; return action_error;
 }
-esp_err_t app_calibrate(bool battery, int reference, bool *storage_failed) {
+esp_err_t app_calibrate(bool battery, int reference, uint32_t sample_id, bool *storage_failed) {
+    assert(battery || sample_id == 1);
     action_battery = battery; action_reference = reference; action_calls++;
     *storage_failed = cal_storage_failed;
     if (battery ? (reference < 2500 || reference > 4500) : (reference < -100 || reference > 500)) {
@@ -526,6 +528,10 @@ static esp_err_t request(const char *uri, int method) {
 
 static void check_posts(void) {
     const char *cal_bad[] = {"{", "{}", "{\"type\":1}", "{\"type\":\"other\"}",
+        "{\"type\":\"temperature\",\"reference10\":255}",
+        "{\"type\":\"temperature\",\"reference10\":255,\"sampleId\":0}",
+        "{\"type\":\"temperature\",\"reference10\":255,\"sampleId\":1.5}",
+        "{\"type\":\"temperature\",\"reference10\":255,\"sampleId\":4294967296}",
         "{\"type\":\"temperature\"}", "{\"type\":\"temperature\",\"reference10\":25.5}",
         "{\"type\":\"battery\",\"referenceMv\":\"3595\"}", "{\"type\":\"battery\",\"referenceMv\":null}"};
     for (unsigned i = 0; i < sizeof(cal_bad) / sizeof(cal_bad[0]); i++) {
@@ -533,7 +539,7 @@ static void check_posts(void) {
         assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 400);
         assert(action_calls == calls);
     }
-    post_body = "{\"type\":\"temperature\",\"reference10\":255}";
+    post_body = "{\"type\":\"temperature\",\"reference10\":255,\"sampleId\":1}";
     action_error = ESP_OK;
     assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 200);
     assert(!action_battery && action_reference == 255);

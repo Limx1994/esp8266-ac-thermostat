@@ -178,12 +178,13 @@ static esp_err_t status_get(httpd_req_t *req)
     app_get_status(&st);
     char body[640];
     int len = snprintf(body, sizeof(body),
-        "{\"temperature10\":%d,\"valid\":%s,\"sensorError\":%d,\"carrier\":%d,"
+        "{\"temperature10\":%d,\"valid\":%s,\"sensorError\":%d,\"sampleId\":%u,\"carrier\":%d,"
         "\"batteryMv\":%u,\"batteryValid\":%s,\"batteryError\":%d,"
         "\"learnState\":%d,\"learnError\":%d,\"rules\":["
         "{\"threshold10\":%d,\"rising\":%s,\"enabled\":%s,\"learned\":%s,\"sendError\":%d},"
         "{\"threshold10\":%d,\"rising\":%s,\"enabled\":%s,\"learned\":%s,\"sendError\":%d}]}",
         st.temp10, st.temp_valid ? "true" : "false", st.sensor_error,
+        (unsigned)st.temp_sample_id,
         ir_get_carrier(),
         (unsigned)st.battery_mv, st.battery_valid ? "true" : "false", st.battery_error,
         ir_state(), ir_last_error(), st.rules[0].threshold10,
@@ -257,9 +258,19 @@ static esp_err_t calibration_post(httpd_req_t *req)
         return error_reply(req, "400 Bad Request", ESP_ERR_INVALID_ARG);
     }
     int reference = value->valueint;
+    uint32_t sample_id = 0;
+    if (!battery) {
+        const cJSON *sample = cJSON_GetObjectItemCaseSensitive(json, "sampleId");
+        if (!cJSON_IsNumber(sample) || !(sample->valuedouble >= 1 && sample->valuedouble <= UINT32_MAX) ||
+            sample->valuedouble != (uint32_t)sample->valuedouble) {
+            cJSON_Delete(json);
+            return error_reply(req, "400 Bad Request", ESP_ERR_INVALID_ARG);
+        }
+        sample_id = (uint32_t)sample->valuedouble;
+    }
     cJSON_Delete(json);
     bool storage_failed;
-    esp_err_t err = app_calibrate(battery, reference, &storage_failed);
+    esp_err_t err = app_calibrate(battery, reference, sample_id, &storage_failed);
     if (err == ESP_OK) return reply(req, "200 OK", "{\"ok\":true}");
     if (!storage_failed && err == ESP_ERR_INVALID_ARG) return error_reply(req, "400 Bad Request", err);
     if (!storage_failed && err == ESP_ERR_INVALID_STATE) return error_reply(req, "409 Conflict", err);

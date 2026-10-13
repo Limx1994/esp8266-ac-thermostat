@@ -27,6 +27,7 @@ assert.ok(html.includes('按温度变化速度调整为2～10分钟间隔'));
 let storedCarrier = 40;
 let failSave = false;
 let temperature10 = 220;
+let sampleId = 1;
 let valid = true;
 let failStatus = false;
 let batteryMv = 4199;
@@ -63,7 +64,7 @@ async function loadPage() {
         statusReads++;
         assert.strictEqual(options.cache, 'no-store');
         return {ok: !failStatus, json: async () => ({
-          valid, temperature10, sensorError: 7, carrier: storedCarrier, learnState, learnError: 9,
+          valid, temperature10, sampleId, sensorError: 7, carrier: storedCarrier, learnState, learnError: 9,
           batteryMv, batteryValid, batteryError: 8,
           rules: [0, 1].map(() => ({threshold10: 220, rising,
             enabled: false, learned, sendError}))
@@ -80,6 +81,8 @@ async function loadPage() {
       if (path === '/api/carrier') storedCarrier = data.carrier;
       if (path === '/api/learn') learnState = 1;
       if (path === '/api/calibration') {
+        if (data.type === 'temperature' && data.sampleId !== sampleId)
+          return {ok: false, status: 409, json: async () => ({error: 'sample changed'})};
         if (data.type === 'temperature') temperature10 = data.reference10;
         else batteryMv = data.referenceMv;
       }
@@ -255,7 +258,7 @@ async function check() {
   }
   input.value = '25.5';
   await submit();
-  assert.deepStrictEqual(requests.at(-1).data, {type: 'temperature', reference10: 255});
+  assert.deepStrictEqual(requests.at(-1).data, {type: 'temperature', reference10: 255, sampleId: 1});
   assert.strictEqual(modal.hidden, true);
   assert.strictEqual(elements.get('temperature').textContent, '当前温度 25.5 °C');
   tap(2);
@@ -301,6 +304,9 @@ async function check() {
   networkFailure = true;
   await refresh();
   assert.strictEqual(elements.get('message').textContent, '网络中断');
+  assert.strictEqual(elements.get('temperature').textContent, '温度状态已过期，请检查连接');
+  assert.strictEqual(elements.get('battery').textContent, '电压状态已过期，请检查连接');
+  assert.strictEqual(elements.get('lowBattery').hidden, true);
   await vm.runInContext('saveCarrier()', context);
   assert.match(elements.get('message').textContent, /网络中断/);
   networkFailure = false;
@@ -394,6 +400,19 @@ async function check() {
   learnState = 3; await refresh();
   assert.strictEqual(elements.get('learn1').disabled, false);
   assert.strictEqual(elements.get('message').textContent, '红外学习成功并已保存');
+  const reviewInput = context.document.getElementById('calValue'),reviewModal = context.document.getElementById('calModal');
+  tap(1); clickTime += 800;
+  reviewInput.value = '25.5';
+  sampleId = 2; temperature10 = 260; await refresh();
+  await submit();
+  assert.strictEqual(requests.at(-1).data.sampleId, 1);
+  assert.strictEqual(reviewModal.hidden, false);
+  assert.match(elements.get('calError').textContent, /温度样本已更新或过期/);
+  assert.strictEqual(temperature10, 260);
+  vm.runInContext('closeCalibration()', context);
+  tap(1); clickTime += 800; reviewInput.value = '25.5'; await submit();
+  assert.strictEqual(requests.at(-1).data.sampleId, 2);
+  assert.strictEqual(reviewModal.hidden, true);
   console.log('control page: stale status success/errors, learning confirmation and out-of-order polling passed');
   console.log('control page: five taps, calibration dialogs/precision/save/cancel/errors, routes, battery and shared carrier passed');
 }

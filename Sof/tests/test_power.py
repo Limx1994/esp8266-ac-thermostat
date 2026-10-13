@@ -198,6 +198,9 @@ unsigned test_send_start;
 unsigned test_send_reports;
 bool drop_send_logs;
 void test_log(const char *tag, const char *fmt, ...) {
+#ifdef TEST_SENSOR_INIT
+    assert(critical_depth == 0); /* Sensor diagnostics must run outside slots. */
+#endif
 #ifdef TEST_SLEEP_TRACE
     assert(irq_state == 0); /* 入口不打印，汇总在恢复中断后输出。 */
     assert(strcmp(tag, "sleep_trace") == 0);
@@ -680,13 +683,15 @@ esp_err_t sensor_start(bool *external_power) {
     conversion_pending = !(start_failed && sample_count == 2);
     return conversion_pending ? ESP_OK : ESP_ERR_NOT_FOUND;
 }
-esp_err_t sensor_finish(int16_t *temp) {
+esp_err_t sensor_finish(int16_t *temp, int16_t *raw16) {
+
     assert(!auto_sleep && conversion_pending);
     assert(now_ms - sample_times[sample_count - 1] >= 750);
     conversion_pending = false;
     const int16_t temperatures[] = {250, 260, 260, 255, 260};
     *temp = temp_script ? temp_script[sample_count <= temp_count ? sample_count - 1 : temp_count - 1]
                         : temperatures[sample_count <= 5 ? sample_count - 1 : 4];
+    if (raw16) *raw16 = *temp * 16 / 10;
     return sensor_error && sample_count == 2 ? ESP_ERR_INVALID_CRC : ESP_OK;
 }
 esp_err_t ir_init(void) { return boot_fault == 7 ? ESP_FAIL : ESP_OK; }
@@ -1260,9 +1265,9 @@ int main(void) {
     assert(sample_times[0] == 61000); /* 诊断延迟后从实际转换时刻计时，避免紧接着再转换。 */
     /* 网页校准基于未追加校准的样本；模拟提交、重启及错误，不访问真实 NVS。 */
     bool storage_failed = true;
-    assert(app_calibrate(false, 250, NULL) == ESP_ERR_INVALID_ARG);
-    assert(app_calibrate(false, 501, &storage_failed) == ESP_ERR_INVALID_ARG && !storage_failed);
-    assert(app_calibrate(true, 2499, &storage_failed) == ESP_ERR_INVALID_ARG);
+    assert(app_calibrate(false, 250, current.temp_sample_id, NULL) == ESP_ERR_INVALID_ARG);
+    assert(app_calibrate(false, 501, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_ARG && !storage_failed);
+    assert(app_calibrate(true, 2499, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_ARG);
     adc_raw = 702;
     run_control(16000, battery_ap, 1, false, false, false, 0);
     assert(base_battery_mv == 3595 && base_temp10 == 260);
@@ -1272,13 +1277,13 @@ int main(void) {
     temp_sample_tick = xTaskGetTickCount();
     battery_sample_tick = temp_sample_tick;
     now_ms += 5000;
-    assert(app_calibrate(true, 3595, &storage_failed) == ESP_OK);
+    assert(app_calibrate(true, 3595, current.temp_sample_id, &storage_failed) == ESP_OK);
     now_ms += 10;
-    assert(app_calibrate(true, 3595, &storage_failed) == ESP_ERR_INVALID_STATE);
+    assert(app_calibrate(true, 3595, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_STATE);
     now_ms = saved_now + 20000;
-    assert(app_calibrate(false, 260, &storage_failed) == ESP_OK);
+    assert(app_calibrate(false, 260, current.temp_sample_id, &storage_failed) == ESP_OK);
     now_ms += 10;
-    assert(app_calibrate(false, 260, &storage_failed) == ESP_ERR_INVALID_STATE);
+    assert(app_calibrate(false, 260, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_STATE);
     now_ms = saved_now;
     temp_sample_tick = saved_temp_tick;
     battery_sample_tick = saved_battery_tick;
@@ -1296,45 +1301,49 @@ int main(void) {
     update_battery();
     assert(current.battery_valid);
     states[0].primed = true; trend.count = 3; last_send[0] = 123; send_recorded[0] = true;
-    assert(app_calibrate(false, 280, &storage_failed) == ESP_OK && !storage_failed);
+    int16_t previous_offset = temp_adjust10;
+    assert(app_calibrate(false, 280, 0, &storage_failed) == ESP_ERR_INVALID_STATE);
+    assert(app_calibrate(false, 280, current.temp_sample_id + 1, &storage_failed) == ESP_ERR_INVALID_STATE);
+    assert(temp_adjust10 == previous_offset);
+    assert(app_calibrate(false, 280, current.temp_sample_id, &storage_failed) == ESP_OK && !storage_failed);
     assert(current.temp10 == 280 && temp_adjust10 == 20 && trend.count == 0 && !states[0].primed);
     assert(last_send[0] == 123 && send_recorded[0]);
-    assert(app_calibrate(false, 280, &storage_failed) == ESP_OK && temp_adjust10 == 20);
-    assert(app_calibrate(false, 311, &storage_failed) == ESP_ERR_INVALID_ARG);
-    assert(app_calibrate(false, 210, &storage_failed) == ESP_OK && temp_adjust10 == -50);
-    assert(app_calibrate(false, 209, &storage_failed) == ESP_ERR_INVALID_ARG && temp_adjust10 == -50);
-    assert(app_calibrate(false, 310, &storage_failed) == ESP_OK && temp_adjust10 == 50);
-    assert(app_calibrate(false, 280, &storage_failed) == ESP_OK && temp_adjust10 == 20);
-    assert(app_calibrate(true, 4000, &storage_failed) == ESP_OK && current.battery_mv == 4000);
-    assert(app_calibrate(true, 4000, &storage_failed) == ESP_OK && battery_adjust.base_mv == 3595);
+    assert(app_calibrate(false, 280, current.temp_sample_id, &storage_failed) == ESP_OK && temp_adjust10 == 20);
+    assert(app_calibrate(false, 461, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_ARG);
+    assert(app_calibrate(false, 60, current.temp_sample_id, &storage_failed) == ESP_OK && temp_adjust10 == -200);
+    assert(app_calibrate(false, 59, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_ARG && temp_adjust10 == -200);
+    assert(app_calibrate(false, 460, current.temp_sample_id, &storage_failed) == ESP_OK && temp_adjust10 == 200);
+    assert(app_calibrate(false, 280, current.temp_sample_id, &storage_failed) == ESP_OK && temp_adjust10 == 20);
+    assert(app_calibrate(true, 4000, current.temp_sample_id, &storage_failed) == ESP_OK && current.battery_mv == 4000);
+    assert(app_calibrate(true, 4000, current.temp_sample_id, &storage_failed) == ESP_OK && battery_adjust.base_mv == 3595);
     assert(adjusted_battery(3994) == 4444); /* boot/sleep 已换算值再应用统一比例。 */
     now_ms += 21000;
-    assert(app_calibrate(false, 270, &storage_failed) == ESP_ERR_INVALID_STATE);
-    assert(app_calibrate(true, 3900, &storage_failed) == ESP_ERR_INVALID_STATE);
+    assert(app_calibrate(false, 270, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_STATE);
+    assert(app_calibrate(true, 3900, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_STATE);
     run_control(16000, battery_ap, 1, false, false, false, 0);
     assert(temp_adjust10 == 20 && current.temp10 == 280 && current.battery_mv == 4000);
     rule_open_error = ESP_FAIL;
-    assert(app_calibrate(false, 270, &storage_failed) == ESP_FAIL && storage_failed);
+    assert(app_calibrate(false, 270, current.temp_sample_id, &storage_failed) == ESP_FAIL && storage_failed);
     rule_open_error = ESP_OK; rule_save_error = ESP_ERR_INVALID_STATE;
-    assert(app_calibrate(true, 3900, &storage_failed) == ESP_ERR_INVALID_STATE && storage_failed);
+    assert(app_calibrate(true, 3900, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_STATE && storage_failed);
     rule_save_error = ESP_OK; rule_commit_error = ESP_FAIL;
-    assert(app_calibrate(false, 270, &storage_failed) == ESP_FAIL && storage_failed);
+    assert(app_calibrate(false, 270, current.temp_sample_id, &storage_failed) == ESP_FAIL && storage_failed);
     assert(temp_adjust10 == 20 && current.temp10 == 280 && current.battery_mv == 4000);
     rule_commit_error = ESP_OK;
     current.temp_valid = false;
-    assert(app_calibrate(false, 270, &storage_failed) == ESP_ERR_INVALID_STATE && !storage_failed);
+    assert(app_calibrate(false, 270, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_STATE && !storage_failed);
     current.temp_valid = true; current.battery_valid = false;
-    assert(app_calibrate(true, 3900, &storage_failed) == ESP_ERR_INVALID_STATE);
+    assert(app_calibrate(true, 3900, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_STATE);
     current.battery_valid = true; base_battery_mv = 0;
-    assert(app_calibrate(true, 3900, &storage_failed) == ESP_ERR_INVALID_STATE);
+    assert(app_calibrate(true, 3900, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_STATE);
     base_battery_mv = 1000;
-    assert(app_calibrate(true, 3900, &storage_failed) == ESP_ERR_INVALID_ARG);
+    assert(app_calibrate(true, 3900, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_ARG);
     base_battery_mv = 3595; battery_sample_ap = false;
-    assert(app_calibrate(true, 3900, &storage_failed) == ESP_ERR_INVALID_STATE);
+    assert(app_calibrate(true, 3900, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_STATE);
     run_control(1000, NULL, 0, false, false, false, 0);
     assert(current.temp10 == 270 && current.battery_mv == 3969 && !ap);
     assert(send_count == 1); /* 追加温度偏移参与规则判断。 */
-    assert(app_calibrate(false, 270, &storage_failed) == ESP_ERR_INVALID_STATE);
+    assert(app_calibrate(false, 270, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_STATE);
     adc_raw = 910;
     run_control(61000, NULL, 0, false, false, false, 0);
     assert(current.battery_mv == 4732 && adc_sleep_seen && current.temp10 == 280);
@@ -1378,8 +1387,8 @@ int main(void) {
         adc_raw = 740;
         run_control(4000, battery_ap, 1, false, false, false, 0);
         assert(base_battery_mv == 3790);
-        assert(app_calibrate(true, target, &storage_failed) == ESP_OK);
-        assert(app_calibrate(true, target, &storage_failed) == ESP_OK);
+        assert(app_calibrate(true, target, current.temp_sample_id, &storage_failed) == ESP_OK);
+        assert(app_calibrate(true, target, current.temp_sample_id, &storage_failed) == ESP_OK);
         assert(current.battery_mv == target && battery_adjust.base_mv == 3790 &&
                battery_adjust.reference_mv == target);
         adc_raw = 746;
@@ -1397,9 +1406,13 @@ int main(void) {
     cal_read_error = ESP_OK;
     cal_sizes[0] = 1;
     assert(load_calibration() == ESP_ERR_INVALID_STATE);
-    cal_sizes[0] = 2; int16_t bad_offset = 51;
+    cal_sizes[0] = 2; int16_t bad_offset = 201;
     memcpy(cal_saved[0], &bad_offset, sizeof(bad_offset));
     assert(load_calibration() == ESP_ERR_INVALID_STATE);
+    for (int16_t limit = -200; limit <= 200; limit += 400) {
+        memcpy(cal_saved[0], &limit, sizeof(limit));
+        assert(load_calibration() == ESP_OK && temp_adjust10 == limit);
+    }
     bad_offset = 20; memcpy(cal_saved[0], &bad_offset, sizeof(bad_offset));
     battery_adjust_t bad_voltage = {4000, 0};
     memcpy(cal_saved[1], &bad_voltage, sizeof(bad_voltage));
@@ -1410,8 +1423,8 @@ int main(void) {
     app_set_learning(false); led_handle = NULL;
     app_set_learning(true); app_set_learning(false);
     assert(!led_learning && critical_depth == 0);
-    assert(app_calibrate(true, 4501, &storage_failed) == ESP_ERR_INVALID_ARG);
-    assert(app_calibrate(false, -101, &storage_failed) == ESP_ERR_INVALID_ARG);
+    assert(app_calibrate(true, 4501, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_ARG);
+    assert(app_calibrate(false, -101, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_ARG);
     const battery_adjust_t invalid_voltage[] = {
         {2499, 3000}, {4501, 3000}, {4000, 0}, {2500, 5001}, {4500, 2999}
     };
@@ -1426,7 +1439,7 @@ int main(void) {
     assert(battery_adjust_valid(&(battery_adjust_t){4500, 3000}));
     cal_sizes[1] = 1;
     assert(load_calibration() == ESP_ERR_INVALID_STATE);
-    int16_t negative_offset = -51;
+    int16_t negative_offset = -201;
     cal_sizes[0] = sizeof(negative_offset);
     memcpy(cal_saved[0], &negative_offset, sizeof(negative_offset));
     assert(load_calibration() == ESP_ERR_INVALID_STATE);
@@ -1451,6 +1464,13 @@ int main(void) {
     update_battery();
     assert(battery_off_samples == UINT32_MAX);
     puts("校准边界、存储失败、启动失败及采样计数饱和检查通过");
+    ap = true; current.temp_valid = true;
+    temp_sample_tick = xTaskGetTickCount();
+    base_raw16 = 292; base_temp10 = sensor_temperature(base_raw16, 0);
+    assert(app_calibrate(false, 0, current.temp_sample_id, &storage_failed) == ESP_OK);
+    assert(temp_adjust10 == -183 && current.temp10 == -1);
+    assert(sensor_temperature(-4, 3) == 1);
+    assert(sensor_temperature(4, -3) == -1);
     puts("power control: web calibration persistence/failures/freshness, state voltage, trend, LED, battery and AP lifecycle passed");
     return 0;
 }
@@ -1473,6 +1493,10 @@ static int inputs[512], input_count, input_pos;
 static uint8_t commands[32], byte_value;
 static int command_count, bit_count, mode, level;
 static int direction_calls, fail_direction;
+static bool finish_queued;
+static uint32_t late_at, late_us, reset_release_cycles;
+static bool slot_fault;
+static int fault_positions[3], fault_count, fault_next;
 static bool fail_level;
 static uint32_t bus_cycles, low_start;
 
@@ -1483,6 +1507,12 @@ void ets_delay_us(uint32_t us) {
 uint32_t soc_get_ccount(void) {
     assert(mode == GPIO_MODE_OUTPUT_OD && critical_depth == 1);
     bus_cycles += TEST_CPU_MHZ; /* One microsecond per deterministic poll. */
+    if (fault_next < fault_count && input_pos == fault_positions[fault_next] &&
+        bus_cycles - low_start >= 12 * TEST_CPU_MHZ) {
+        bus_cycles += 10 * TEST_CPU_MHZ;
+        fault_next++; slot_fault = true;
+    }
+    if (late_at && bus_cycles >= late_at) { bus_cycles += late_us * TEST_CPU_MHZ; late_at = 0; slot_fault = true; }
     if (GPIO.out_w1tc) {
         assert(GPIO.out_w1tc == (1U << 4));
         GPIO.out_w1tc = 0; level = 0; low_start = bus_cycles;
@@ -1491,11 +1521,15 @@ uint32_t soc_get_ccount(void) {
         assert(GPIO.out_w1ts == (1U << 4));
         GPIO.out_w1ts = 0; level = 1;
         uint32_t low_us = (bus_cycles - low_start) / TEST_CPU_MHZ;
+        if (low_us >= 480) {
+            reset_release_cycles = bus_cycles;
+            bit_count = byte_value = 0; /* Reset discards an interrupted command. */
+        }
         if (low_us >= 480 || low_us < 6) {
             assert(input_pos < input_count);
             GPIO.in = inputs[input_pos++] << 4;
         } else {
-            assert(low_us == 7 || low_us == 61);
+            assert(slot_fault || low_us == 7 || low_us == 61);
             byte_value |= (low_us == 7) << bit_count++;
             if (bit_count == 8) {
                 assert(command_count < 32);
@@ -1525,13 +1559,21 @@ static void setup_bus(bool external, bool present) {
     command_count = bit_count = byte_value = 0;
     direction_calls = fail_direction = 0;
     mode = GPIO_MODE_OUTPUT_OD; level = 1;
-    bus_cycles = low_start = 0;
+    bus_cycles = low_start = late_at = reset_release_cycles = 0;
+    late_us = 100; fault_count = fault_next = 0;
+    finish_queued = false; slot_fault = false;
+    conversion_started = false;
+    slot_error = ESP_OK;
     GPIO.out_w1tc = GPIO.out_w1ts = 0;
     input_count = 2;
     queue_result(0x0550, true); /* 上电温度仅用于核验配置。 */
     inputs[input_count++] = 0;
 }
 static void queue_config(int16_t raw, bool good_crc, uint8_t config) {
+    if (conversion_started && !finish_queued) {
+        inputs[input_count++] = 1; /* Conversion ready before reset. */
+        finish_queued = true;
+    }
     uint8_t data[9] = {(uint8_t)raw, (uint8_t)(raw >> 8), 75, 70, config, 0xff, 12, 16, 0};
     data[8] = crc8(data, 8) ^ (good_crc ? 0 : 1);
     inputs[input_count++] = 0;
@@ -1557,11 +1599,11 @@ int main(void) {
     assert(sensor_init() == ESP_OK);
     assert(start_conversion(NULL) == ESP_ERR_INVALID_ARG);
     assert(sensor_start(NULL) == ESP_ERR_INVALID_ARG);
-    assert(sensor_finish(NULL) == ESP_ERR_INVALID_ARG);
+    assert(sensor_finish(NULL, NULL) == ESP_ERR_INVALID_ARG);
     setup_bus(true, true);
     assert(sensor_start(&external) == ESP_OK && external && mode == GPIO_MODE_INPUT);
     queue_result(400, true);
-    assert(sensor_finish(&temp) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
+    assert(sensor_finish(&temp, NULL) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
 #ifdef CONFIG_APP_SENSOR_IDLE_INPUT
     assert(mode == GPIO_MODE_INPUT);
 #else
@@ -1574,11 +1616,13 @@ int main(void) {
     bus_cycles = UINT32_MAX - 1000; /* Counter wrap during the reset pulse. */
     assert(sensor_start(&external) == ESP_OK && external);
     queue_result(432, true);
-    assert(sensor_finish(&temp) == ESP_OK && temp == 270 + CONFIG_APP_TEMP_OFFSET10 && critical_depth == 0);
+    assert(sensor_finish(&temp, NULL) == ESP_OK && temp == 270 + CONFIG_APP_TEMP_OFFSET10 && critical_depth == 0);
     setup_bus(false, true);
-    assert(sensor_start(&external) == ESP_OK && !external && mode == GPIO_MODE_OUTPUT_OD);
+    assert(sensor_start(&external) == ESP_ERR_INVALID_STATE && !external);
+    setup_bus(true, true);
+    assert(sensor_start(&external) == ESP_OK);
     queue_result(-168, true);
-    assert(sensor_finish(&temp) == ESP_OK && temp == -105 + CONFIG_APP_TEMP_OFFSET10);
+    assert(sensor_finish(&temp, NULL) == ESP_OK && temp == -105 + CONFIG_APP_TEMP_OFFSET10);
     setup_bus(true, false);
     external = true;
     assert(sensor_start(&external) == ESP_ERR_NOT_FOUND && !external && command_count == 0);
@@ -1591,48 +1635,51 @@ int main(void) {
     setup_bus(true, true);
     assert(sensor_start(&external) == ESP_OK);
     fail_direction = direction_calls + 1;
-    assert(sensor_finish(&temp) == ESP_FAIL);
+    assert(sensor_finish(&temp, NULL) == ESP_FAIL);
     setup_bus(true, true);
     assert(sensor_start(&external) == ESP_OK);
     queue_result(400, false); temp = 999;
     queue_result(400, false);
     queue_result(400, false);
-    assert(sensor_finish(&temp) == ESP_ERR_INVALID_CRC && temp == 999);
+    assert(sensor_finish(&temp, NULL) == ESP_ERR_INVALID_CRC && temp == 999);
     assert(crc_logs == 3);
     assert(input_pos == input_count && command_count == 12);
     setup_bus(true, true);
     assert(sensor_start(&external) == ESP_OK);
     queue_result(400, false);
     queue_result(400, true);
-    assert(sensor_finish(&temp) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
+    assert(sensor_finish(&temp, NULL) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
     assert(input_pos == input_count && command_count == 10);
     setup_bus(true, true);
     assert(sensor_start(&external) == ESP_OK);
     inputs[input_count++] = 1;
+    finish_queued = true;
     queue_result(400, true);
-    assert(sensor_finish(&temp) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
+    assert(sensor_finish(&temp, NULL) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
     assert(input_pos == input_count && command_count == 8);
     setup_bus(true, true);
     assert(sensor_start(&external) == ESP_OK);
     queue_result(0x0550, true);
-    assert(sensor_finish(&temp) == ESP_ERR_INVALID_STATE);
+    assert(sensor_finish(&temp, NULL) == ESP_ERR_INVALID_STATE);
     setup_bus(true, true);
     assert(sensor_start(&external) == ESP_OK);
+    inputs[input_count++] = 1; /* Conversion ready. */
     inputs[input_count++] = 1;
     inputs[input_count++] = 1;
     inputs[input_count++] = 1;
     temp = 999;
-    assert(sensor_finish(&temp) == ESP_ERR_NOT_FOUND);
+    assert(sensor_finish(&temp, NULL) == ESP_ERR_NOT_FOUND);
     assert(temp == 999 && input_pos == input_count && command_count == 6);
     setup_bus(true, true);
     assert(sensor_start(&external) == ESP_OK);
     unsigned old_crc_logs = crc_logs;
+    inputs[input_count++] = 1; /* Conversion ready. */
     for (int attempt = 0; attempt < 3; attempt++) {
         inputs[input_count++] = 0;
         for (int bit = 0; bit < 72; bit++) inputs[input_count++] = 1;
     }
     temp = 999;
-    assert(sensor_finish(&temp) == ESP_ERR_INVALID_CRC && temp == 999);
+    assert(sensor_finish(&temp, NULL) == ESP_ERR_INVALID_CRC && temp == 999);
     assert(crc_logs == old_crc_logs + 3 && input_pos == input_count);
 #ifdef CONFIG_APP_SENSOR_IDLE_INPUT
     assert(mode == GPIO_MODE_INPUT);
@@ -1640,16 +1687,19 @@ int main(void) {
     assert(sensor_start(&external) == ESP_OK);
     queue_result(400, true);
     fail_direction = direction_calls + 2; /* Read succeeds, release fails. */
-    assert(sensor_finish(&temp) == ESP_FAIL && mode == GPIO_MODE_OUTPUT_OD);
+    temp = 999;
+    int16_t rejected_raw = 1234;
+    assert(sensor_finish(&temp, &rejected_raw) == ESP_FAIL && mode == GPIO_MODE_OUTPUT_OD);
+    assert(temp == 999 && rejected_raw == 1234);
     setup_bus(true, false);
     fail_direction = 2; /* Preserve the primary error if release also fails. */
     assert(sensor_start(&external) == ESP_ERR_NOT_FOUND);
 #endif
     assert(critical_depth == 0);
     setup_bus(false, true);
-    assert(sensor_start(&external) == ESP_OK && !external);
+    assert(sensor_start(&external) == ESP_ERR_INVALID_STATE && !external);
     setup_bus(false, true);
-    assert(sensor_start(&external) == ESP_OK && !external);
+    assert(sensor_start(&external) == ESP_ERR_INVALID_STATE && !external);
     setup_bus(true, true); inputs[input_count - 1] = 1;
     assert(sensor_start(&external) == ESP_ERR_NOT_FOUND && !external);
     const int16_t samples[] = {0, 1, -1, 4, -4, 8, -8, 399};
@@ -1664,7 +1714,7 @@ int main(void) {
         setup_bus(true, true);
         assert(sensor_start(&external) == ESP_OK);
         queue_result(samples[i], true);
-        assert(sensor_finish(&temp) == ESP_OK && temp == calibrated[i]);
+        assert(sensor_finish(&temp, NULL) == ESP_OK && temp == calibrated[i]);
     }
     rule_cfg_t rule = {.threshold10 = 250, .rising = 1, .enabled = 1};
     rule_state_t state = {0};
@@ -1679,12 +1729,12 @@ int main(void) {
         inputs[input_count++] = 0; /* Write Scratchpad presence. */
         queue_result(0x0550, true); /* Configuration readback. */
         inputs[input_count++] = 0; /* Convert T presence. */
-        assert(sensor_start(&external) == ESP_OK && external);
+            assert(sensor_start(&external) == ESP_OK && external);
         const uint8_t corrected[] = {0xcc, 0xb4, 0xcc, 0xbe, 0xcc, 0x4e,
                                      75, 70, 0x7f, 0xcc, 0xbe, 0xcc, 0x44};
         assert(command_count == 13 && memcmp(commands, corrected, 13) == 0);
         queue_result(400, true);
-        assert(sensor_finish(&temp) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
+        assert(sensor_finish(&temp, NULL) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
         assert(input_pos == input_count);
     }
     for (int failure = 0; failure < 6; failure++) {
@@ -1715,9 +1765,129 @@ int main(void) {
     assert(sensor_start(&external) == ESP_OK);
     queue_config(400, true, 0x1f);
     temp = 999;
-    assert(sensor_finish(&temp) == ESP_ERR_INVALID_STATE && temp == 999);
+    assert(sensor_finish(&temp, NULL) == ESP_ERR_INVALID_STATE && temp == 999);
     assert(critical_depth == 0);
-    puts("power sensor: retries, GPIO, calibration rounding/sign, rule thresholds and 12-bit repair/readback passed");
+    const int16_t valid_raw[] = {-880, 2000};
+    for (unsigned i = 0; i < sizeof(valid_raw) / sizeof(valid_raw[0]); i++) {
+        int16_t raw = 0;
+        setup_bus(true, true);
+        assert(sensor_start(&external) == ESP_OK);
+        queue_result(valid_raw[i], true);
+        assert(sensor_finish(&temp, &raw) == ESP_OK && raw == valid_raw[i]);
+        assert(temp == sensor_temperature(raw, 0));
+    }
+    const int16_t invalid_raw[] = {-881, 2001, 3000, -1000};
+    for (unsigned i = 0; i < sizeof(invalid_raw) / sizeof(invalid_raw[0]); i++) {
+        setup_bus(true, true);
+        assert(sensor_start(&external) == ESP_OK);
+        queue_result(invalid_raw[i], true); temp = 999;
+        assert(sensor_finish(&temp, NULL) == ESP_ERR_INVALID_RESPONSE && temp == 999);
+    }
+    setup_bus(true, true);
+    assert(sensor_start(&external) == ESP_OK);
+    queue_config(400, true, 0x60); temp = 999;
+    assert(sensor_finish(&temp, NULL) == ESP_ERR_INVALID_RESPONSE && temp == 999);
+    /* No start-status bits are queued: the command immediately releases DQ. */
+    setup_bus(true, true);
+    assert(sensor_start(&external) == ESP_OK && external && input_pos == input_count);
+    queue_result(400, true);
+    assert(sensor_finish(&temp, NULL) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
+    setup_bus(true, true);
+    assert(sensor_start(&external) == ESP_OK);
+    queue_result(0x0550, true); temp = 999;
+    assert(sensor_finish(&temp, NULL) == ESP_ERR_INVALID_STATE && temp == 999);
+    setup_bus(true, true);
+    assert(sensor_start(&external) == ESP_OK);
+    inputs[input_count++] = 0; temp = 999;
+    assert(sensor_finish(&temp, NULL) == ESP_ERR_TIMEOUT && temp == 999);
+    assert(sensor_finish(&temp, NULL) == ESP_ERR_INVALID_STATE);
+    /* A short interruption around release must retain a valid presence window. */
+    setup_bus(true, true);
+    late_at = 484 * TEST_CPU_MHZ; late_us = 10;
+    assert(reset_bus() && slot_error == ESP_OK);
+    assert(bus_cycles - reset_release_cycles >= 60 * TEST_CPU_MHZ);
+    assert(bus_cycles - reset_release_cycles <= 75 * TEST_CPU_MHZ);
+    /* Reproduce 494 us reset-low: presence sample follows actual release. */
+    setup_bus(true, true);
+    late_at = 480 * TEST_CPU_MHZ; late_us = 14;
+    assert(reset_bus() && slot_error == ESP_OK);
+    assert((reset_release_cycles - low_start) / TEST_CPU_MHZ == 494);
+    assert(bus_cycles - reset_release_cycles >= 70 * TEST_CPU_MHZ);
+    assert(bus_cycles - reset_release_cycles <= 75 * TEST_CPU_MHZ);
+    setup_bus(true, true);
+    late_at = 480 * TEST_CPU_MHZ; late_us = 14;
+    assert(sensor_start(&external) == ESP_OK && external);
+    queue_result(400, true);
+    assert(sensor_finish(&temp, NULL) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
+    setup_bus(true, true);
+    late_at = 480 * TEST_CPU_MHZ; late_us = 900;
+    assert(start_conversion(&external) == ESP_ERR_TIMEOUT && !external);
+    assert(strcmp(slot_stage, "reset-release") == 0 && slot_limit_us == 960);
+    setup_bus(true, true);
+    late_at = 500 * TEST_CPU_MHZ;
+    assert(start_conversion(&external) == ESP_ERR_TIMEOUT && !external);
+    assert(strcmp(slot_stage, "presence-sample") == 0 && slot_limit_us == 75);
+    setup_bus(true, true);
+    late_at = 5 * TEST_CPU_MHZ;
+    write_bit(1);
+    assert(slot_error == ESP_ERR_TIMEOUT && critical_depth == 0);
+    assert(strcmp(slot_stage, "write-release") == 0 && slot_elapsed_cycles > 11 * TEST_CPU_MHZ);
+    setup_bus(true, true);
+    late_at = 12 * TEST_CPU_MHZ;
+    read_bit();
+    assert(slot_error == ESP_ERR_TIMEOUT && critical_depth == 0);
+    assert(strcmp(slot_stage, "read-sample") == 0 && slot_elapsed_cycles > 15 * TEST_CPU_MHZ);
+    /* One late power-status sample restarts the entire start transaction. */
+    setup_bus(true, true); input_count = 2;
+    inputs[input_count++] = 0; inputs[input_count++] = 1;
+    queue_result(0x0550, true);
+    inputs[input_count++] = 0;
+    fault_positions[0] = 2; fault_count = 1;
+    assert(sensor_start(&external) == ESP_OK && external && fault_next == 1);
+    queue_result(400, true);
+    assert(sensor_finish(&temp, NULL) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
+    assert(input_pos == input_count);
+    /* Persistent late samples stop after three starts and never publish success. */
+    setup_bus(true, true); input_count = 6;
+    for (int i = 0; i < 6; i++) inputs[i] = i % 2;
+    for (int i = 0; i < 3; i++) fault_positions[i] = (i + 1) * 2;
+    fault_count = 3;
+    assert(sensor_start(&external) == ESP_ERR_TIMEOUT && !external && fault_next == 3);
+    assert(input_pos == input_count && !conversion_started);
+    /* Completion retry keeps the same conversion, without a bus reset. */
+    setup_bus(true, true); assert(sensor_start(&external) == ESP_OK);
+    inputs[input_count++] = 1;
+    fault_positions[0] = input_count; fault_count = 1;
+    inputs[input_count++] = 1; finish_queued = true;
+    queue_result(400, true);
+    assert(sensor_finish(&temp, NULL) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
+    assert(fault_next == 1 && input_pos == input_count && command_count == 8);
+    setup_bus(true, true); assert(sensor_start(&external) == ESP_OK);
+    for (int i = 0; i < 3; i++) {
+        inputs[input_count++] = 1;
+        fault_positions[i] = input_count;
+    }
+    fault_count = 3; temp = 999;
+    assert(sensor_finish(&temp, NULL) == ESP_ERR_TIMEOUT && fault_next == 3);
+    assert(temp == 999 && input_pos == input_count && command_count == 6);
+    /* Scratchpad retry discards the failed bit and resets before rereading. */
+    setup_bus(true, true); assert(sensor_start(&external) == ESP_OK);
+    inputs[input_count++] = 1; inputs[input_count++] = 0; inputs[input_count++] = 0;
+    finish_queued = true; fault_positions[0] = input_count; fault_count = 1;
+    queue_result(400, true);
+    assert(sensor_finish(&temp, NULL) == ESP_OK && temp == 250 + CONFIG_APP_TEMP_OFFSET10);
+    assert(fault_next == 1 && input_pos == input_count && command_count == 10);
+    setup_bus(true, true); assert(sensor_start(&external) == ESP_OK);
+    inputs[input_count++] = 1;
+    for (int i = 0; i < 3; i++) {
+        inputs[input_count++] = 0; inputs[input_count++] = 0;
+        fault_positions[i] = input_count;
+    }
+    fault_count = 3; temp = 999;
+    int16_t failed_raw = 1234;
+    assert(sensor_finish(&temp, &failed_raw) == ESP_ERR_TIMEOUT && fault_next == 3);
+    assert(temp == 999 && failed_raw == 1234 && input_pos == input_count);
+    puts("power sensor: external power, busy/ready, timing faults, raw limits, structure, retries and rounding passed");
     return 0;
 }
 '''
