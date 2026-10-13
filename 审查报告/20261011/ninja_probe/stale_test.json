@@ -1,9 +1,0 @@
-{
-  "command": [
-    "D:\\空调温度\\审查报告\\20261011\\ninja_probe\\build_ascii\\rules_test.exe"
-  ],
-  "cwd": "D:\\空调温度\\审查报告\\20261011\\ninja_probe",
-  "exit": 0,
-  "stdout": "trend: noise/spikes, signed median, fast confirmation, gradual extension, timing/reset/wrap passed\nrules_test: threshold equality, repeated sends, startup/recovery and disabled rules passed\n",
-  "stderr": ""
-}

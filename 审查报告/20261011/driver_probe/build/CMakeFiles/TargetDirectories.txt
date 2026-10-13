@@ -1,2 +1,0 @@
-D:/空调温度/审查报告/20261011/driver_probe/build/CMakeFiles/edit_cache.dir
-D:/空调温度/审查报告/20261011/driver_probe/build/CMakeFiles/rebuild_cache.dir

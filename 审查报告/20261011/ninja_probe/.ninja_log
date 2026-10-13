@@ -1,4 +1,0 @@
-# ninja log v5
-0	324	8134346795751674	build_ascii/rules.o	58ab2c7e3e9e5b9f
-112	336	8134346795901753	build_ascii/rules_test.o	90106909701a347e
-336	519	8134346797695346	build_ascii/rules_test.exe	3391bcdcd9e80bee
