@@ -372,6 +372,7 @@ static size_t post_pos;
 static int action_error, action_slot, action_calls, action_carrier;
 static bool action_battery, cal_storage_failed;
 static int action_reference;
+static uint32_t action_sample_id;
 static rule_cfg_t action_rule;
 int httpd_req_recv(httpd_req_t *req, char *body, size_t len) {
     if (post_recv_error) return -1;
@@ -491,7 +492,7 @@ esp_err_t app_save_rule(int slot, const rule_cfg_t *cfg) {
     action_slot = slot; action_rule = *cfg; action_calls++; return action_error;
 }
 esp_err_t app_calibrate(bool battery, int reference, uint32_t sample_id, bool *storage_failed) {
-    assert(battery || sample_id == 1);
+    action_sample_id = sample_id;
     action_battery = battery; action_reference = reference; action_calls++;
     *storage_failed = cal_storage_failed;
     if (battery ? (reference < 2500 || reference > 4500) : (reference < -100 || reference > 500)) {
@@ -528,7 +529,9 @@ static esp_err_t request(const char *uri, int method) {
 
 static void check_posts(void) {
     const char *cal_bad[] = {"{", "{}", "{\"type\":1}", "{\"type\":\"other\"}",
-        "{\"type\":\"temperature\",\"reference10\":255}",
+        "{\"type\":\"temperature\",\"reference10\":255,\"sampleId\":null}",
+        "{\"type\":\"temperature\",\"reference10\":255,\"sampleId\":\"1\"}",
+        "{\"type\":\"temperature\",\"reference10\":255,\"sampleId\":-1}",
         "{\"type\":\"temperature\",\"reference10\":255,\"sampleId\":0}",
         "{\"type\":\"temperature\",\"reference10\":255,\"sampleId\":1.5}",
         "{\"type\":\"temperature\",\"reference10\":255,\"sampleId\":4294967296}",
@@ -542,7 +545,14 @@ static void check_posts(void) {
     post_body = "{\"type\":\"temperature\",\"reference10\":255,\"sampleId\":1}";
     action_error = ESP_OK;
     assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 200);
-    assert(!action_battery && action_reference == 255);
+    assert(!action_battery && action_reference == 255 && action_sample_id == 1);
+    post_body = "{\"type\":\"temperature\",\"reference10\":255}";
+    assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 200);
+    assert(!action_battery && action_reference == 255 && action_sample_id == 0);
+    post_body = "{\"type\":\"temperature\",\"reference10\":255,\"sampleId\":4294967295}";
+    assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 200);
+    assert(action_sample_id == UINT32_MAX);
+    puts("温度校准编号可省略或不同，非法编号仍拒绝检查通过");
     int before_null_string = action_calls;
     null_cal_string = true;
     assert(request("/api/calibration", HTTP_POST) == ESP_OK && response_code == 400);

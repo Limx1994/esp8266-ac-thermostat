@@ -23,6 +23,7 @@ assert.ok(html.includes('.modal section{box-sizing:border-box;width:100%;max-wid
 assert.ok(html.includes('热点开启时暂停自动温控，可手动测试红外'));
 assert.ok(html.includes('关闭后每60秒采温。首次满足规则即发送'));
 assert.ok(html.includes('按温度变化速度调整为2～10分钟间隔'));
+assert.ok(!html.includes('请关闭校正框后重新打开'));
 
 let storedCarrier = 40;
 let failSave = false;
@@ -81,8 +82,8 @@ async function loadPage() {
       if (path === '/api/carrier') storedCarrier = data.carrier;
       if (path === '/api/learn') learnState = 1;
       if (path === '/api/calibration') {
-        if (data.type === 'temperature' && data.sampleId !== sampleId)
-          return {ok: false, status: 409, json: async () => ({error: 'sample changed'})};
+        if (data.type === 'temperature' && !valid)
+          return {ok: false, status: 409, json: async () => ({error: 'sample unavailable'})};
         if (data.type === 'temperature') temperature10 = data.reference10;
         else batteryMv = data.referenceMv;
       }
@@ -257,10 +258,48 @@ async function check() {
     assert.strictEqual(modal.hidden, false);
   }
   input.value = '25.5';
+  // 校正框停留超过 30 秒，温度多次更新只改变设备读数，不覆盖输入。
+  for (let n = 0; n < 3; n++) {
+    clickTime += 15000; sampleId++; temperature10++;
+    await refresh();
+    assert.strictEqual(elements.get('calCurrent').textContent, '设备当前温度 '+(temperature10/10).toFixed(1)+' °C');
+    assert.strictEqual(input.value, '25.5');
+    assert.strictEqual(modal.hidden, false);
+  }
+  sampleId++; temperature10 = 250; // 状态刷新后再次采温，保存也不能因编号变化而失败。
   await submit();
-  assert.deepStrictEqual(requests.at(-1).data, {type: 'temperature', reference10: 255, sampleId: 1});
+  assert.deepStrictEqual(requests.at(-1).data, {type: 'temperature', reference10: 255});
   assert.strictEqual(modal.hidden, true);
   assert.strictEqual(elements.get('temperature').textContent, '当前温度 25.5 °C');
+  tap(1); clickTime += 800; input.value = '26.0';
+  valid = false; await refresh();
+  assert.strictEqual(elements.get('calCurrent').textContent, '温度读取失败，错误码 7');
+  await submit();
+  assert.strictEqual(elements.get('calError').textContent, '当前温度不可用或已过期，请等待读数更新后重试');
+  assert.strictEqual(modal.hidden, false);
+  assert.strictEqual(input.value, '26.0');
+  assert.strictEqual(elements.get('calSave').disabled, false);
+  // 读数仍标为有效但服务端判定过期时，保留输入并允许原框重试。
+  valid = true; failAction = '/api/calibration'; failureStatus = 409;
+  await refresh(); await submit();
+  assert.strictEqual(elements.get('calError').textContent, '当前温度不可用或已过期，请等待读数更新后重试');
+  assert.strictEqual(modal.hidden, false);
+  assert.strictEqual(input.value, '26.0');
+  failAction = ''; failureStatus = 503; networkFailure = true;
+  await refresh(); await submit();
+  assert.strictEqual(elements.get('calCurrent').textContent, '温度状态已过期，请检查连接');
+  assert.match(elements.get('calError').textContent, /网络中断/);
+  assert.strictEqual(modal.hidden, false);
+  assert.strictEqual(input.value, '26.0');
+  networkFailure = false; sampleId++; temperature10 = 254;
+  await refresh();
+  assert.strictEqual(elements.get('calCurrent').textContent, '设备当前温度 25.4 °C');
+  assert.strictEqual(input.value, '26.0');
+  await submit();
+  assert.deepStrictEqual(requests.at(-1).data, {type: 'temperature', reference10: 260});
+  assert.strictEqual(modal.hidden, true);
+  assert.strictEqual(elements.get('temperature').textContent, '当前温度 26.0 °C');
+  console.log('control page: temperature calibration across multiple samples, fresh save and same-dialog failure recovery passed');
   tap(2);
   assert.strictEqual(elements.get('calTitle').textContent, '电池电压校正');
   assert.strictEqual(input.step, '0.001');
@@ -403,16 +442,15 @@ async function check() {
   const reviewInput = context.document.getElementById('calValue'),reviewModal = context.document.getElementById('calModal');
   tap(1); clickTime += 800;
   reviewInput.value = '25.5';
-  sampleId = 2; temperature10 = 260; await refresh();
+  const staleCal = delayStatus();
+  sampleId++; temperature10 = 260; await refresh();
+  staleCal.resolve({ok: true, json: async () => snapshot}); await staleCal.pending;
+  assert.strictEqual(elements.get('calCurrent').textContent, '设备当前温度 26.0 °C');
+  assert.strictEqual(reviewInput.value, '25.5');
   await submit();
-  assert.strictEqual(requests.at(-1).data.sampleId, 1);
-  assert.strictEqual(reviewModal.hidden, false);
-  assert.match(elements.get('calError').textContent, /温度样本已更新或过期/);
-  assert.strictEqual(temperature10, 260);
-  vm.runInContext('closeCalibration()', context);
-  tap(1); clickTime += 800; reviewInput.value = '25.5'; await submit();
-  assert.strictEqual(requests.at(-1).data.sampleId, 2);
+  assert.deepStrictEqual(requests.at(-1).data, {type: 'temperature', reference10: 255});
   assert.strictEqual(reviewModal.hidden, true);
+  assert.strictEqual(temperature10, 255);
   console.log('control page: stale status success/errors, learning confirmation and out-of-order polling passed');
   console.log('control page: five taps, calibration dialogs/precision/save/cancel/errors, routes, battery and shared carrier passed');
 }

@@ -27,6 +27,7 @@ void app_reset_rule(int slot);
 /* 学习开始/结束时通知现有 LED 任务，学习期间常亮。 */
 void app_set_learning(bool active);
 /* reference 为 0.1 ℃整数或 mV；热点开启时允许校准，提交后生效。
- * 温度 sample_id 必须匹配当前样本，有效期 20 秒；电压忽略 sample_id，有效期 5 秒且来自 AP。
+ * 温度使用最新有效样本，有效期 20 秒；sample_id 仅保留兼容和拒绝诊断，不要求匹配。
+ * 电压忽略 sample_id，有效期 5 秒且来自 AP。
  * storage_failed 区分存储失败和输入/样本错误，调用方必须传入有效指针。 */
 esp_err_t app_calibrate(bool battery, int reference, uint32_t sample_id, bool *storage_failed);

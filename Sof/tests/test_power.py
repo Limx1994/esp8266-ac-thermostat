@@ -232,6 +232,8 @@ void test_log(const char *tag, const char *fmt, ...) {
 #ifdef TEST_IDLE_PINS
     if (strstr(fmt, "battery=") || strstr(fmt, "battery read failed:"))
         snprintf(last_battery_log, sizeof(last_battery_log), "%s", record);
+    if (strstr(fmt, "temperature calibration applied:"))
+        snprintf(last_temp_cal_log, sizeof(last_temp_cal_log), "%s", record);
     if (strstr(fmt, "button_trace:")) {
         assert(critical_depth == 0 && !auto_sleep);
         assert(strstr(record, "levels=") && strstr(record, "intr=") &&
@@ -443,6 +445,7 @@ static unsigned wait_enter_logs, wait_done_logs, wait_key_logs;
 static unsigned conversion_enter_logs, conversion_done_logs, dispatch_logs;
 static unsigned release_enter_logs, release_done_logs;
 static char last_battery_log[512];
+static char last_temp_cal_log[512];
 void esp_log_level_set(const char *tag, int level) {
     assert(strcmp(tag, "*") == 0 && level == ESP_LOG_NONE);
 }
@@ -1311,13 +1314,10 @@ int main(void) {
     update_battery();
     assert(current.battery_valid);
     states[0].primed = true; trend.count = 3; last_send[0] = 123; send_recorded[0] = true;
-    int16_t previous_offset = temp_adjust10;
-    assert(app_calibrate(false, 280, 0, &storage_failed) == ESP_ERR_INVALID_STATE);
-    assert(app_calibrate(false, 280, current.temp_sample_id + 1, &storage_failed) == ESP_ERR_INVALID_STATE);
-    assert(temp_adjust10 == previous_offset);
-    assert(app_calibrate(false, 280, current.temp_sample_id, &storage_failed) == ESP_OK && !storage_failed);
+    assert(app_calibrate(false, 280, 0, &storage_failed) == ESP_OK && !storage_failed);
     assert(current.temp10 == 280 && temp_adjust10 == 20 && trend.count == 0 && !states[0].primed);
     assert(last_send[0] == 123 && send_recorded[0]);
+    assert(app_calibrate(false, 280, current.temp_sample_id + 1, &storage_failed) == ESP_OK && temp_adjust10 == 20);
     assert(app_calibrate(false, 280, current.temp_sample_id, &storage_failed) == ESP_OK && temp_adjust10 == 20);
     assert(app_calibrate(false, 461, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_ARG);
     assert(app_calibrate(false, 60, current.temp_sample_id, &storage_failed) == ESP_OK && temp_adjust10 == -200);
@@ -1474,6 +1474,17 @@ int main(void) {
     update_battery();
     assert(battery_off_samples == UINT32_MAX);
     puts("校准边界、存储失败、启动失败及采样计数饱和检查通过");
+    /* 打开后多次正常采温，旧编号和省略编号均使用最新基准。 */
+    const int16_t cal_temperatures[] = {240, 250, 260, 270};
+    temp_script = cal_temperatures; temp_count = 4;
+    run_control(46000, battery_ap, 1, false, false, false, 0);
+    assert(current.temp_sample_id == 4 && base_temp10 == 270);
+    assert(app_calibrate(false, 280, 1, &storage_failed) == ESP_OK && !storage_failed);
+    assert(temp_adjust10 == 10 && current.temp10 == 280);
+    assert(strstr(last_temp_cal_log, "sample=4 raw16=432 reference10=280 offset10=10 final10=280"));
+    assert(app_calibrate(false, 280, 0, &storage_failed) == ESP_OK && temp_adjust10 == 10);
+    temp_script = NULL; temp_count = 0;
+    puts("温度校准等待多次采样后使用最新基准及实际样本日志检查通过");
     ap = true; current.temp_valid = true;
     temp_sample_tick = xTaskGetTickCount();
     base_raw16 = 292; base_temp10 = sensor_temperature(base_raw16, 0);

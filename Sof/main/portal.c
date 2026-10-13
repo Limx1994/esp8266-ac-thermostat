@@ -261,12 +261,13 @@ static esp_err_t calibration_post(httpd_req_t *req)
     uint32_t sample_id = 0;
     if (!battery) {
         const cJSON *sample = cJSON_GetObjectItemCaseSensitive(json, "sampleId");
-        if (!cJSON_IsNumber(sample) || !(sample->valuedouble >= 1 && sample->valuedouble <= UINT32_MAX) ||
-            sample->valuedouble != (uint32_t)sample->valuedouble) {
+        if (sample && (!cJSON_IsNumber(sample) ||
+            !(sample->valuedouble >= 1 && sample->valuedouble <= UINT32_MAX) ||
+            sample->valuedouble != (uint32_t)sample->valuedouble)) {
             cJSON_Delete(json);
             return error_reply(req, "400 Bad Request", ESP_ERR_INVALID_ARG);
         }
-        sample_id = (uint32_t)sample->valuedouble;
+        if (sample) sample_id = (uint32_t)sample->valuedouble;
     }
     cJSON_Delete(json);
     bool storage_failed;

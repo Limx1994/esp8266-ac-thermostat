@@ -23,9 +23,9 @@
 
 ## 全量烧录与发布校验
 
-1.0E（2026-10-13 发布整理）延续默认分段烧录及 `python flash.py --full --port COM3`：从 `0x0` 写入 `build\auto\full_flash.bin`，要求镜像恰为 4 MB 且内容与当前分段固件一致。该操作会清除规则、红外编码、共享载波及网页校准参数；仅预检使用 `python flash.py --full --port COM3 --dry-run`。
+1.0F 延续默认分段烧录及 `python flash.py --full --port COM3`：从 `0x0` 写入 `build\auto\full_flash.bin`，要求镜像恰为 4 MB 且内容与当前分段固件一致。该操作会清除规则、红外编码、共享载波及网页校准参数；仅预检使用 `python flash.py --full --port COM3 --dry-run`。
 
-Release 附件包含分段 ZIP、完整 BIN/HEX 及 `SHA256SUMS.txt`；下载后用 `Get-FileHash -Algorithm SHA256` 与清单逐项比对。ZIP 内含布局、esptool、许可、TXT 操作说明及记录版本和提交的 `release_manifest.json`；解压后也须核对包内校验清单。发布验证检查 ZIP CRC、逐文件 SHA256 和包内分段/全量 dry-run。用户于 2026-10-12 确认全部功能实机通过；该反馈来自用户对当前功能的确认；本轮不重新连接设备或补造测量记录。
+Release 附件包含分段 ZIP、完整 BIN/HEX 及 `SHA256SUMS.txt`；下载后用 `Get-FileHash -Algorithm SHA256` 与清单逐项比对。ZIP 内含布局、esptool、许可、TXT 操作说明及记录版本和完整提交的 `release_manifest.json`；解压后也须核对包内校验清单。发布验证检查 ZIP CRC、逐文件 SHA256 和包内分段/全量 dry-run。2026-10-13 用户确认当前全部功能实机通过，包含温度校准修复；电流实测 200μA，测量边界见 [功耗验收](../README.md#功耗验收)。本轮不重新连接设备。
 
 ## SDK 定时器构建工具
 

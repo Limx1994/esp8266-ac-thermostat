@@ -318,8 +318,7 @@ esp_err_t app_calibrate(bool battery, int reference, uint32_t sample_id, bool *s
     TickType_t age = xTaskGetTickCount() - (battery ? battery_sample_tick : temp_sample_tick);
     bool valid = battery ? current.battery_valid && battery_sample_ap && base_battery_mv :
                            current.temp_valid;
-    if (!portal_is_on() || !valid || age > pdMS_TO_TICKS(battery ? 5000 : 20000) ||
-        (!battery && (!sample_id || sample_id != current.temp_sample_id))) {
+    if (!portal_is_on() || !valid || age > pdMS_TO_TICKS(battery ? 5000 : 20000)) {
         ESP_LOGW(TAG, "calibration rejected: type=%s sample=%u current=%u age_ticks=%u valid=%d",
                  battery ? "battery" : "temperature", (unsigned)sample_id,
                  (unsigned)current.temp_sample_id, (unsigned)age, valid);
@@ -353,7 +352,7 @@ esp_err_t app_calibrate(bool battery, int reference, uint32_t sample_id, bool *s
             temp_adjust10 = offset;
             current.temp10 = sensor_temperature(base_raw16, temp_adjust10);
             ESP_LOGI(TAG, "temperature calibration applied: sample=%u raw16=%d reference10=%d offset10=%d final10=%d",
-                     (unsigned)sample_id, (int)base_raw16, reference, offset, (int)current.temp10);
+                     (unsigned)current.temp_sample_id, (int)base_raw16, reference, offset, (int)current.temp10);
             memset(states, 0, sizeof(states));
             rule_trend_reset(&trend);
         }
