@@ -7,6 +7,8 @@ Sof/sdkconfig.old
 Sof/sdk_component.cmake
 **/__pycache__/
 *.py[cod]
+# AI 工作数据，不随发布仓库分发
+.workbuddy-ai/
 # 测量导出、额外下载工具与硬件生成文件
 Sof/*.csv
 Sof/tools/flash_download_tool/

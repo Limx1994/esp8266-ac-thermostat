@@ -1,0 +1,15 @@
+{
+  "globs": [
+    "README.md",
+    "AGENTS.md",
+    "Sof/README.md",
+    "Sof/ESP-12F硬件引脚与链路说明.md",
+    "Sof/ESP8266编译环境路径.md",
+    "Sof/tools/README.md",
+    "Sof/tools/esptool-v4.12.0/README.md"
+  ],
+  "config": {
+    "MD060": true,
+    "MD013": false
+  }
+}

@@ -11,9 +11,9 @@
 - [硬件引脚与接线](ESP-12F硬件引脚与链路说明.md) · [编译环境](ESP8266编译环境路径.md) · [烧录工具](tools/README.md)
 - [本地发布与验证状态](#本地发布)
 
-本版为 **1.0F（2026-10-13）**，标签 `v1.0F`；发布状态及附件以 [Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0F) 为准。温度校准保存使用最新有效样本，`sampleId` 可省略；框内读数随轮询更新，输入和失败重试留在原框。延续 GPIO16 学习控制、DHCP PAD 修正、温度链路校验及统一舍入；项目内 SDK 和应用、bootloader 固定新驱动继续使用。NVS 格式与采样周期兼容，正常固件采用 light sleep，启动深睡测试入口关闭。
+本版为 **1.0G（2026-10-20）**，标签 `v1.0G`；发布状态及附件以 [Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0G) 为准。HTTP 服务器停止增加 2 秒等待上限，超时返回错误并保留句柄供重试；DS18B20 写暂存器后补足 tWR 10 ms 等待；文档检查脚本纳入仓库，全新克隆可复现。延续 1.0F 温度校准保存（使用最新有效样本、`sampleId` 可省略）、GPIO16 学习控制、DHCP PAD 修正、温度链路校验及统一舍入；项目内 SDK 和应用、bootloader 固定新驱动继续使用。NVS 格式与采样周期兼容，正常固件采用 light sleep，启动深睡测试入口关闭。
 
-2026-10-13 用户确认当前全部功能实机通过，包含此次温度校准修复；电流实测 **200μA**。测量工况、仪器、接点及平均方式未提供，不推算续航；软件验证独立记录于 [本地发布](#本地发布)，测量边界见 [功耗验收](#功耗验收)。
+2026-10-13 用户确认全部功能实机通过，包含温度校准修复；电流实测 **200μA**，该确认针对 1.0F 镜像。1.0G 仅执行软件检查与发布附件校验，未连接设备、烧录或重新测量；测量工况、仪器、接点及平均方式未提供，不推算续航；软件验证独立记录于 [本地发布](#本地发布)，测量边界见 [功耗验收](#功耗验收)。
 
 Git 根目录为上层 `D:\空调温度`；本目录 `Sof` 仍是固件构建与测试入口。上层 `Ad` 保存硬件设计，`dxf-pdf` 保存元件资料和 DXF 文件。原有历史保留，迁移前版本的路径以当时树结构为准。
 
@@ -38,7 +38,7 @@ Git 根目录为上层 `D:\空调温度`；本目录 `Sof` 仍是固件构建与
 
 若误差达标，保留零偏移。若偏差随热点或充电状态明显变化，先解决安装受热，不能用固定偏移补偿；只有热平衡后的稳定偏差才做单点校准。在约 25 ℃求 `偏移℃ = 平均参考温度 − 平均原始温度`，四舍五入为 0.1 ℃的整数填入固件目录生成配置 `sdkconfig` 的 `CONFIG_APP_TEMP_OFFSET10`，再执行 `python build.py`。例如参考为 25.0 ℃、原始平均为 25.3 ℃时设为 `-3`，即减 0.3 ℃。范围为 −50～50（±5.0 ℃），不是允许误差；明显大偏差应先排错。`sdkconfig.defaults` 默认值为 0，不覆盖已有 `sdkconfig`，构建后须核对 `build\auto\config\sdkconfig.h` 的实际值。编译偏移不写入 NVS；0.5A 提供网页追加偏移，见 [网页隐藏校准](#网页隐藏校准)。
 
-固件在原始 1/16 ℃读数上合并编译偏移与网页偏移后，仅做一次四舍五入到 0.1 ℃；显示与规则判断共享同一结果。每次转换前读取并 CRC 校验 scratchpad 的分辨率，只有低于 12 位时才保留 TH/TL 并修正 RAM，读回确认后启动转换，不写传感器 EEPROM。核验/读回失败上报错误并阻止本次控制；结束读取对 CRC、设备未找到及 scratchpad 时序超时最多三次完整重读，并上报 GPIO 清理错误，转换后分辨率变回低位也拒绝该读数。仅支持用户确认的独立供电，供电检测异常直接拒绝转换；独立供电确认后发送转换命令，启动阶段不探测 busy；由主任务完整等待 750 ms 加 1 tick，结束确认 ready 再复位读取。CRC 通过后核验配置固定位、保留字节 5/7 和原始 −55～125 ℃范围；固定等待方式无法区分真实 85 ℃与上电默认值，保守拒绝原始 85 ℃读数；正常温控范围不依赖此值。日志记录转换前 raw/config/CRC，转换命令标记 `method=fixed-wait wait_ms=750`；启动 busy 探测及 `busy not observed` 警告已删除，真实结束状态或数据错误仍明确报错。状态检查不能代替实机验证，也不能保证识别转换期间的瞬时掉电。sensor 日志 `raw16`、`resolution=12`、`offset10`、`temperature10` 表示编译偏移后的基准；thermostat 日志记录样本编号、原始值、网页偏移、最终读数及 AP 状态，校准日志记录对应参考值。供电、转换状态、时隙、结构、范围和清理失败均明确上报；这些日志表示有效 scratchpad 已解码，最终成功还要求总线清理成功。静默 UART 配置下不输出运行诊断。
+固件在原始 1/16 ℃读数上合并编译偏移与网页偏移后，仅做一次四舍五入到 0.1 ℃；显示与规则判断共享同一结果。每次转换前读取并 CRC 校验 scratchpad 的分辨率，只有低于 12 位时才保留 TH/TL 并修正 RAM，写暂存器后等待 tWR 10 ms 再复位读回确认，之后才启动转换，不写传感器 EEPROM。核验/读回失败上报错误并阻止本次控制；结束读取对 CRC、设备未找到及 scratchpad 时序超时最多三次完整重读，并上报 GPIO 清理错误，转换后分辨率变回低位也拒绝该读数。仅支持用户确认的独立供电，供电检测异常直接拒绝转换；独立供电确认后发送转换命令，启动阶段不探测 busy；由主任务完整等待 750 ms 加 1 tick，结束确认 ready 再复位读取。CRC 通过后核验配置固定位、保留字节 5/7 和原始 −55～125 ℃范围；固定等待方式无法区分真实 85 ℃与上电默认值，保守拒绝原始 85 ℃读数；正常温控范围不依赖此值。日志记录转换前 raw/config/CRC，转换命令标记 `method=fixed-wait wait_ms=750`；启动 busy 探测及 `busy not observed` 警告已删除，真实结束状态或数据错误仍明确报错。状态检查不能代替实机验证，也不能保证识别转换期间的瞬时掉电。sensor 日志 `raw16`、`resolution=12`、`offset10`、`temperature10` 表示编译偏移后的基准；thermostat 日志记录样本编号、原始值、网页偏移、最终读数及 AP 状态，校准日志记录对应参考值。供电、转换状态、时隙、结构、范围和清理失败均明确上报；这些日志表示有效 scratchpad 已解码，最终成功还要求总线清理成功。静默 UART 配置下不输出运行诊断。
 
 校准后在约 18 ℃、30 ℃独立复核，并在三个温点分别检查热点开启/关闭、充电状态及休眠恢复后的读数与规则触发。仅在参考稳定的区间评估，配对温度误差须不超过 ±0.5 ℃；记录失败数量和原因，不将失败或缺失读数计作成功。若多温点仍不能达标，停止追加补偿，换用可追溯来源的 DS18B20 后重新核验。软件测试不能代替此项实机精度验收。
 
@@ -176,7 +176,7 @@ DHCP 生成源码将选项 `PAD`（0）按单字节跳过，不读取不存在�
 
 `sdkconfig.defaults` 设置 CPU 固定 80 MHz、晶振与 Flash 各 26 MHz、`CONFIG_PM_ENABLE=y`、HTTP 请求头上限 2048 字节和 URI 上限 1024 字节。已有 `sdkconfig` 不会被 defaults 覆盖，须同步选择 80 MHz；实际参数以构建生成的 `sdkconfig.h` 和 `flasher_args.json` 为准。
 
-项目 `components\esp_http_server` 覆盖 SDK 的路由、解析和 socket 错误处理，其余实现、头文件及 Kconfig 继续使用指定 SDK。末尾 `*` 匹配剩余路径，`/generate_204_*` 探测重定向至控制页，`/mmtls/*` 的 GET/POST 返回 404。不支持的协议起始字节直接关闭连接，以 INFO 记录原因；HTTP 解析失败返回错误并关闭连接，收发错误保留真实 `errno`。
+项目 `components\esp_http_server` 覆盖 SDK 的路由、解析和 socket 错误处理，其余实现、头文件及 Kconfig 继续使用指定 SDK。末尾 `*` 匹配剩余路径，`/generate_204_*` 探测重定向至控制页，`/mmtls/*` 的 GET/POST 返回 404。不支持的协议起始字节直接关闭连接，以 INFO 记录原因；HTTP 解析失败返回错误并关闭连接，收发错误保留真实 `errno`。`httpd_stop` 等待服务线程退出最多 2 秒，超时记录错误并返回 `ESP_ERR_TIMEOUT`，句柄保留供调用方重试，避免客户端慢速送字节使解析长时间占用控制任务。
 
 默认分段烧录保留未覆盖的 NVS；`python flash.py --full --port COM3` 从 `0x0` 写入 4 MB 完整镜像，会清除规则、红外码、载波和网页校准参数。全量入口核对容量与当前分段固件的一致性；可加 `--dry-run` 只预检。dry-run 不打开串口、不写 Flash。实际接线与烧录命令见 [工具说明](tools/README.md)；分段偏移以本次构建为准。完整 4 MB 镜像的未使用区域填 `0xFF`，整片写入会清除 NVS；保留规则和编码时使用分段烧录。
 
@@ -198,6 +198,7 @@ python -m unittest discover -s tests -p test_tools.py
 python -m unittest discover -s tests -p test_wifi_eval.py
 node --check tests\check_page.js
 node tests\check_page.js
+python tools\checks\check_docs.py
 python flash.py --port COM3 --dry-run
 python flash.py --full --port COM3 --dry-run
 git diff --check
@@ -206,6 +207,8 @@ git diff --check
 规则测试检查阈值、等号、首次满足、重复满足及禁用规则；功耗主机测试检查实际控制、传感器和红外代码的流程与错误处理；HTTP 主机测试检查路由、解析、请求体清理、超时与 socket 错误；完整 HTTP 主循环测试检查资源分配、启动停止及 socket 清理；DHCP/ARP/WiFi 测试检查实际生成源码、重试回退和缓存复位；驱动评估单测检查固定库来源、哈希、缺失/损坏拒绝及失败清理。串口测试检查自动选择条件；页面检查验证六个 API 路径、2 秒刷新、共享载波保存、隐藏校准及温度/电池错误显示。
 
 主机测试使用现有 GCC 和 SDK mocks，C 编译启用 `-Wall -Wextra -Werror`，产物保存在 `build_ascii\`。功耗测试需要本次构建生成的 SDK 副本，须先运行 `python build.py`。测试覆盖 80/160 MHz、基线/测量配置及温度偏移，另检查实际 SDK 定时器表、暂停/恢复与失败回退。`python tests\check_build.py` 核对应用与 bootloader 的固定驱动来源、完整 BIN/HEX 与版本，并用现有 `tests\startup_test.c` 和最小 SDK mock 直接编译启动诊断，不依赖覆盖工具。这些主机测试不测量实际睡眠、电流、红外波形或手机弹页；最新软件结果与用户实机确认见 [本地发布](#本地发布)。
+
+`python tools\checks\check_docs.py` 在仓库内复核全部 Git 跟踪 Markdown 的相对链接与锚点、凭据特征及源码行数上限，不依赖发布基线；Markdown 风格检查使用仓库内 `tools\checks\markdownlint-cli2.jsonc`，命令为 `npx markdownlint-cli2 --config tools\checks\markdownlint-cli2.jsonc`，需本机已安装该工具。
 
 ### 覆盖统计（停用）
 
@@ -251,6 +254,18 @@ git diff --check
 - 稳定性：连续运行至少 24 小时，记录采样周期、计时漂移、复位、异常和漏发/重复发送；报告失败与跳过数量及原因。
 
 ## 本地发布
+
+### 1.0G · 2026-10-20
+
+纳入两处时序与资源修复：`httpd_stop` 等待服务线程退出最多 2 秒，超时记录错误并返回 `ESP_ERR_TIMEOUT`、保留句柄供调用方重试，避免客户端慢速送字节使解析长时间占用控制任务；DS18B20 `ensure_resolution` 写暂存器后补足 tWR 10 ms，防止复位过早导致分辨率修正写入未生效。文档检查脚本 `tools\checks\check_docs.py` 与 `markdownlint-cli2.jsonc` 纳入仓库，全新克隆可复现；`tests\test_power.py` 按实际 `sdkconfig.h` 开关构造期望，`test_http_main.py` 增加线程停止超时用例。HTTP API、NVS 格式、采样周期与自动发送间隔不变。
+
+本轮生产固件构建通过（Ninja `-j 12`，8.1 秒）；14 个构建、功能与冒烟检查全部通过，失败 0、跳过 0。Python 单测 25 项通过（串口 6、工具 16、驱动评估 3）；规则、温度/功耗及 SDK 定时器、热点/HTTP/DHCP、页面语法与功能、固定驱动来源、镜像/启动、分段/全量烧录 dry-run 和 `git diff --check` 通过。`check_build` 确认 16 个固定文件哈希一致，镜像为 v1.0G、dio/4MB/26m，启动诊断通过。
+
+7 份 Markdown 通过 `check_docs.py`（相对链接、锚点、凭据特征、单文件 4800 行上限）与 markdownlint-cli2 检查，0 问题。测试数量来自本轮日志，日志位于 `build\release_1_0G_20261020\`，不纳入 Git。发布附件在标签对应的最终提交上重新构建，核验布局、BIN/HEX、ZIP CRC、逐文件 SHA256 和解压后的两种 dry-run，上传后核对远端提交与附件。
+
+[1.0G Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0G) 提供分段 ZIP、4 MB 完整 BIN/HEX 和 `SHA256SUMS.txt`；ZIP 内 `release_manifest.json` 记录版本与完整提交。分段烧录保留未覆盖的 NVS，完整镜像清除保存设置。旧标签、Release 和附件保留。
+
+本轮不连接设备、烧录或重新测量；实机结论仍以 2026-10-13 用户确认（含温度校准修复、电流 200μA）为依据，该确认对应 1.0F 镜像。以下各版本记录保留当时验证范围，不作为 1.0G 的测试统计。
 
 ### 1.0F · 2026-10-13
 
