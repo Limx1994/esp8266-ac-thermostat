@@ -176,6 +176,9 @@ static esp_err_t ensure_resolution(void)
     write_byte(data[3]);
     write_byte(data[4] | 0x60);
     if (slot_error != ESP_OK) return slot_error;
+    /* 写暂存器后必须等待 tWR=10 ms 才允许下一次复位；提前复位会使配置写入
+     * 失效，读回仍是旧值，且该错误不在 sensor_start 的重试范围内。 */
+    ets_delay_us(10000);
     err = read_scratchpad(verified);
     if (err != ESP_OK) return err;
     if (verified[2] != data[2] || verified[3] != data[3] ||

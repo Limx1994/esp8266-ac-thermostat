@@ -1832,7 +1832,7 @@ typedef int esp_err_t;
 typedef void *httpd_handle_t;
 typedef void (*httpd_work_fn_t)(void *);
 enum { ESP_OK, ESP_FAIL, ESP_ERR_INVALID_ARG, ESP_ERR_HTTPD_ALLOC_MEM,
-       ESP_ERR_HTTPD_TASK, THREAD_RUNNING, THREAD_STOPPED };
+       ESP_ERR_HTTPD_TASK, ESP_ERR_TIMEOUT, THREAD_RUNNING, THREAD_STOPPED };
 typedef struct { int unused; } httpd_uri_t;
 struct sock_db { int unused; };
 struct resp_hdr { int unused; };

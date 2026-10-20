@@ -403,8 +403,20 @@ esp_err_t httpd_stop(httpd_handle_t handle)
     }
 
     ESP_LOGD(TAG, LOG_FMT("sent control msg to stop server"));
+    /* Upper bound for leaving the server loop. A client that trickles request
+     * bytes keeps httpd_parse_req() busy for minutes, so an unbounded wait
+     * would stall the only control task. On timeout the handle is retained
+     * and the caller may retry. */
+    const int stop_wait_ms = 2000;
+    int waited_ms = 0;
     while (hd->hd_td.status != THREAD_STOPPED) {
+        if (waited_ms >= stop_wait_ms) {
+            ESP_LOGE(TAG, LOG_FMT("thread still running after %d ms; server retained"),
+                     stop_wait_ms);
+            return ESP_ERR_TIMEOUT;
+        }
         httpd_os_thread_sleep(100);
+        waited_ms += 100;
     }
 
     /* Release global user context, if not NULL */

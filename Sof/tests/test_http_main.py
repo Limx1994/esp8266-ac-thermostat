@@ -30,7 +30,7 @@ typedef int socklen_t;
 typedef void *httpd_handle_t;
 typedef void (*httpd_work_fn_t)(void *);
 enum { ESP_OK, ESP_FAIL, ESP_ERR_INVALID_ARG, ESP_ERR_HTTPD_ALLOC_MEM,
-       ESP_ERR_HTTPD_TASK, THREAD_RUNNING, THREAD_STOPPING, THREAD_STOPPED };
+       ESP_ERR_HTTPD_TASK, ESP_ERR_TIMEOUT, THREAD_RUNNING, THREAD_STOPPING, THREAD_STOPPED };
 typedef struct { int unused; } httpd_uri_t;
 struct sock_db { int unused; };
 struct resp_hdr { int unused; };
@@ -58,6 +58,7 @@ static int new_result, process_result, task_result, option_result, bind_result, 
 static unsigned long long read_mask;
 static unsigned char payload[128];
 static bool thread_mode;
+static bool stall_thread;
 static struct httpd_data *live;
 #define LOG_FMT(x) x
 #define ESP_LOGE(tag, ...) ((void)(tag))
@@ -153,7 +154,9 @@ TEST = r'''
 #include "mock.h"
 #include "__SOURCE__"
 static void httpd_os_thread_sleep(unsigned ms) {
- assert(ms==100); recv_result=sizeof(struct httpd_ctrl_data);
+ assert(ms==100);
+ if (stall_thread) return; /* A slow client keeps the thread out of the select loop. */
+ recv_result=sizeof(struct httpd_ctrl_data);
  read_mask=1ULL<<live->ctrl_fd; select_result=1; httpd_thread(live);
 }
 static void work(void *arg) { assert(arg==&work_calls); work_calls++; }
@@ -217,6 +220,9 @@ int main(void) {
  read_mask=1ULL<<live->listen_fd; accept_result=-1; assert(httpd_server(live)==ESP_OK);
  accept_result=20; assert(httpd_server(live)==ESP_OK && sessions[20]);
  read_mask=1ULL<<live->ctrl_fd; recv_result=0; assert(httpd_server(live)==ESP_OK);
+ stall_thread=true;
+ assert(httpd_stop(handle)==ESP_ERR_TIMEOUT && live->hd_td.status==THREAD_RUNNING);
+ stall_thread=false;
  live->config.global_user_ctx=malloc(1); live->config.global_transport_ctx=malloc(1);
  thread_mode=true; assert(httpd_stop(handle)==ESP_OK && exits==1); check_closed();
  reset(); assert(httpd_start(&handle,&cfg)==ESP_OK); live=handle;

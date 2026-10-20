@@ -1521,9 +1521,12 @@ static int fault_positions[3], fault_count, fault_next;
 static bool fail_level;
 static uint32_t bus_cycles, low_start;
 
+unsigned write_settle_calls;
+
 void ets_delay_us(uint32_t us) {
     assert(mode == GPIO_MODE_OUTPUT_OD);
-    assert(us == 410 && critical_depth == 0);
+    assert((us == 410 || us == 10000) && critical_depth == 0);
+    if (us == 10000) write_settle_calls++; /* DS18B20 tWR after Write Scratchpad. */
 }
 uint32_t soc_get_ccount(void) {
     assert(mode == GPIO_MODE_OUTPUT_OD && critical_depth == 1);
@@ -1751,6 +1754,7 @@ int main(void) {
         queue_result(0x0550, true); /* Configuration readback. */
         inputs[input_count++] = 0; /* Convert T presence. */
             assert(sensor_start(&external) == ESP_OK && external);
+        assert(write_settle_calls == (unsigned)(bits - 8)); /* tWR waited once per correction. */
         const uint8_t corrected[] = {0xcc, 0xb4, 0xcc, 0xbe, 0xcc, 0x4e,
                                      75, 70, 0x7f, 0xcc, 0xbe, 0xcc, 0x44};
         assert(command_count == 13 && memcmp(commands, corrected, 13) == 0);
@@ -2982,6 +2986,13 @@ int main(void) {
 '''
 
 
+def build_switches():
+    """Read the switches that actually produced build/auto, not a hardcoded pair."""
+    config = (ROOT / "build/auto/config/sdkconfig.h").read_text(encoding="utf-8")
+    return ("#define CONFIG_APP_DISABLE_DHCP_CLIENT_TIMERS 1" in config,
+            "#define CONFIG_APP_PAUSE_NETWORK_TIMERS 1" in config)
+
+
 def check_lwip_timers(gcc):
     sdk = Path(os.environ.get("IDF_PATH") or ROOT / "vendor/ESP8266_RTOS_SDK")
     original = (sdk / "components/lwip/lwip/src/core/timeouts.c").read_text(encoding="utf-8")
@@ -2990,15 +3001,19 @@ def check_lwip_timers(gcc):
              "  {DHCP_COARSE_TIMER_MSECS, HANDLER(dhcp_coarse_tmr)},\n"
              "  {DHCP_FINE_TIMER_MSECS, HANDLER(dhcp_fine_tmr)},\n#endif")
     assert original.count(block) == 1
-    expected = original.replace(block, "/* AP-only build: DHCP client cyclic timers disabled. */")
-    expected = expected.replace("static u32_t current_timeout_due_time;",
-                                "static u32_t current_timeout_due_time;\nstatic int app_timers_paused;")
-    expected = expected.replace("if (!tcpip_tcp_timer_active && (tcp_active_pcbs || tcp_tw_pcbs))",
-                                "if (!app_timers_paused && !tcpip_tcp_timer_active && (tcp_active_pcbs || tcp_tw_pcbs))")
-    expected = expected.replace("  cyclic->handler();", "  if (app_timers_paused) return;\n  cyclic->handler();")
-    fragment = (ROOT / "tools/lwip_timers.inc").read_text(encoding="utf-8")
-    marker = "#else /* LWIP_TIMERS && !LWIP_TIMERS_CUSTOM */"
-    expected = expected.replace(marker, fragment + "\n" + marker)
+    dhcp_disabled, pause_enabled = build_switches()
+    expected = original
+    if dhcp_disabled:
+        expected = expected.replace(block, "/* AP-only build: DHCP client cyclic timers disabled. */")
+    if pause_enabled:
+        expected = expected.replace("static u32_t current_timeout_due_time;",
+                                    "static u32_t current_timeout_due_time;\nstatic int app_timers_paused;")
+        expected = expected.replace("if (!tcpip_tcp_timer_active && (tcp_active_pcbs || tcp_tw_pcbs))",
+                                    "if (!app_timers_paused && !tcpip_tcp_timer_active && (tcp_active_pcbs || tcp_tw_pcbs))")
+        expected = expected.replace("  cyclic->handler();", "  if (app_timers_paused) return;\n  cyclic->handler();")
+        fragment = (ROOT / "tools/lwip_timers.inc").read_text(encoding="utf-8")
+        marker = "#else /* LWIP_TIMERS && !LWIP_TIMERS_CUSTOM */"
+        expected = expected.replace(marker, fragment + "\n" + marker)
     assert generated == expected
     prefix = r'''
 #include <assert.h>
@@ -3064,7 +3079,10 @@ int main(void) {
     return 0;
 }
 '''
-    for disabled, source in [(0, original), (1, generated)]:
+    variants = [(0, original)]
+    if dhcp_disabled:
+        variants.append((1, generated))
+    for disabled, source in variants:
         table = re.search(r"const struct lwip_cyclic_timer lwip_cyclic_timers\[\] = \{.*?\n\};", source, re.S)
         init = re.search(r"void sys_timeouts_init\(void\)\n\{.*?\n\}", source, re.S)
         assert table and init
@@ -3075,7 +3093,8 @@ int main(void) {
                         f"-DTEST_CLIENT_DISABLED={disabled}", str(path), "-o", str(exe)], check=True, cwd=ROOT)
         subprocess.run([str(exe)], check=True, cwd=ROOT)
 
-    check_network_pause(gcc, generated, prefix, fragment)
+    if pause_enabled:
+        check_network_pause(gcc, generated, prefix, fragment)
 
 
 def check_network_pause(gcc, source, prefix, fragment):
