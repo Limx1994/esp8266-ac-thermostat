@@ -111,8 +111,11 @@ esp_irqflag_t soc_save_local_irq(void);
 void soc_restore_local_irq(esp_irqflag_t);
 extern volatile uint32_t test_rtc_counter;
 #define RTC_SLP_CNT_VAL 0
+#define RTC_USER_BASE 0x60001200
 uint32_t test_read_reg(uint32_t);
 #define REG_READ(reg) test_read_reg(reg)
+void test_write_reg(uint32_t, uint32_t);
+#define REG_WRITE(reg, val) test_write_reg((reg), (val))
 extern uint32_t g_esp_ticks_per_us;
 uint32_t soc_get_ccompare(void);
 #define CONFIG_ESP_CONSOLE_UART_NUM 0
@@ -165,6 +168,7 @@ esp_err_t gpio_isr_handler_remove(gpio_num_t);
 esp_err_t gpio_install_isr_service(int);
 esp_err_t esp_pm_configure(const void *);
 esp_err_t esp_sleep_enable_gpio_wakeup(void);
+void esp_deep_sleep(uint64_t);
 void esp_sleep_lock(void);
 void esp_sleep_unlock(void);
 int64_t esp_timer_get_time(void);
@@ -474,6 +478,10 @@ static bool fail_pm_restore, fail_led_task, frozen_ticks, missing_ir;
 static bool fail_portal_stop_once;
 static bool fail_portal_start_once, boot_held_s1;
 static bool boot_ir_busy;
+static uint32_t rtc_latch_words[3];   /* 0x60001200 RTC 用户内存锁存后备存储 */
+static uint64_t deep_sleep_arg;
+static int deep_sleep_calls;
+static bool latch_boot, latch_preserved;
 static uint32_t report_delay;
 static unsigned zero_waits;
 static void advance_time(uint32_t target);
@@ -522,6 +530,8 @@ static void advance_time(uint32_t target) {
         if (ev.action == 5) { ap_used = true; ap_start = now_ms; }
         else if (ev.action == 6) { /* Status polling is not an action. */ }
         else if (ev.action == 7) { assert(ap); dns_failed = true; }
+        else if (ev.action == 8) adc_raw = (uint16_t)ev.hold;
+        else if (ev.action == 9) adc_error = (esp_err_t)ev.hold;
         else if (ev.action == 3 || ev.action == 4) ir_busy = ev.action == 3;
         else {
             int pin = ev.action == 1 ? 12 : 13;
@@ -639,6 +649,23 @@ esp_err_t gpio_wakeup_enable(int pin, int type) {
     GPIO.pin[pin].int_type = type; GPIO.pin[pin].wakeup_enable = true; return ESP_OK;
 }
 esp_err_t esp_sleep_enable_gpio_wakeup(void) { return boot_fault == 14 ? ESP_FAIL : ESP_OK; }
+uint32_t test_read_reg(uint32_t reg) {
+    if (reg == RTC_USER_BASE) return rtc_latch_words[0];
+    if (reg == RTC_USER_BASE + 4) return rtc_latch_words[1];
+    assert(reg == RTC_USER_BASE + 8);
+    return rtc_latch_words[2];
+}
+void test_write_reg(uint32_t reg, uint32_t value) {
+    if (reg == RTC_USER_BASE) { rtc_latch_words[0] = value; return; }
+    if (reg == RTC_USER_BASE + 4) { rtc_latch_words[1] = value; return; }
+    assert(reg == RTC_USER_BASE + 8);
+    rtc_latch_words[2] = value;
+}
+_Noreturn void esp_deep_sleep(uint64_t time_us) {
+    deep_sleep_calls++;
+    deep_sleep_arg = time_us;
+    longjmp(finished, 3); /* 模拟永不返回：1=正常结束 2=abort 3=深睡 */
+}
 esp_err_t esp_pm_configure(const void *cfg) {
     pm_calls++;
     bool enable = ((const esp_pm_config_esp8266_t *)cfg)->light_sleep_enable;
@@ -761,6 +788,9 @@ static void run_control(uint32_t duration, const event_t *script, size_t count,
     adc_sleep_seen = false;
     battery_ap_active = battery_after_ap = false;
     battery_off_tick = battery_off_samples = 0;
+    battery_low_streak = 0; battery_sleep_armed = false; battery_sleep_mv = 0;
+    deep_sleep_calls = 0; deep_sleep_arg = 0;
+    if (!latch_preserved) memset(rtc_latch_words, 0, sizeof(rtc_latch_words));
     last_battery_log[0] = '\0';
     button_count[0] = button_count[1] = 0;
     wait_enter_logs = wait_done_logs = wait_key_logs = 0;
@@ -781,6 +811,11 @@ static void run_control(uint32_t duration, const event_t *script, size_t count,
     memset(button_wakes, 0, sizeof(button_wakes));
     now_ms = notified = 0; start_tick = base; end_ms = duration;
     GPIO.in = (boot_held_s1 ? 0 : 1U << 12) | (1U << 13);
+    if (latch_boot) {
+        rtc_latch_words[0] = RTC_LATCH_MAGIC;
+        rtc_latch_words[1] = ~RTC_LATCH_MAGIC;
+        rtc_latch_words[2] = (3446U << 16) | 3U;
+    }
     events = script; event_count = count; event_pos = 0;
     if (!setjmp(finished)) app_main();
     for (int i = 1; i < sample_count; i++)
@@ -1143,6 +1178,66 @@ int main(void) {
     adc_raw = UINT16_MAX;
     run_control(61000, NULL, 0, false, false, false, 0);
     assert(!current.battery_valid && current.battery_error == ESP_ERR_INVALID_RESPONSE);
+    /* 低电压永久深睡锁存：3 次确认、streak 重置、复位回睡、POR 恢复、IR 推迟。
+     * adc=673：boot 相位 3420 mV、AP 相位 3446 mV，均低于 3450；adc=855 为正常电压。 */
+    {
+        /* a) 电压始终正常：不触发、不写锁存。 */
+        adc_raw = 855;
+        const event_t normal_key[] = {{1000,1,0}};
+        run_control(7000, normal_key, 1, false, false, false, 0);
+        assert(deep_sleep_calls == 0 && battery_low_streak == 0 && !battery_sleep_armed);
+        assert(!battery_sleep_latch_valid() && rtc_latch_words[0] == 0);
+
+        /* b) 连续 2 次低于后回升：streak 重置、不触发。 */
+        adc_raw = 673;
+        const event_t recover[] = {{1000,1,0},{2500,8,855}};
+        run_control(7000, recover, 2, false, false, false, 0);
+        assert(deep_sleep_calls == 0 && battery_low_streak == 0 && !battery_sleep_armed);
+        assert(!battery_sleep_latch_valid());
+
+        /* c) 连续 3 次低于：armed → 快闪约 4.8 s → 停热点 → 写锁存 → esp_deep_sleep(0)。 */
+        adc_raw = 673;
+        const event_t ap_on[] = {{1000,1,0}};
+        run_control(130000, ap_on, 1, false, false, false, 0);
+        assert(deep_sleep_calls == 1 && deep_sleep_arg == 0 && ap_stops == 1);
+        assert(stopped_at >= 8700 && stopped_at <= 9300);
+        assert(rtc_latch_words[0] == RTC_LATCH_MAGIC && rtc_latch_words[1] == ~RTC_LATCH_MAGIC);
+        assert((rtc_latch_words[2] >> 16) == 3446 && (rtc_latch_words[2] & 0xFFFF) == 3);
+        assert(battery_reads == 3 && battery_sleep_armed && battery_sleep_mv == 3446);
+
+        /* c2) 锁存跨复位保持：任何复位立即回睡，无采样、无热点、无 LED 快闪。 */
+        latch_preserved = true;
+        run_control(1000, NULL, 0, false, false, false, 0);
+        latch_preserved = false;
+        assert(deep_sleep_calls == 1 && battery_reads == 0 && sample_count == 0 && ap_starts == 0);
+        /* c3) POR：锁存存储清零后正常启动，电压仍低则重新计数。 */
+        adc_raw = 673;
+        run_control(1000, NULL, 0, false, false, false, 0);
+        assert(deep_sleep_calls == 0 && sample_count == 1 && !battery_sleep_latch_valid());
+
+        /* d) 预置锁存：app_main 最早期直接深睡，先于全部初始化。 */
+        latch_boot = true;
+        unsigned before_latch_abort = abort_calls;
+        run_control(1000, NULL, 0, false, false, false, 0);
+        latch_boot = false;
+        assert(deep_sleep_calls == 1 && deep_sleep_arg == 0 && abort_calls == before_latch_abort);
+        assert(battery_reads == 0 && sample_count == 0 && ap_starts == 0 && !ap);
+
+        /* e) ADC 错误打断连续计数：错误后重新计 1 次，不触发。 */
+        adc_raw = 673;
+        const event_t adc_err[] = {{1000,1,0},{3500,9,1},{4500,9,0}};
+        run_control(7000, adc_err, 3, false, false, false, 0);
+        assert(deep_sleep_calls == 0 && !battery_sleep_latch_valid());
+        assert(battery_reads == 4 && battery_low_streak == 1 && !battery_sleep_armed);
+
+        /* f) 触发时 IR 忙碌：推迟到红外空闲（9000 ms）后才快闪并休眠。 */
+        adc_raw = 673;
+        const event_t ir_defer[] = {{1000,1,0},{2000,3,0},{9000,4,0}};
+        run_control(130000, ir_defer, 3, false, false, false, 0);
+        assert(deep_sleep_calls == 1 && deep_sleep_arg == 0 && ap_stops == 1);
+        assert(stopped_at >= 13700 && stopped_at <= 14300);
+        assert(battery_sleep_armed && battery_sleep_latch_valid());
+    }
     adc_raw = 855;
     led_test = true; led_handle = (void *)2;
     for (led_flow = 1; led_flow <= 2; led_flow++) {
@@ -1493,6 +1588,7 @@ int main(void) {
     assert(sensor_temperature(-4, 3) == 1);
     assert(sensor_temperature(4, -3) == -1);
     puts("power control: web calibration persistence/failures/freshness, state voltage, trend, LED, battery and AP lifecycle passed");
+    puts("power control: low-battery latch streak/reset, RTC persistence across reset, POR recovery, deep sleep and IR deferral passed");
     return 0;
 }
 '''

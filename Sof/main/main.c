@@ -58,6 +58,9 @@ static int16_t base_raw16;
 static uint16_t base_battery_mv;
 static TickType_t temp_sample_tick, battery_sample_tick;
 static bool battery_sample_ap;
+static unsigned battery_low_streak;
+static bool battery_sleep_armed;   /* 已达低电压阈值，等红外空闲后休眠 */
+static uint16_t battery_sleep_mv;  /* 触发时的最终校准电压 */
 
 #ifdef CONFIG_APP_QUIET_UART
 static int quiet_log(int ch)
@@ -101,6 +104,14 @@ static esp_err_t init_idle_pins(void)
 #define BATTERY_AP_ADC_X2 1404U
 /* 2026-10-10：11 次 ADC 均值 811.09、实测 3795 mV，扣除网页比例 3794/3790。 */
 #define BATTERY_SLEEP_ADC_X2 1709U
+/* 低电量永久休眠：连续 3 次有效采样低于 3450 mV 触发，仅断电重装电池（POR）恢复。 */
+#define BATTERY_SLEEP_THRESHOLD_MV 3450U
+#define BATTERY_SLEEP_STREAK_LIMIT 3U
+/* RTC 用户内存锁存（0x60001200）：magic+反码强校验；data 高 16 位为触发时 mV、低 16 位为 streak。 */
+#define RTC_LATCH_MAGIC 0x6C6F7762U /* "lowb" */
+#define RTC_LATCH_REG_MAGIC (RTC_USER_BASE)
+#define RTC_LATCH_REG_INV   (RTC_USER_BASE + 4)
+#define RTC_LATCH_REG_DATA  (RTC_USER_BASE + 8)
 
 static esp_err_t check_cpu_freq(void)
 {
@@ -472,6 +483,57 @@ static void update_battery(void)
                  battery_base, (unsigned)voltage.reference_mv, (unsigned)voltage.base_mv,
                  sample_phase, (unsigned)(ap_on ? 0 : battery_off_samples), (unsigned)off_ms);
     }
+    /* 连续有效采样低于阈值才触发；ADC 错误或电压回升都打断连续证据。 */
+    if (battery_err == ESP_OK && battery_mv < BATTERY_SLEEP_THRESHOLD_MV) {
+        if (battery_low_streak < BATTERY_SLEEP_STREAK_LIMIT) battery_low_streak++;
+        if (battery_low_streak >= BATTERY_SLEEP_STREAK_LIMIT && !battery_sleep_armed) {
+            battery_sleep_armed = true;
+            battery_sleep_mv = battery_mv;
+            ESP_LOGE(TAG, "battery low lockout armed: mv=%u streak=%u; sleep deferred until IR idle",
+                     battery_mv, battery_low_streak);
+        }
+    } else if (battery_low_streak) {
+        battery_low_streak = 0;
+        ESP_LOGW(TAG, "battery low streak reset");
+    }
+}
+
+static bool battery_sleep_latch_valid(void)
+{
+    uint32_t magic = REG_READ(RTC_LATCH_REG_MAGIC);
+    return magic == RTC_LATCH_MAGIC && REG_READ(RTC_LATCH_REG_INV) == ~magic;
+}
+
+/* 写序 data -> 反码 -> magic 最后：任意时刻断电只会留下无效锁存（等同 POR 正常启动），无假阳性。 */
+static void battery_sleep_latch_write(uint16_t final_mv, unsigned streak)
+{
+    REG_WRITE(RTC_LATCH_REG_DATA, (uint32_t)final_mv << 16 | (streak & 0xFFFFU));
+    REG_WRITE(RTC_LATCH_REG_INV, ~RTC_LATCH_MAGIC);
+    REG_WRITE(RTC_LATCH_REG_MAGIC, RTC_LATCH_MAGIC);
+}
+
+/* 终态：无限期深睡。任何复位（软复位/WDT/外部 RST/深睡唤醒）经 RTC 锁存回睡，仅 POR（扣电池）恢复。 */
+static void enter_low_battery_sleep(void)
+{
+    ESP_LOGE(TAG, "battery low %u mV: entering indefinite deep sleep; reinstall battery to recover",
+             battery_sleep_mv);
+    /* 先解除红外学习驻留再熄灯，确保 led_task 停靠后由本任务接管 GPIO2 快闪。 */
+    app_set_learning(false);
+    set_led_enabled(false);
+    ESP_ERROR_CHECK(gpio_set_level(GPIO_NUM_2, 1));
+    for (unsigned i = 0; i < 16; i++) { /* 约 4.8 s 快闪：150 ms 亮 / 150 ms 灭 */
+        ESP_ERROR_CHECK(gpio_set_level(GPIO_NUM_2, 0));
+        vTaskDelay(pdMS_TO_TICKS(150));
+        ESP_ERROR_CHECK(gpio_set_level(GPIO_NUM_2, 1));
+        vTaskDelay(pdMS_TO_TICKS(150));
+    }
+    if (portal_is_on()) {
+        esp_err_t err = portal_stop(); /* 尽力一次，失败不阻塞休眠 */
+        if (err != ESP_OK) ESP_LOGE(TAG, "portal stop before sleep: %s", esp_err_to_name(err));
+    }
+    battery_sleep_latch_write(battery_sleep_mv, battery_low_streak);
+    esp_deep_sleep(0);
+    abort(); /* Should never return. */
 }
 
 static TickType_t update_temp(void)
@@ -581,6 +643,14 @@ void app_main(void)
     abort(); /* Should never return. */
 #endif
 
+    /* 低电压锁存有效：任何复位后立即回到无限期深睡并跳过全部初始化；仅 POR（扣电池）可恢复。 */
+    if (battery_sleep_latch_valid()) {
+        ESP_LOGE(TAG, "battery low latch valid (final=%u mV): returning to deep sleep; power cycle to recover",
+                 (unsigned)(REG_READ(RTC_LATCH_REG_DATA) >> 16));
+        esp_deep_sleep(0);
+        abort(); /* Should never return. */
+    }
+
     ESP_LOGI(TAG, "starting");
     main_handle = xTaskGetCurrentTaskHandle();
     rule_trend_reset(&trend);
@@ -685,6 +755,9 @@ void app_main(void)
             close_pending = err != ESP_OK;
             if (err != ESP_OK) ESP_LOGE(TAG, "portal stop request: %s", esp_err_to_name(err));
         }
+        /* 低电压已触发：红外一旦空闲立即进入无限期深睡；等待期间正常温控继续。 */
+        if (battery_sleep_armed && !ir_is_busy())
+            enter_low_battery_sleep();
         if (s1 || s2) {
             trace_buttons("button-action-done", 0, 0);
             set_led_enabled(portal_is_on());
@@ -739,6 +812,7 @@ void app_main(void)
             if (remaining < wait) wait = remaining;
             if (close_pending && wait > pdMS_TO_TICKS(100)) wait = pdMS_TO_TICKS(100);
         }
+        if (battery_sleep_armed && wait > pdMS_TO_TICKS(100)) wait = pdMS_TO_TICKS(100);
         if (release_pending && wait > pdMS_TO_TICKS(20)) wait = pdMS_TO_TICKS(20);
         bool allow_sleep = !portal_is_on() && !ir_is_busy() && !release_pending;
         bool trace_wait = !portal_is_on() && wait && !release_pending;
