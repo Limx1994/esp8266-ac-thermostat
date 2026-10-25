@@ -267,7 +267,7 @@ git diff --check
 
 本轮生产固件构建通过（Ninja `-j 12`，10.2 秒，应用 BIN 549,936 字节）；构建、功能与冒烟检查全部通过，失败 0、跳过 0。Python 单测 25 项通过（串口 6、工具 16、驱动评估 3）；功耗回归 69 项、规则、热点/HTTP/DHCP、页面语法与功能、固定驱动来源、镜像/启动诊断、分段/全量烧录 dry-run 和 `git diff --check` 通过。`check_build` 确认 16 个固定文件哈希一致，镜像为 v1.0I、dio/4MB/26m，启动诊断通过。低电压锁存场景覆盖正常、电压回升重置、连续 3 次锁存、复位保持、上电复位恢复、预置锁存、ADC 错误中断计数及红外忙碌推迟休眠；网页校准流程用例按 3.6 V 阈值注入 ADC 错误，避免 3595 mV 样本误触发锁存。
 
-7 份 Markdown 通过 `check_docs.py`（相对链接、锚点、凭据特征、单文件 4800 行上限）检查；markdownlint-cli2 本机未安装，本轮未执行，仓库内 `check_docs.py` 为入库检查。测试数量来自本轮日志。发布附件在标签对应的最终提交上重新构建，核验布局、BIN/HEX、ZIP CRC、逐文件 SHA256 和解压后的两种 dry-run，上传后核对远端提交与附件。
+Git 跟踪 Markdown 全部通过 `check_docs.py`（相对链接、锚点、凭据特征、单文件 4800 行上限）检查；markdownlint-cli2 本机未安装，本轮未执行，仓库内 `check_docs.py` 为入库检查。测试数量来自本轮日志。发布附件在标签对应的最终提交上重新构建，核验布局、BIN/HEX、ZIP CRC、逐文件 SHA256 和解压后的两种 dry-run，上传后核对远端提交与附件。
 
 [1.0I Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0I)
 
