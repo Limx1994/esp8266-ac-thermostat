@@ -1179,7 +1179,7 @@ int main(void) {
     run_control(61000, NULL, 0, false, false, false, 0);
     assert(!current.battery_valid && current.battery_error == ESP_ERR_INVALID_RESPONSE);
     /* 低电压永久深睡锁存：3 次确认、streak 重置、复位回睡、POR 恢复、IR 推迟。
-     * adc=673：boot 相位 3420 mV、AP 相位 3446 mV，均低于 3450；adc=855 为正常电压。 */
+     * adc=673：boot 相位 3420 mV、AP 相位 3446 mV，均低于 3600；adc=855 为正常电压。 */
     {
         /* a) 电压始终正常：不触发、不写锁存。 */
         adc_raw = 855;
@@ -1377,7 +1377,9 @@ int main(void) {
     assert(app_calibrate(false, 501, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_ARG && !storage_failed);
     assert(app_calibrate(true, 2499, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_ARG);
     adc_raw = 702;
-    run_control(16000, battery_ap, 1, false, false, false, 0);
+    /* 3595 mV 已低于永久休眠阈值：注入 ADC 错误打断连续计数，避免校准流程被锁存中断。 */
+    const event_t cal_battery_ap[] = {{1000,1,0},{3500,9,1},{4500,9,0},{7500,9,1},{8500,9,0},{11500,9,1},{12500,9,0}};
+    run_control(16000, cal_battery_ap, 7, false, false, false, 0);
     assert(base_battery_mv == 3595 && base_temp10 == 260);
     uint32_t saved_now = now_ms;
     TickType_t saved_temp_tick = temp_sample_tick;
@@ -1425,7 +1427,7 @@ int main(void) {
     now_ms += 21000;
     assert(app_calibrate(false, 270, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_STATE);
     assert(app_calibrate(true, 3900, current.temp_sample_id, &storage_failed) == ESP_ERR_INVALID_STATE);
-    run_control(16000, battery_ap, 1, false, false, false, 0);
+    run_control(16000, cal_battery_ap, 7, false, false, false, 0);
     assert(temp_adjust10 == 20 && current.temp10 == 280 && current.battery_mv == 4000);
     rule_open_error = ESP_FAIL;
     assert(app_calibrate(false, 270, current.temp_sample_id, &storage_failed) == ESP_FAIL && storage_failed);

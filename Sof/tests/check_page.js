@@ -19,7 +19,7 @@ assert.ok(html.includes('S2关闭热点进入休眠，每60秒测温并按规则
 assert.ok(!html.includes('S2暂停温控'));
 assert.ok(html.includes('休眠中两键都可唤醒，S1开关Wi-Fi热点'));
 assert.ok(html.includes("id='lowBattery' role='status' hidden"));
-assert.ok(html.includes('低于3.45 V设备将自动深度休眠，需重新安装电池恢复'));
+assert.ok(html.includes('低于3.6 V设备将自动深度休眠，需重新安装电池恢复'));
 assert.ok(html.includes('.modal section{box-sizing:border-box;width:100%;max-width:340px;max-height:100%;overflow-y:auto'));
 assert.ok(html.includes('热点开启时暂停自动温控，可手动测试红外'));
 assert.ok(html.includes('关闭后每60秒采温。首次满足规则即发送'));
@@ -105,11 +105,11 @@ async function check() {
   assert.strictEqual(elements.get('temperature').textContent, '当前温度 22.0 °C');
   assert.strictEqual(elements.get('battery').textContent, '电池电压 4.20 V');
   assert.strictEqual(elements.get('lowBattery').hidden, true);
-  // 验证 3.5 V 边界及读数失败后的提示恢复，防止无效读数触发低电量告警。
-  for (const voltage of [3501, 3500, 3499, 3400]) {
+  // 验证 3.7 V 边界及读数失败后的提示恢复，防止无效读数触发低电量告警。
+  for (const voltage of [3701, 3700, 3699, 3400]) {
     batteryMv = voltage;
     await refresh();
-    assert.strictEqual(elements.get('lowBattery').hidden, voltage >= 3500);
+    assert.strictEqual(elements.get('lowBattery').hidden, voltage >= 3700);
   }
   batteryValid = false;
   await refresh();

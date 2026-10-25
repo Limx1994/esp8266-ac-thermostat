@@ -104,8 +104,8 @@ static esp_err_t init_idle_pins(void)
 #define BATTERY_AP_ADC_X2 1404U
 /* 2026-10-10：11 次 ADC 均值 811.09、实测 3795 mV，扣除网页比例 3794/3790。 */
 #define BATTERY_SLEEP_ADC_X2 1709U
-/* 低电量永久休眠：连续 3 次有效采样低于 3450 mV 触发，仅断电重装电池（POR）恢复。 */
-#define BATTERY_SLEEP_THRESHOLD_MV 3450U
+/* 低电量永久休眠：连续 3 次有效采样低于 3600 mV 触发，仅断电重装电池（POR）恢复。 */
+#define BATTERY_SLEEP_THRESHOLD_MV 3600U
 #define BATTERY_SLEEP_STREAK_LIMIT 3U
 /* RTC 用户内存锁存（0x60001200）：magic+反码强校验；data 高 16 位为触发时 mV、低 16 位为 streak。 */
 #define RTC_LATCH_MAGIC 0x6C6F7762U /* "lowb" */
