@@ -3,3 +3,6 @@ Ad/PCB_Project.PrjPcb whitespace=-blank-at-eof
 
 # SDK 快照按原始字节保存，避免 checkout 换行转换破坏 SHA256
 Sof/vendor/ESP8266_RTOS_SDK/** -text
+
+# PowerShell 脚本：UTF-8 BOM + CRLF，保证 Windows PowerShell 5.1 正确解析中文
+*.ps1 text eol=crlf
