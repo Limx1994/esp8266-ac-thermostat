@@ -36,6 +36,20 @@ class FlashPortTest(unittest.TestCase):
     def test_explicit_slow_baud(self):
         self.check_baud(["--baud", "115200"], 115200)
 
+    # dry-run 不应扫描串口：未指定 --port 时也必须成功。
+    def test_dry_run_without_port(self):
+        segments = [(0x10000, "ac_thermostat.bin",
+                     Path("ac_thermostat.bin"), 4096)]
+        with patch.object(flash.sys, "argv", ["flash.py", "--dry-run"]), \
+                patch.object(flash, "read_layout",
+                             return_value=("dio", "4MB", "26m", segments)), \
+                patch.object(flash.winreg, "OpenKey",
+                             side_effect=AssertionError("不应扫描串口")), \
+                patch.object(flash.subprocess, "run") as run, \
+                redirect_stdout(io.StringIO()):
+            flash.main()
+        run.assert_not_called()
+
     # 通过模拟端口列表覆盖唯一选择和歧义拒绝分支。
     def check_ports(self, names, expected=None):
         key = MagicMock()

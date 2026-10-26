@@ -71,6 +71,7 @@ typedef int (*httpd_pending_func_t)(httpd_handle_t, int);
 typedef struct {
     uint16_t max_uri_handlers, max_open_sockets, max_resp_headers;
     bool lru_purge_enable;
+    int recv_wait_timeout;
 } httpd_config_t;
 typedef struct httpd_req {
     httpd_handle_t handle;

@@ -455,6 +455,8 @@ esp_err_t portal_start(void)
     config.max_open_sockets = 5;
     config.lru_purge_enable = true;
     config.max_uri_handlers = 16;
+    /* 收包超时必须短于 httpd_stop 的 2000 ms 上限，否则半开连接会让停止超时。 */
+    config.recv_wait_timeout = 1;
     err = httpd_start(&server, &config);
     if (err != ESP_OK) goto fail_wifi;
     /* 同时注册手机探测、后台请求和控制 API；通配路径依赖本地 SDK URI 覆盖。 */

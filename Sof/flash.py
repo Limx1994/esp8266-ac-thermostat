@@ -558,7 +558,10 @@ def main():
     mode, size_text, freq, segments = read_layout()
     if args.full:
         segments = read_full_image(size_text, segments)
-    port = resolve_port(args.port)
+    # dry-run 不访问串口：未显式指定端口时用占位符，真正烧录前才解析。
+    port = args.port if args.dry_run else resolve_port(args.port)
+    if not port:
+        port = "<自动选择>"
 
     print(
         f"  端口：{port}，波特率：{args.baud}；"
