@@ -15,7 +15,7 @@
   0x10000 .\build\auto\ac_thermostat.bin
 ```
 
-不传 `--port` 时可运行 `python flash.py`：脚本会读取系统串口列表，仅在恰有两个串口且其中一个是 COM1 时选择另一个，其他情况报错，请使用 `--port COMx` 明确指定。`python flash.py --dry-run` 也会自动选择串口，但不会打开串口或写入 Flash。
+不传 `--port` 时可运行 `python flash.py`：脚本会读取系统串口列表，仅在恰有两个串口且其中一个是 COM1 时选择另一个，其他情况报错，请使用 `--port COMx` 明确指定。`python flash.py --dry-run` 不解析串口：未指定 `--port` 时命令中显示占位符 `<自动选择>`，不打开串口、不写入 Flash；自动选择只在真实烧录时发生。
 
 默认烧录波特率为 `460800`，esptool 默认启用压缩传输。连接不稳定时使用 `python flash.py --port COM3 --baud 115200`；`--baud` 接受 9600～921600 的整数，实际可用速率还取决于串口设备。总耗时取决于传输、擦除、写入和校验，实际提速尚未实机测量。烧录波特率不改变固件日志的 115200 baud。
 
@@ -23,7 +23,7 @@
 
 ## 全量烧录与发布校验
 
-1.0I 延续默认分段烧录及 `python flash.py --full --port COM3`：从 `0x0` 写入 `build\auto\full_flash.bin`，要求镜像恰为 4 MB 且内容与当前分段固件一致。该操作会清除规则、红外编码、共享载波及网页校准参数；仅预检使用 `python flash.py --full --port COM3 --dry-run`。
+1.0J 延续默认分段烧录及 `python flash.py --full --port COM3`：从 `0x0` 写入 `build\auto\full_flash.bin`，要求镜像恰为 4 MB 且内容与当前分段固件一致。该操作会清除规则、红外编码、共享载波及网页校准参数；仅预检使用 `python flash.py --full --port COM3 --dry-run`。
 
 Release 附件包含分段 ZIP、完整 BIN/HEX 及 `SHA256SUMS.txt`；下载后用 `Get-FileHash -Algorithm SHA256` 与清单逐项比对。ZIP 内含布局、esptool、许可、TXT 操作说明及记录版本和完整提交的 `release_manifest.json`；解压后也须核对包内校验清单。发布验证检查 ZIP CRC、逐文件 SHA256 和包内分段/全量 dry-run。2026-10-21 用户实机日志确认低电压锁存触发并进入无限期深睡，同轮电流实测深睡 301μA、常态 L 休眠 500μA，作为当前功耗标准；2026-10-13 的 200μA 保留为历史记录，测量边界见 [功耗验收](../README.md#功耗验收)。本轮不重新连接设备。
 
