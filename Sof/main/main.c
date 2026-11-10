@@ -555,12 +555,23 @@ static TickType_t update_temp(void)
 #endif
         }
         set_auto_sleep(conversion_sleep);
-        /* 多等待一个 tick，避免首个 tick 不完整导致实际转换时间不足 750 ms。 */
-        vTaskDelay(conversion_wait);
         if (auto_sleep) adc_sleep_seen = true;
+        /* 先按额定 750 ms 等待（保留轻休眠省电），再轮询 DS18B20 忙状态确认完成。
+         * 若轻休眠期间的节拍补偿不足使固定等待提前返回，轮询会持续等待器件自身的
+         * 完成信号，避免读到 busy 未结束的 scratchpad 而整轮静默、不再发信号。 */
+        vTaskDelay(conversion_wait);
+        bool done = false;
+        esp_err_t werr = ESP_OK;
+        for (int poll = 0; poll < 90 && !done; poll++) {
+            werr = sensor_poll_status(&done);
+            if (werr != ESP_OK) break;
+            if (!done) vTaskDelay(pdMS_TO_TICKS(10));
+        }
         set_auto_sleep(false);
         if (conversion_sleep) trace_buttons("conversion-done", conversion_wait, 0);
-        err = sensor_finish(&temp10, &raw16);
+        if (werr != ESP_OK) err = werr;
+        else if (!done) err = ESP_ERR_TIMEOUT;
+        else err = sensor_finish(&temp10, &raw16);
     }
     bool fire[2] = { false, false };
     bool control_on = !portal_is_on();
@@ -707,7 +718,20 @@ void app_main(void)
     bool close_pending = false;
     bool release_pending = false, release_high = false;
     TickType_t release_at = 0;
-    if (gpio_get_level(GPIO_NUM_12) == 0) s1_pending = true;
+    /* 开机按住 S1 进配置模式。ESP8266 内部上拉很弱，电池彻底掉电数十分钟后线路
+     * 电容完全放电，上电瞬间 GPIO12 可能瞬时读低。若仅做一次瞬时电平判断，会把上电
+     * 毛刺误判为"开机按住按键"，从而进入热点模式——该模式下自动红外被永久暂停
+     * (control_on=false) 且设备无法休眠 (allow_sleep=false)，直到用户按键关闭热点。
+     * 这里改为持续去抖：约 60 ms 内一直为低才认作真实按键保持，既保留"开机按住进
+     * 配置"功能，又滤除上电毛刺。 */
+    {
+        bool held = gpio_get_level(GPIO_NUM_12) == 0;
+        for (int i = 0; i < 6 && held; i++) {
+            vTaskDelay(pdMS_TO_TICKS(10));
+            if (gpio_get_level(GPIO_NUM_12) != 0) held = false;
+        }
+        if (held) s1_pending = true;
+    }
     while (true) {
         set_auto_sleep(false);
         if (s1_pending || s2_pending) trace_buttons("button-dispatch", 0, 0);

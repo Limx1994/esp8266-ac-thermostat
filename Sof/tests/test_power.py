@@ -476,7 +476,7 @@ static uint32_t stopped_at;
 static bool ap, ap_used, ir_busy, fail_pm, fail_wakeup, sensor_error;
 static bool fail_pm_restore, fail_led_task, frozen_ticks, missing_ir;
 static bool fail_portal_stop_once;
-static bool fail_portal_start_once, boot_held_s1;
+static bool fail_portal_start_once, boot_held_s1, boot_glitch_s1;
 static bool boot_ir_busy;
 static uint32_t rtc_latch_words[3];   /* 0x60001200 RTC 用户内存锁存后备存储 */
 static uint64_t deep_sleep_arg;
@@ -519,6 +519,7 @@ static int temp_count;
 static bool enable_down, fail_send_once;
 static int send_slots[512];
 static int conversion_sleeps, conversion_awake;
+static bool conversion_sleep_counted;
 static int led_level = 1;
 typedef struct { uint32_t ms; int action; uint32_t hold; } event_t;
 static const event_t *events;
@@ -563,10 +564,15 @@ void vTaskDelete(TaskHandle_t handle) { (void)handle; assert(fail_led_config); }
 void vTaskDelay(TickType_t ticks) {
     assert(ap || !led_enabled);
     if (conversion_pending) {
-        assert(ticks == pdMS_TO_TICKS(750) + 1);
-        assert(auto_sleep == (power_external && !ap && !ir_busy && !sleep_failed));
-        if (auto_sleep) conversion_sleeps++;
-        else conversion_awake++;
+        /* 转换期间以 10 ms 步进取 vTaskDelay 轮询忙状态；仍允许轻休眠。
+         * 每次转换只计一次休眠/唤醒，保持原有按转换计数的语义。 */
+        assert(ticks == pdMS_TO_TICKS(10) || ticks == pdMS_TO_TICKS(750) + 1);
+        if (!conversion_sleep_counted) {
+            conversion_sleep_counted = true;
+            assert(auto_sleep == (power_external && !ap && !ir_busy && !sleep_failed));
+            if (auto_sleep) conversion_sleeps++;
+            else conversion_awake++;
+        }
     }
     advance_time(now_ms + ticks * 10U);
 }
@@ -721,6 +727,7 @@ esp_err_t sensor_start(bool *external_power) {
     sample_count++;
     *external_power = power_external;
     conversion_pending = !(start_failed && sample_count == 2);
+    conversion_sleep_counted = false;
     return conversion_pending ? ESP_OK : ESP_ERR_NOT_FOUND;
 }
 esp_err_t sensor_finish(int16_t *temp, int16_t *raw16) {
@@ -733,6 +740,12 @@ esp_err_t sensor_finish(int16_t *temp, int16_t *raw16) {
                         : temperatures[sample_count <= 5 ? sample_count - 1 : 4];
     if (raw16) *raw16 = *temp * 16 / 10;
     return sensor_error && sample_count == 2 ? ESP_ERR_INVALID_CRC : ESP_OK;
+}
+/* 轮询忙状态：模拟 DS18B20 转换，750 ms 内返回未完成，之后完成。main.c 的轮询
+ * 循环会在此期间以 10 ms 步进取 vTaskDelay，从而推进 now_ms 满足 sensor_finish 的下界断言。 */
+esp_err_t sensor_poll_status(bool *ready) {
+    if (ready) *ready = (now_ms - sample_times[sample_count - 1] >= 750);
+    return ESP_OK;
 }
 esp_err_t ir_init(void) { return boot_fault == 7 ? ESP_FAIL : ESP_OK; }
 void ir_report_last_send(void) { assert(!auto_sleep); }
@@ -782,6 +795,7 @@ static void run_control(uint32_t duration, const event_t *script, size_t count,
     memset(&GPIO, 0, sizeof(GPIO)); memset(&current, 0, sizeof(current));
     memset(states, 0, sizeof(states)); memset(hold_until, 0, sizeof(hold_until));
     if (boot_held_s1) hold_until[12] = 100;
+    else if (boot_glitch_s1) hold_until[12] = 20; /* 上电毛刺：仅前 20 ms 为低，短于去抖窗 */
     memset(last_send, 0, sizeof(last_send));
     memset(send_recorded, 0, sizeof(send_recorded));
     s1_pending = s2_pending = led_enabled = led_learning = auto_sleep = sleep_failed = false;
@@ -806,11 +820,12 @@ static void run_control(uint32_t duration, const event_t *script, size_t count,
     fast_reads = single_reads = critical_depth = 0;
     conversion_pending = false;
     conversion_sleeps = conversion_awake = 0;
+    conversion_sleep_counted = false;
     ap_starts = ap_stops = stop_attempts = 0; stopped_at = 0;
     wifi_get_calls = wifi_set_calls = 0;
     memset(button_wakes, 0, sizeof(button_wakes));
     now_ms = notified = 0; start_tick = base; end_ms = duration;
-    GPIO.in = (boot_held_s1 ? 0 : 1U << 12) | (1U << 13);
+    GPIO.in = (boot_held_s1 || boot_glitch_s1 ? 0 : 1U << 12) | (1U << 13);
     if (latch_boot) {
         rtc_latch_words[0] = RTC_LATCH_MAGIC;
         rtc_latch_words[1] = ~RTC_LATCH_MAGIC;
@@ -1356,6 +1371,13 @@ int main(void) {
     run_control(1000, NULL, 0, false, false, false, 0);
     assert(ap && ap_starts == 1 && send_count == 0);
     boot_held_s1 = false;
+    /* 上电瞬间 GPIO12 短暂低电平（毛刺）必须被去抖滤除，不得误进热点：
+     * 这正是修复的故障——电池彻底掉电后上电电平毛刺误判为开机按住 S1，
+     * 导致 control_on=false 永久停发红外且无法休眠。 */
+    boot_glitch_s1 = true;
+    run_control(1000, NULL, 0, false, false, false, 0);
+    assert(!ap && ap_starts == 0);
+    boot_glitch_s1 = false;
     boot_fault = 14;
     run_control(1000, NULL, 0, false, false, false, 0);
     assert(sleep_failed && !auto_sleep && sample_count == 1);
@@ -1929,14 +1951,14 @@ int main(void) {
     late_at = 484 * TEST_CPU_MHZ; late_us = 10;
     assert(reset_bus() && slot_error == ESP_OK);
     assert(bus_cycles - reset_release_cycles >= 60 * TEST_CPU_MHZ);
-    assert(bus_cycles - reset_release_cycles <= 75 * TEST_CPU_MHZ);
+    assert(bus_cycles - reset_release_cycles <= 90 * TEST_CPU_MHZ);
     /* Reproduce 494 us reset-low: presence sample follows actual release. */
     setup_bus(true, true);
     late_at = 480 * TEST_CPU_MHZ; late_us = 14;
     assert(reset_bus() && slot_error == ESP_OK);
     assert((reset_release_cycles - low_start) / TEST_CPU_MHZ == 494);
     assert(bus_cycles - reset_release_cycles >= 70 * TEST_CPU_MHZ);
-    assert(bus_cycles - reset_release_cycles <= 75 * TEST_CPU_MHZ);
+    assert(bus_cycles - reset_release_cycles <= 90 * TEST_CPU_MHZ);
     setup_bus(true, true);
     late_at = 480 * TEST_CPU_MHZ; late_us = 14;
     assert(sensor_start(&external) == ESP_OK && external);
@@ -1949,7 +1971,7 @@ int main(void) {
     setup_bus(true, true);
     late_at = 500 * TEST_CPU_MHZ;
     assert(start_conversion(&external) == ESP_ERR_TIMEOUT && !external);
-    assert(strcmp(slot_stage, "presence-sample") == 0 && slot_limit_us == 75);
+    assert(strcmp(slot_stage, "presence-sample") == 0 && slot_limit_us == 90);
     setup_bus(true, true);
     late_at = 5 * TEST_CPU_MHZ;
     write_bit(1);

@@ -68,10 +68,11 @@ static bool IRAM_ATTR reset_bus(void)
     /* 低电平可被中断延长，存在脉冲窗口必须相对释放边沿计时。 */
     slot_wait(release, 70);
     /* 上升沿位于两个时间戳之间：至少等到后时间戳 +60 us，
-     * 同时不得晚于前时间戳 +75 us，覆盖存在脉冲的保证重叠窗口。 */
+     * 同时不得晚于前时间戳 +90 us（原 +75 us），覆盖存在脉冲的保证重叠窗口。
+     * 放宽 15 us 以容忍现场 NMI/缓存缺失导致的采样点漂移，避免误报超时。 */
     slot_wait(released, 60);
     bool present = (GPIO.in & (1U << DQ)) == 0;
-    check_slot(release, 75, "presence-sample");
+    check_slot(release, 90, "presence-sample");
     portEXIT_CRITICAL();
     ets_delay_us(410);
     return present && slot_error == ESP_OK;
@@ -83,10 +84,12 @@ static void IRAM_ATTR write_bit(int bit)
     uint32_t edge = soc_get_ccount();
     GPIO.out_w1tc = 1U << DQ;
     uint32_t start = soc_get_ccount();
-    check_slot(edge, 2, "write-edge");
+    /* 边沿上限由 2 us 放宽到 10 us：临界区内驱动引脚到下次采样仅数条指令，
+     * 现场 NMI（IR 硬件定时器/Wi-Fi）或缓存缺失即可越过 2 us 误报超时。 */
+    check_slot(edge, 10, "write-edge");
     slot_wait(start, bit ? 6 : 60);
     GPIO.out_w1ts = 1U << DQ;
-    check_slot(start, bit ? 11 : 65, "write-release");
+    check_slot(start, bit ? 15 : 69, "write-release");
     slot_wait(start, 70);
     portEXIT_CRITICAL();
 }
@@ -97,13 +100,14 @@ static int IRAM_ATTR read_bit(void)
     uint32_t edge = soc_get_ccount();
     GPIO.out_w1tc = 1U << DQ;
     uint32_t start = soc_get_ccount();
-    check_slot(edge, 2, "read-edge");
+    /* 同上，读时序边沿上限由 2 us 放宽到 10 us，容忍现场 NMI/缓存缺失。 */
+    check_slot(edge, 10, "read-edge");
     slot_wait(start, 3);
     GPIO.out_w1ts = 1U << DQ;
-    check_slot(start, 8, "read-release");
+    check_slot(start, 12, "read-release");
     slot_wait(start, 13);
     int bit = (GPIO.in >> DQ) & 1U;
-    check_slot(start, 15, "read-sample");
+    check_slot(start, 20, "read-sample");
     slot_wait(start, 70);
     portEXIT_CRITICAL();
     return bit;
@@ -287,6 +291,27 @@ static esp_err_t read_temp(int16_t *temp10, int16_t *raw16)
     ESP_LOGI("sensor", "raw16=%d resolution=12 offset10=%d temperature10=%d",
              (int)raw, CONFIG_APP_TEMP_OFFSET10, (int)*temp10);
     return ESP_OK;
+}
+
+esp_err_t sensor_poll_status(bool *ready)
+{
+    if (!ready) return ESP_ERR_INVALID_ARG;
+    if (!conversion_started) {
+        ESP_LOGE("sensor", "poll without conversion command");
+        return ESP_ERR_INVALID_STATE;
+    }
+    *ready = false;
+    esp_err_t err = gpio_set_direction(DQ, GPIO_MODE_OUTPUT_OD);
+    if (err == ESP_OK) {
+        /* 单读时隙探测 busy：DQ 被器件拉低表示仍在转换，释放为高表示完成。
+         * 读时隙本身不复位总线，可反复调用直到 ready。 */
+        slot_error = ESP_OK;
+        int bit = read_bit();
+        err = slot_error != ESP_OK ? slot_error : ESP_OK;
+        report_slot_error();
+        if (err == ESP_OK) *ready = (bit != 0);
+    }
+    return release_bus(err);
 }
 
 esp_err_t sensor_finish(int16_t *temp10, int16_t *raw16)

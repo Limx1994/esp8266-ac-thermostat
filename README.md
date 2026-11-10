@@ -55,7 +55,9 @@ python flash.py --port COM3 --dry-run
 
 ## 当前状态
 
-本版：**1.0J · 2026-10-26**，标签 `v1.0J`；发布附件与核验结果见 [本地发布](Sof/README.md#本地发布)。
+本版：**1.0K · 2026-11-10**，标签 `v1.0K`；发布附件与核验结果见 [本地发布](Sof/README.md#本地发布)。
+
+1.0K 修复 IR 永久停发根因：轻休眠节拍补偿不足使固定等待 750 ms 提前返回，`sensor_finish` 读到 busy 未完成的 scratchpad，整轮 `err!=OK`、规则永不触发；改为启动转换后轮询 `sensor_poll_status` 直到 ready 再 `sensor_finish`。同轮放宽 1-Wire 最脆弱时隙守门阈值（write_bit/read_bit/reset_bus），容忍现场 NMI 或 Flash cache 缺失导致的采样点漂移；S1 开机检测加约 60 ms 去抖，滤除上电电容放电造成的瞬时低电平误判（该加固为独立健壮性改进，非本次根因）。延续 1.0J/I/H/G/F 各项修复与固定驱动。
 
 1.0J 修两处隐患：`--dry-run` 预检不再解析串口，未给 `--port` 也能跑通并显示占位符 `<自动选择>`，自动选择只在真实烧录时发生；HTTP 服务收包超时收紧到 1 秒，短于停止等待的 2 秒上限，手机半开连接不再让热点关闭卡住。温控规则、红外、NVS 格式与采样周期不变。
 
@@ -79,7 +81,7 @@ python flash.py --port COM3 --dry-run
 ## 下载与许可
 
 - [GitHub 仓库](https://github.com/Limx1994/esp8266-ac-thermostat)
-- [1.0J Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0J)：分段烧录包、完整镜像及 SHA256 校验清单。保留规则和红外编码时使用分段烧录；完整镜像会清除 NVS。旧版本见 [1.0I Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0I)。
+- [1.0K Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0K)：分段烧录包、完整镜像及 SHA256 校验清单。保留规则和红外编码时使用分段烧录；完整镜像会清除 NVS。旧版本见 [1.0J Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0J)、[1.0I Release](https://github.com/Limx1994/esp8266-ac-thermostat/releases/tag/v1.0I)。
 - 项目采用 [PolyForm Noncommercial 1.0.0](LICENSE)，附带第三方工具保留其原有许可。
 
 ---

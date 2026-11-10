@@ -6,12 +6,18 @@
 /* 初始化 GPIO4 的 1-Wire 总线；测量配置下空闲时切为输入，返回 GPIO 错误。 */
 esp_err_t sensor_init(void);
 /* 唤醒状态下启动转换，external_power 必须有效，用于返回是否为外部供电。
- * 只支持独立供电，命令发送成功后至少等待 750 ms 再调用 sensor_finish。
+ * 只支持独立供电，命令发送成功后轮询 sensor_poll_status 直到 ready，再调用
+ * sensor_finish；不要盲目固定等待 750 ms——轻休眠期间节拍补偿不足会使固定等待
+ * 提前结束，导致 sensor_finish 读到 busy 未完成的 scratchpad 而整轮静默。
  * 启动阶段不探测 busy，使用固定等待，不产生 busy not observed 警告。
  * 转换前核验 12 位分辨率；低分辨率只修正 RAM 并读回确认，不写 EEPROM。
  * 启动事务时序超时最多完整重试三次，其他错误立即返回；每次失败记录原因。
  * 返回参数、GPIO、设备未找到、CRC 或配置读回错误。 */
 esp_err_t sensor_start(bool *external_power);
+/* 转换启动后轮询 DS18B20 忙状态；成功返回 ESP_OK 并将 *ready 置为 true 表示
+ * 转换完成（可调用 sensor_finish），false 表示仍在转换（应稍后重试）。
+ * 总线时序错误才返回非 ESP_OK；busy 本身不是错误。未发转换命令返回无效状态。 */
+esp_err_t sensor_poll_status(bool *ready);
 /* temp10 必须有效，成功读数先应用构建配置偏移，再舍入到 0.1 ℃；
  * 状态位时序超时最多重读三次，不复位；真实 busy 不放行。
  * CRC、设备未找到或 scratchpad 时序超时最多完整读三次，每次校验。
